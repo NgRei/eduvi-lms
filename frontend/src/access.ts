@@ -7,7 +7,7 @@ export default function access(
   const { currentUser } = initialState ?? {};
   return {
     canAdmin: currentUser && currentUser.access === 'admin',
-    canInstructor: currentUser && (currentUser.access === 'instructor' || currentUser.access === 'admin'),
-    canStudent: currentUser && (currentUser.access === 'student' || currentUser.access === 'instructor' || currentUser.access === 'admin'),
+    canInstructor: currentUser && currentUser.access === 'instructor',
+    canStudent: currentUser && currentUser.access === 'student',
   };
 }

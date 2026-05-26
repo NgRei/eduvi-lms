@@ -139,7 +139,7 @@ export default [
   },
   {
     path: '/',
-    redirect: '/student/dashboard',
+    component: './HomeRedirect',
   },
   {
     component: './exception/404',
