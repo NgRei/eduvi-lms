@@ -2,12 +2,11 @@ import { GridContent } from '@ant-design/pro-components';
 import { Menu } from 'antd';
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import BaseView from './components/base';
-import BindingView from './components/binding';
-import NotificationView from './components/notification';
+import ChangePasswordView from './components/change-password';
 import SecurityView from './components/security';
 import useStyles from './style.style';
 
-type SettingsStateKeys = 'base' | 'security' | 'binding' | 'notification';
+type SettingsStateKeys = 'base' | 'security' | 'change-password';
 type SettingsState = {
   mode: 'inline' | 'horizontal';
   selectKey: SettingsStateKeys;
@@ -21,10 +20,8 @@ const SettingsContent: React.FC<{ selectKey: SettingsStateKeys }> = ({
       return <BaseView />;
     case 'security':
       return <SecurityView />;
-    case 'binding':
-      return <BindingView />;
-    case 'notification':
-      return <NotificationView />;
+    case 'change-password':
+      return <ChangePasswordView />;
     default:
       return null;
   }
@@ -33,10 +30,9 @@ const SettingsContent: React.FC<{ selectKey: SettingsStateKeys }> = ({
 const Settings: React.FC = () => {
   const { styles } = useStyles();
   const menuMap: Record<string, React.ReactNode> = {
-    base: '基本设置',
-    security: '安全设置',
-    binding: '账号绑定',
-    notification: '新消息通知',
+    base: 'Thông tin cơ bản',
+    security: 'Bảo mật',
+    'change-password': 'Đổi mật khẩu',
   };
   const [initConfig, setInitConfig] = useState<SettingsState>({
     mode: 'inline',
@@ -75,12 +71,14 @@ const Settings: React.FC = () => {
       window.removeEventListener('resize', handler);
     };
   }, []);
+
   const getMenu = () => {
     return Object.keys(menuMap).map((item) => ({
       key: item,
       label: menuMap[item],
     }));
   };
+
   return (
     <GridContent>
       <div
@@ -112,4 +110,5 @@ const Settings: React.FC = () => {
     </GridContent>
   );
 };
+
 export default Settings;

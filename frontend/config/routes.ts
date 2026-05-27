@@ -119,6 +119,18 @@ export default [
       },
     ],
   },
+  // ================= ACCOUNT SETTINGS (All roles) =================
+  {
+    path: '/account',
+    hideInMenu: true,
+    routes: [
+      {
+        path: '/account/settings',
+        name: 'Cài đặt tài khoản',
+        component: './account/settings',
+      },
+    ],
+  },
   // ================= EXCEPTIONS & FALLBACKS =================
   {
     path: '/exception',

@@ -64,12 +64,12 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
     {
       key: 'settings',
       icon: <SettingOutlined />,
-      label: '个人设置',
+      label: 'Cài đặt tài khoản',
     },
     {
       key: 'theme',
       icon: <SkinOutlined />,
-      label: '主题设置',
+      label: 'Giao diện',
     },
     {
       type: 'divider' as const,
@@ -77,7 +77,7 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: '退出登录',
+      label: 'Đăng xuất',
     },
   ];
 

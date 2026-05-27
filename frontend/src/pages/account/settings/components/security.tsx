@@ -1,63 +1,51 @@
-import { List } from 'antd';
+import { List, Tag } from 'antd';
 import React from 'react';
+import { useModel } from '@umijs/max';
 
 type Unpacked<T> = T extends (infer U)[] ? U : T;
 
-const passwordStrength = {
-  strong: <span className="strong">强</span>,
-  medium: <span className="medium">中</span>,
-  weak: <span className="weak">弱 Weak</span>,
-};
-
 const SecurityView: React.FC = () => {
+  const { initialState } = useModel('@@initialState');
+  const currentUser = initialState?.currentUser;
+
+  const passwordStrength = {
+    strong: <Tag color="success">Mạnh</Tag>,
+    medium: <Tag color="warning">Trung bình</Tag>,
+    weak: <Tag color="error">Yếu</Tag>,
+  };
+
   const getData = () => [
     {
-      title: '账户密码',
+      title: 'Mật khẩu tài khoản',
       description: (
         <>
-          当前密码强度：
-          {passwordStrength.strong}
+          Độ mạnh hiện tại: {passwordStrength.strong}
         </>
       ),
       actions: [
-        <a key="Modify" href="#">
-          修改
+        <a key="Modify" href="/account/settings" onClick={(e) => { e.preventDefault(); }}>
+          Đổi mật khẩu
         </a>,
       ],
     },
     {
-      title: '密保手机',
-      description: `已绑定手机：138****8293`,
+      title: 'Địa chỉ Email',
+      description: `Email đã xác thực: ${currentUser?.email || 'Chưa cập nhật'}`,
       actions: [
-        <a key="Modify" href="#">
-          修改
-        </a>,
+        <span key="verified" style={{ color: '#52c41a' }}>Đã xác thực</span>,
       ],
     },
     {
-      title: '密保问题',
-      description: '未设置密保问题，密保问题可有效保护账户安全',
-      actions: [
-        <a key="Set" href="#">
-          设置
-        </a>,
-      ],
+      title: 'Tên đăng nhập',
+      description: `Username: ${currentUser?.username || 'Chưa cập nhật'}`,
+      actions: [],
     },
     {
-      title: '备用邮箱',
-      description: `已绑定邮箱：ant***sign.com`,
-      actions: [
-        <a key="Modify" href="#">
-          修改
-        </a>,
-      ],
-    },
-    {
-      title: 'MFA 设备',
-      description: '未绑定 MFA 设备，绑定后，可以进行二次确认',
+      title: 'Xác thực hai yếu tố',
+      description: 'Chưa bật xác thực hai yếu tố (2FA). Bật để tăng cường bảo mật.',
       actions: [
         <a key="bind" href="#">
-          绑定
+          Bật
         </a>,
       ],
     },

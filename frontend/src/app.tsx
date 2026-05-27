@@ -12,12 +12,9 @@ dayjs.extend(relativeTime);
 
 import {
   AvatarDropdown,
-  DocLink,
   ErrorBoundary,
   Footer,
-  LangDropdown,
   OfflineBanner,
-  VersionDropdown,
 } from '@/components';
 import { currentUser as queryCurrentUser } from '@/services/ant-design-pro/api';
 import defaultSettings from '../config/defaultSettings';
@@ -92,14 +89,10 @@ export const layout: RunTimeLayoutConfig = ({
       }
       return dom;
     },
-    actionsRender: () => [
-      <DocLink key="doc" />,
-      <VersionDropdown key="version" />,
-      <LangDropdown key="lang" />,
-    ],
+    actionsRender: () => [],
     avatarProps: {
       src: initialState?.currentUser?.avatar,
-      title: 'ProUser',
+      title: initialState?.currentUser?.name,
       render: (_, avatarChildren) => (
         <AvatarDropdown>{avatarChildren}</AvatarDropdown>
       ),
