@@ -19,27 +19,17 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
 }) => {
   const loginOut = async () => {
     await outLogin();
-    const { search, pathname } = window.location;
-    const urlParams = new URL(window.location.href).searchParams;
-    const searchParams = new URLSearchParams({
-      redirect: pathname + search,
+    startTransition(() => {
+      setInitialState((s) => ({ ...s, currentUser: undefined }));
     });
-    const redirect = urlParams.get('redirect');
-    if (window.location.pathname !== '/user/login' && !redirect) {
-      history.replace({
-        pathname: '/user/login',
-        search: searchParams.toString(),
-      });
-    }
+    // Always go to clean login page — no redirect param
+    window.location.href = '/user/login';
   };
   const { initialState, setInitialState } = useModel('@@initialState');
 
   const onMenuClick: MenuProps['onClick'] = (event) => {
     const { key } = event;
     if (key === 'logout') {
-      startTransition(() => {
-        setInitialState((s) => ({ ...s, currentUser: undefined }));
-      });
       loginOut();
       return;
     }

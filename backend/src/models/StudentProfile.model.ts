@@ -4,8 +4,11 @@ import { sequelize } from '../config/database';
 export class StudentProfile extends Model {
   declare id: string;
   declare user_id: string;
-  declare grade_level?: string;
-  declare school_name?: string;
+  declare date_of_birth: string | null;
+  declare phone: string | null;
+  declare address: string | null;
+  declare school_name: string | null;
+  declare grade_level: string | null;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 }
@@ -22,12 +25,24 @@ StudentProfile.init(
       allowNull: false,
       unique: true,
     },
-    grade_level: {
-      type: DataTypes.STRING(50),
+    date_of_birth: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+    phone: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    address: {
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     school_name: {
       type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    grade_level: {
+      type: DataTypes.STRING(50),
       allowNull: true,
     },
   },

@@ -30,8 +30,8 @@ const SettingsContent: React.FC<{ selectKey: SettingsStateKeys }> = ({
 const Settings: React.FC = () => {
   const { styles } = useStyles();
   const menuMap: Record<string, React.ReactNode> = {
-    base: 'Thông tin cơ bản',
-    security: 'Bảo mật',
+    base: 'Thông tin cá nhân',
+    security: 'Thông tin tài khoản',
     'change-password': 'Đổi mật khẩu',
   };
   const [initConfig, setInitConfig] = useState<SettingsState>({

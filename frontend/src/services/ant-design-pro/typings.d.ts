@@ -7,20 +7,29 @@ declare namespace API {
     avatar?: string;
     userid?: string;
     email?: string;
+    username?: string;
+    user_type?: string;
+    access?: string;
+    created_at?: string;
+    profile?: {
+      date_of_birth?: string;
+      phone?: string;
+      address?: string;
+      school_name?: string;
+      grade_level?: string;
+      expertise?: string;
+      experience_years?: number;
+      degree?: string;
+      linkedin_url?: string;
+      total_students?: number;
+      rating_avg?: number;
+    } | null;
     signature?: string;
     title?: string;
     group?: string;
     tags?: { key?: string; label?: string }[];
     notifyCount?: number;
     unreadCount?: number;
-    country?: string;
-    access?: string;
-    geographic?: {
-      province?: { label?: string; key?: string };
-      city?: { label?: string; key?: string };
-    };
-    address?: string;
-    phone?: string;
   };
 
   type LoginResult = {

@@ -7,11 +7,26 @@ export async function currentUser(options?: { [key: string]: any }) {
   const response = await request<{
     success: boolean;
     data?: {
-      id: number | string;
+      id: string;
       email: string;
       username: string;
       full_name: string;
       user_type: string;
+      is_active: boolean;
+      created_at: string;
+      profile?: {
+        date_of_birth?: string;
+        phone?: string;
+        address?: string;
+        school_name?: string;
+        grade_level?: string;
+        expertise?: string;
+        experience_years?: number;
+        degree?: string;
+        linkedin_url?: string;
+        total_students?: number;
+        rating_avg?: number;
+      } | null;
     };
   }>('/api/auth/me', {
     method: 'GET',
@@ -22,10 +37,14 @@ export async function currentUser(options?: { [key: string]: any }) {
     const user = response.data;
     return {
       data: {
-        userid: user.id.toString(),
+        userid: user.id,
         name: user.full_name || user.username,
         email: user.email,
+        username: user.username,
         access: user.user_type,
+        user_type: user.user_type,
+        created_at: user.created_at,
+        profile: user.profile,
         avatar: 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
       } as API.CurrentUser
     };

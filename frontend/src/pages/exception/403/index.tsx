@@ -6,10 +6,10 @@ export default () => (
     <Result
       status="403"
       title="403"
-      subTitle="Sorry, you are not authorized to access this page."
+      subTitle="Xin lỗi, bạn không có quyền truy cập trang này."
       extra={
         <Link to="/" prefetch>
-          <Button type="primary">Back to home</Button>
+          <Button type="primary">Về trang chủ</Button>
         </Link>
       }
     />

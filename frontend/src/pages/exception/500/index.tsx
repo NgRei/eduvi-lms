@@ -6,10 +6,10 @@ export default () => (
     <Result
       status="500"
       title="500"
-      subTitle="Sorry, something went wrong."
+      subTitle="Xin lỗi, máy chủ đang gặp lỗi. Vui lòng thử lại sau."
       extra={
         <Link to="/" prefetch>
-          <Button type="primary">Back Home</Button>
+          <Button type="primary">Về trang chủ</Button>
         </Link>
       }
     />

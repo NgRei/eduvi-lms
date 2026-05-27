@@ -327,18 +327,41 @@ export const getMe = async (req: AuthRequest, res: Response) => {
     const user = await User.findByPk(req.user.id, {
       attributes: ['id', 'email', 'username', 'full_name', 'user_type', 'is_active', 'created_at'],
       include: [
-        { model: StudentProfile, as: 'studentProfile', attributes: ['grade_level', 'school_name'] },
-        { model: InstructorProfile, as: 'instructorProfile', attributes: ['expertise', 'experience_years'] }
-      ]
+        {
+          model: StudentProfile,
+          as: 'studentProfile',
+          attributes: ['date_of_birth', 'phone', 'address', 'school_name', 'grade_level'],
+        },
+        {
+          model: InstructorProfile,
+          as: 'instructorProfile',
+          attributes: ['expertise', 'experience_years', 'degree', 'linkedin_url', 'total_students', 'rating_avg'],
+        },
+      ],
     });
 
     if (!user) {
       return res.status(404).json({ success: false, error: 'Không tìm thấy thông tin tài khoản!' });
     }
 
+    const profile = user.user_type === 'student'
+      ? (user as any).studentProfile
+      : user.user_type === 'instructor'
+        ? (user as any).instructorProfile
+        : null;
+
     return res.status(200).json({
       success: true,
-      data: user,
+      data: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        full_name: user.full_name,
+        user_type: user.user_type,
+        is_active: user.is_active,
+        created_at: user.createdAt,
+        profile: profile ? profile.toJSON() : null,
+      },
     });
   } catch (error: any) {
     console.error('getMe Error:', error);

@@ -139,6 +139,34 @@ const Login: React.FC = () => {
     }
   };
 
+  /**
+   * Get default dashboard path based on user role
+   */
+  const getDefaultPath = (userType: string): string => {
+    switch (userType) {
+      case 'admin': return '/admin/dashboard';
+      case 'instructor': return '/instructor/dashboard';
+      case 'student': return '/student/dashboard';
+      default: return '/';
+    }
+  };
+
+  /**
+   * Check if redirect URL is allowed for the given role
+   */
+  const isRedirectAllowed = (redirect: string, userType: string): boolean => {
+    // /account/* is allowed for all roles
+    if (redirect.startsWith('/account/')) return true;
+    // /exception/* is allowed for all
+    if (redirect.startsWith('/exception/')) return true;
+    // Check role-specific prefix
+    if (redirect.startsWith(`/${userType}/`)) return true;
+    // Root is always allowed
+    if (redirect === '/') return true;
+    // Everything else is blocked (wrong role's page)
+    return false;
+  };
+
   const fetchUserInfo = async () => {
     const userInfo = await initialState?.fetchUserInfo?.();
     if (userInfo) {
@@ -162,9 +190,17 @@ const Login: React.FC = () => {
         });
         message.success(defaultLoginSuccessMessage);
         await fetchUserInfo();
+
         const urlParams = new URL(window.location.href).searchParams;
-        const redirectUrl = getSafeRedirectUrl(urlParams.get('redirect'));
-        window.location.href = redirectUrl;
+        const rawRedirect = getSafeRedirectUrl(urlParams.get('redirect'));
+        const userType = msg.currentAuthority || 'student';
+
+        // Only redirect if the URL matches the user's role
+        const finalRedirect = isRedirectAllowed(rawRedirect, userType)
+          ? rawRedirect
+          : getDefaultPath(userType);
+
+        window.location.href = finalRedirect;
         return;
       }
       console.log(msg);
