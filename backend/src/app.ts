@@ -43,8 +43,22 @@ sequelize.authenticate()
     // Sync models - automatically creates tables in phpMyAdmin if they do not exist
     return sequelize.sync({ force: false });
   })
-  .then(() => {
+  .then(async () => {
     console.log('Database schema successfully synchronized.');
+    
+    // Add FULLTEXT index for courses search if not exists
+    try {
+      await sequelize.query(`
+        ALTER TABLE courses 
+        ADD FULLTEXT INDEX ft_courses_search (title, short_description)
+      `);
+      console.log('FULLTEXT index added successfully.');
+    } catch (err: any) {
+      // Index may already exist, ignore error
+      if (!err.message.includes('Duplicate key name')) {
+        console.log('FULLTEXT index note:', err.message);
+      }
+    }
     
     // Start listening
     app.listen(port, () => {

@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { history, Link } from '@umijs/max';
 import {
+  App,
   Button,
   Col,
   Form,
@@ -10,7 +11,6 @@ import {
   Row,
   Select,
   Space,
-  message,
 } from 'antd';
 import type { Store } from 'antd/es/form/interface';
 import type { FC } from 'react';
@@ -33,6 +33,7 @@ const passwordProgressMap: {
 
 const Register: FC = () => {
   const { styles } = useStyles();
+  const { message } = App.useApp();
   const [count, setCount] = useState(0);
   const [open, setVisible] = useState(false);
   const [prefix, setPrefix] = useState('84');
@@ -57,6 +58,7 @@ const Register: FC = () => {
     ),
   };
 
+  const [passwordValue, setPasswordValue] = useState('');
   const [form] = Form.useForm();
   
   useEffect(() => {
@@ -79,11 +81,10 @@ const Register: FC = () => {
   };
 
   const getPasswordStatus = () => {
-    const value = form.getFieldValue('password');
-    if (value && value.length > 9) {
+    if (passwordValue && passwordValue.length > 9) {
       return 'ok';
     }
-    if (value && value.length > 5) {
+    if (passwordValue && passwordValue.length > 5) {
       return 'pass';
     }
     return 'poor';
@@ -116,34 +117,40 @@ const Register: FC = () => {
   });
 
   const onFinish = (values: Store) => {
+    console.log('Form values:', values);
     register(values);
   };
 
+  const onFinishFailed = (errorInfo: any) => {
+    console.log('Validation failed:', errorInfo);
+  };
+
   const checkConfirm = (_: any, value: string) => {
-    const promise = Promise;
-    if (value && value !== form.getFieldValue('password')) {
-      return promise.reject('Mật khẩu xác nhận không khớp!');
+    if (value && value !== passwordValue) {
+      return Promise.reject('Mật khẩu xác nhận không khớp!');
     }
-    return promise.resolve();
+    return Promise.resolve();
   };
 
   const checkPassword = (_: any, value: string) => {
-    const promise = Promise;
     if (!value) {
       setVisible(!!value);
-      return promise.reject('Vui lòng nhập mật khẩu!');
+      return Promise.reject('Vui lòng nhập mật khẩu!');
     }
     if (!open) {
       setVisible(!!value);
     }
     setPopover(!popover);
     if (value.length < 6) {
-      return promise.reject('');
+      return Promise.reject('');
     }
-    if (value) {
-      form.validateFields(['confirm']);
-    }
-    return promise.resolve();
+    return Promise.resolve();
+  };
+
+  const onPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPasswordValue(value);
+    setVisible(value.length > 0);
   };
 
   const changePrefix = (value: string) => {
@@ -151,14 +158,13 @@ const Register: FC = () => {
   };
 
   const renderPasswordProgress = () => {
-    const value = form.getFieldValue('password');
     const passwordStatus = getPasswordStatus();
-    return value?.length ? (
+    return passwordValue?.length ? (
       <div className={styles[`progress-${passwordStatus}` as keyof typeof styles]}>
         <Progress
           status={passwordProgressMap[passwordStatus]}
           size={6}
-          percent={value.length * 10 > 100 ? 100 : value.length * 10}
+          percent={passwordValue.length * 10 > 100 ? 100 : passwordValue.length * 10}
           showInfo={false}
         />
       </div>
@@ -170,7 +176,7 @@ const Register: FC = () => {
       <h3 style={{ fontSize: 20, fontWeight: 'bold', color: '#111827', textAlign: 'center', marginBottom: 24 }}>
         Đăng ký tài khoản Eduvi LMS
       </h3>
-      <Form form={form} name="UserRegister" onFinish={onFinish}>
+      <Form form={form} name="UserRegister" onFinish={onFinish} onFinishFailed={onFinishFailed}>
         <FormItem
           name="name"
           rules={[
@@ -237,9 +243,9 @@ const Register: FC = () => {
           <FormItem
             name="password"
             className={
-              form.getFieldValue('password') &&
-              form.getFieldValue('password').length > 0 &&
-              styles.password
+              passwordValue &&
+              passwordValue.length > 0 ?
+              styles.password : undefined
             }
             rules={[
               {
@@ -251,6 +257,7 @@ const Register: FC = () => {
               size="large"
               type="password"
               placeholder="Mật khẩu đăng nhập (tối thiểu 6 ký tự)"
+              onChange={onPasswordChange}
             />
           </FormItem>
         </Popover>
