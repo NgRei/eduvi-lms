@@ -9,6 +9,8 @@ export class User extends Model {
   declare full_name: string;
   declare user_type: 'student' | 'instructor' | 'admin';
   declare is_active: boolean;
+  declare reset_password_token: string | null;
+  declare reset_password_expires: Date | null;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 }
@@ -50,6 +52,16 @@ User.init(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
+    },
+    reset_password_token: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      defaultValue: null,
+    },
+    reset_password_expires: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: null,
     },
   },
   {

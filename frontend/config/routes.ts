@@ -23,6 +23,16 @@ export default [
         component: './user/register-result',
       },
       {
+        path: '/user/forgot-password',
+        name: 'Quên mật khẩu',
+        component: './user/forgot-password',
+      },
+      {
+        path: '/user/reset-password',
+        name: 'Đặt lại mật khẩu',
+        component: './user/reset-password',
+      },
+      {
         path: '/user',
         redirect: '/user/login',
       },

@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { Op } from 'sequelize';
 import { User, StudentProfile, InstructorProfile } from '../models';
 import { AuthRequest } from '../middlewares/auth.middleware';
+import { sendPasswordResetEmail } from '../utils/email.util';
 
 // Helper to remove accents from Vietnamese text
 const removeAccents = (str: string): string => {
@@ -168,6 +170,151 @@ export const login = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Login Error:', error);
     return res.status(500).json({ success: false, error: 'Có lỗi xảy ra trong quá trình đăng nhập!' });
+  }
+};
+
+export const changePassword = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Chưa xác thực người dùng!' });
+    }
+
+    const { old_password, new_password, confirm_password } = req.body;
+
+    // Validate input
+    if (!old_password || !new_password || !confirm_password) {
+      return res.status(400).json({ success: false, error: 'Vui lòng cung cấp đầy đủ mật khẩu cũ, mật khẩu mới và xác nhận mật khẩu!' });
+    }
+
+    if (new_password.length < 6) {
+      return res.status(400).json({ success: false, error: 'Mật khẩu mới phải có tối thiểu 6 ký tự!' });
+    }
+
+    if (new_password === old_password) {
+      return res.status(400).json({ success: false, error: 'Mật khẩu mới phải khác mật khẩu cũ!' });
+    }
+
+    if (new_password !== confirm_password) {
+      return res.status(400).json({ success: false, error: 'Xác nhận mật khẩu không khớp!' });
+    }
+
+    // Find user
+    const user = await User.findByPk(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'Không tìm thấy tài khoản!' });
+    }
+
+    // Verify old password
+    const isMatch = await bcrypt.compare(old_password, user.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, error: 'Mật khẩu cũ không chính xác!' });
+    }
+
+    // Hash new password and update
+    const salt = await bcrypt.genSalt(10);
+    const new_password_hash = await bcrypt.hash(new_password, salt);
+
+    await user.update({ password_hash: new_password_hash });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Đổi mật khẩu thành công!',
+    });
+  } catch (error: any) {
+    console.error('Change Password Error:', error);
+    return res.status(500).json({ success: false, error: 'Có lỗi xảy ra trong quá trình đổi mật khẩu!' });
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, error: 'Vui lòng cung cấp địa chỉ email!' });
+    }
+
+    const user = await User.findOne({ where: { email } });
+
+    // Luôn trả success để tránh email enumeration attack
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message: 'Nếu email tồn tại trong hệ thống, bạn sẽ nhận được liên kết đặt lại mật khẩu.',
+      });
+    }
+
+    // Generate random token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+    // Save hashed token to DB, expires in 15 minutes
+    await user.update({
+      reset_password_token: hashedToken,
+      reset_password_expires: new Date(Date.now() + 15 * 60 * 1000),
+    });
+
+    // Send email with raw token (not hashed)
+    await sendPasswordResetEmail(user.email, user.full_name, resetToken);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Nếu email tồn tại trong hệ thống, bạn sẽ nhận được liên kết đặt lại mật khẩu.',
+    });
+  } catch (error: any) {
+    console.error('Forgot Password Error:', error);
+    return res.status(500).json({ success: false, error: 'Có lỗi xảy ra, vui lòng thử lại!' });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { token, new_password, confirm_password } = req.body;
+
+    if (!token || !new_password || !confirm_password) {
+      return res.status(400).json({ success: false, error: 'Vui lòng cung cấp đầy đủ thông tin!' });
+    }
+
+    if (new_password.length < 6) {
+      return res.status(400).json({ success: false, error: 'Mật khẩu mới phải có tối thiểu 6 ký tự!' });
+    }
+
+    if (new_password !== confirm_password) {
+      return res.status(400).json({ success: false, error: 'Xác nhận mật khẩu không khớp!' });
+    }
+
+    // Hash the token from URL to match DB
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    // Find user with valid token and not expired
+    const user = await User.findOne({
+      where: {
+        reset_password_token: hashedToken,
+        reset_password_expires: { [Op.gt]: new Date() },
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, error: 'Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn!' });
+    }
+
+    // Hash new password and update
+    const salt = await bcrypt.genSalt(10);
+    const password_hash = await bcrypt.hash(new_password, salt);
+
+    await user.update({
+      password_hash,
+      reset_password_token: null,
+      reset_password_expires: null,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.',
+    });
+  } catch (error: any) {
+    console.error('Reset Password Error:', error);
+    return res.status(500).json({ success: false, error: 'Có lỗi xảy ra, vui lòng thử lại!' });
   }
 };
 
