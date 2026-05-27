@@ -15,7 +15,7 @@ import {
 import type { Store } from 'antd/es/form/interface';
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
-import { fakeRegister } from './service';
+import { fakeRegister, type RegisterResult } from './service';
 import useStyles from './styles';
 
 const FormItem = Form.Item;
@@ -37,7 +37,6 @@ const Register: FC = () => {
   const [open, setVisible] = useState(false);
   const [prefix, setPrefix] = useState('84');
   const [popover, setPopover] = useState(false);
-  const confirmDirty = false;
   let interval: number | undefined;
 
   const passwordStatusMap = {
@@ -90,54 +89,29 @@ const Register: FC = () => {
     return 'poor';
   };
 
-  const removeAccents = (str: string) => {
-    return str
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/đ/g, 'd')
-      .replace(/Đ/g, 'd');
-  };
-
-  const generateUsername = (fullName: string): string => {
-    if (!fullName) return '';
-    const cleanName = removeAccents(fullName).trim().toLowerCase();
-    const parts = cleanName.split(/\s+/);
-    if (parts.length === 0) return '';
-    
-    const firstName = parts[parts.length - 1]; // "an"
-    const initials = parts
-      .slice(0, parts.length - 1)
-      .map(part => part.charAt(0))
-      .join(''); // "nv"
-      
-    const randomDigits = Math.floor(100 + Math.random() * 900); // 3 digits
-    return `${firstName}${initials}@${randomDigits}`;
-  };
-
   const { isPending: submitting, mutate: register } = useMutation({
     mutationFn: (formValues: Store) => {
-      const generatedUsername = generateUsername(formValues.name);
       const payload = {
-        mail: formValues.email,
+        email: formValues.email,
         password: formValues.password,
-        confirm: formValues.confirm,
-        mobile: formValues.mobile,
-        captcha: formValues.captcha,
-        prefix: formValues.prefix,
-        role: formValues.role,
-        name: formValues.name,
-        username: generatedUsername,
+        full_name: formValues.name,
+        user_type: formValues.role as 'student' | 'instructor',
       };
       return fakeRegister(payload);
     },
-    onSuccess: (data, params) => {
-      if (data.status === 'ok') {
-        const username = generateUsername(params.name);
+    onSuccess: (data: RegisterResult, params) => {
+      if (data.success && data.data) {
         message.success('Đăng ký tài khoản thành công!');
         history.push({
-          pathname: `/user/register-result?account=${params.email}&username=${username}`,
+          pathname: `/user/register-result?account=${params.email}&username=${data.data.username}`,
         });
+      } else {
+        message.error(data.error || 'Đăng ký thất bại, vui lòng thử lại!');
       }
+    },
+    onError: (error: any) => {
+      const errMsg = error?.response?.data?.error || error?.message || 'Đăng ký thất bại!';
+      message.error(errMsg);
     },
   });
 
@@ -166,7 +140,7 @@ const Register: FC = () => {
     if (value.length < 6) {
       return promise.reject('');
     }
-    if (value && confirmDirty) {
+    if (value) {
       form.validateFields(['confirm']);
     }
     return promise.resolve();

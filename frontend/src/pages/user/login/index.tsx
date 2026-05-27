@@ -63,26 +63,26 @@ const useStyles = createStyles(({ token }) => {
   };
 });
 
-const ActionIcons = () => {
-  const { styles } = useStyles();
+// const ActionIcons = () => {
+//   const { styles } = useStyles();
 
-  return (
-    <>
-      <AlipayCircleOutlined
-        key="AlipayCircleOutlined"
-        className={styles.action}
-      />
-      <TaobaoCircleOutlined
-        key="TaobaoCircleOutlined"
-        className={styles.action}
-      />
-      <WeiboCircleOutlined
-        key="WeiboCircleOutlined"
-        className={styles.action}
-      />
-    </>
-  );
-};
+//   return (
+//     <>
+//       <AlipayCircleOutlined
+//         key="AlipayCircleOutlined"
+//         className={styles.action}
+//       />
+//       <TaobaoCircleOutlined
+//         key="TaobaoCircleOutlined"
+//         className={styles.action}
+//       />
+//       <WeiboCircleOutlined
+//         key="WeiboCircleOutlined"
+//         className={styles.action}
+//       />
+//     </>
+//   );
+// };
 
 const Lang = () => {
   const { styles } = useStyles();
@@ -211,14 +211,14 @@ const Login: React.FC = () => {
           initialValues={{
             autoLogin: true,
           }}
-          actions={[
-            <FormattedMessage
-              key="loginWith"
-              id="pages.login.loginWith"
-              defaultMessage="其他登录方式"
-            />,
-            <ActionIcons key="icons" />,
-          ]}
+          // actions={[
+          //   <FormattedMessage
+          //     key="loginWith"
+          //     id="pages.login.loginWith"
+          //     defaultMessage="其他登录方式"
+          //   />,
+          //   <ActionIcons key="icons" />,
+          // ]}
           onFinish={async (values) => {
             await handleSubmit(values as API.LoginParams);
           }}
@@ -431,6 +431,16 @@ const Login: React.FC = () => {
                 id="pages.login.forgotPassword"
                 defaultMessage="忘记密码"
               />
+            </a>
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: -8, marginBottom: 16 }}>
+            <span style={{ color: 'rgba(0, 0, 0, 0.45)' }}>Chưa có tài khoản? </span>
+            <a
+              href="/user/register"
+              style={{ color: '#4F46E5', fontWeight: 500 }}
+            >
+              Đăng ký ngay
             </a>
           </div>
         </LoginForm>

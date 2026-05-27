@@ -6,16 +6,27 @@ export interface StateType {
 }
 
 export interface UserRegisterParams {
-  mail: string;
+  email: string;
   password: string;
-  confirm: string;
-  mobile: string;
-  captcha: string;
-  prefix: string;
+  full_name: string;
+  user_type: 'student' | 'instructor';
 }
 
-export async function fakeRegister(params: UserRegisterParams) {
-  return request('/api/register', {
+export interface RegisterResult {
+  success: boolean;
+  message?: string;
+  error?: string;
+  data?: {
+    id: string;
+    email: string;
+    username: string;
+    full_name: string;
+    user_type: string;
+  };
+}
+
+export async function fakeRegister(params: UserRegisterParams): Promise<RegisterResult> {
+  return request('/api/auth/register', {
     method: 'POST',
     data: params,
   });
