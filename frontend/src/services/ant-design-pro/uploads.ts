@@ -1,4 +1,5 @@
 import { request } from '@umijs/max';
+import type { DeleteResponse } from './types';
 
 // --- Interfaces ---
 
@@ -103,7 +104,7 @@ export async function getVideosByCourse(courseId: string) {
 }
 
 export async function deleteVideo(videoId: string) {
-  return request<{ success: boolean; message?: string }>(`/api/uploads/video/${videoId}`, {
+  return request<DeleteResponse>(`/api/uploads/video/${videoId}`, {
     method: 'DELETE',
   });
 }

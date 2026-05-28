@@ -1,4 +1,5 @@
 import { request } from '@umijs/max';
+import type { DeleteResponse, Pagination } from './types';
 
 // --- Interfaces ---
 
@@ -18,7 +19,7 @@ export interface CourseInstructor {
   full_name: string;
   username: string;
   email?: string;
-  CourseInstructor?: {
+  course_instructor?: {
     is_primary: boolean;
   };
 }
@@ -74,13 +75,6 @@ export interface CourseDetail extends CourseItem {
     status: string;
     progress_percentage: number;
   } | null;
-}
-
-export interface Pagination {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
 }
 
 export interface CoursesResponse {
@@ -141,7 +135,7 @@ export async function createCourse(data: {
   thumbnail?: string;
   price?: number;
   sale_price?: number;
-  target_level?: string;
+  target_level?: 'beginner' | 'intermediate' | 'advanced' | 'all';
   language?: string;
   max_students?: number;
   duration_weeks?: number;
@@ -162,7 +156,7 @@ export async function updateCourse(
     thumbnail?: string;
     price?: number;
     sale_price?: number;
-    target_level?: string;
+    target_level?: 'beginner' | 'intermediate' | 'advanced' | 'all';
     language?: string;
     max_students?: number;
     duration_weeks?: number;
@@ -176,7 +170,7 @@ export async function updateCourse(
 }
 
 export async function deleteCourse(id: string) {
-  return request<{ success: boolean; message?: string }>(`/api/courses/${id}`, {
+  return request<DeleteResponse>(`/api/courses/${id}`, {
     method: 'DELETE',
   });
 }

@@ -1,4 +1,5 @@
 import { request } from '@umijs/max';
+import type { DeleteResponse } from './types';
 
 // --- Interfaces ---
 
@@ -97,13 +98,13 @@ export async function updateLesson(
 }
 
 export async function deleteLesson(id: string) {
-  return request<{ success: boolean; message?: string }>(`/api/lessons/${id}`, {
+  return request<DeleteResponse>(`/api/lessons/${id}`, {
     method: 'DELETE',
   });
 }
 
 export async function reorderLessons(courseId: string, lessonIds: string[]) {
-  return request<{ success: boolean; message?: string }>(
+  return request<DeleteResponse>(
     `/api/courses/${courseId}/lessons/reorder`,
     {
       method: 'PUT',

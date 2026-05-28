@@ -1,4 +1,5 @@
 import { request } from '@umijs/max';
+import type { DeleteResponse, EnrollmentStatus, Pagination } from './types';
 
 // --- Interfaces ---
 
@@ -22,7 +23,7 @@ export interface Enrollment {
   id: string;
   user_id: string;
   course_id: string;
-  status: 'active' | 'completed' | 'dropped' | 'expired';
+  status: EnrollmentStatus;
   progress_percentage: number;
   completed_at: string | null;
   certificate_issued: boolean;
@@ -34,12 +35,7 @@ export interface Enrollment {
 export interface MyEnrollmentsResponse {
   success: boolean;
   data: Enrollment[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
+  pagination: Pagination;
 }
 
 export interface EnrollResponse {
@@ -52,7 +48,7 @@ export interface CheckEnrollmentData {
   enrolled: boolean;
   enrollment: {
     id: string;
-    status: string;
+    status: EnrollmentStatus;
     progress_percentage: number;
     enrolled_at: string;
   } | null;
@@ -73,7 +69,7 @@ export async function enrollCourse(courseId: string) {
 }
 
 export async function unenrollCourse(enrollmentId: string) {
-  return request<{ success: boolean; message?: string }>(`/api/enrollments/${enrollmentId}`, {
+  return request<DeleteResponse>(`/api/enrollments/${enrollmentId}`, {
     method: 'DELETE',
   });
 }
