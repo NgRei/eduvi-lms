@@ -1,0 +1,113 @@
+import { request } from '@umijs/max';
+
+// --- Interfaces ---
+
+export interface LessonMaterial {
+  id: string;
+  title: string;
+  material_type: 'pdf' | 'video' | 'slide' | 'link' | 'zip' | 'other';
+  file_url: string;
+  file_size_kb: number | null;
+  is_downloadable: boolean;
+}
+
+export interface Lesson {
+  id: string;
+  course_id: string;
+  title: string;
+  sort_order: number;
+  lesson_type: 'video' | 'text' | 'quiz' | 'live';
+  content_url: string | null;
+  content_text: string | null;
+  duration_minutes: number | null;
+  is_preview: boolean;
+  is_published: boolean;
+  video_id: string | null;
+  created_at: string;
+  updated_at: string;
+  course?: { id: string; title: string; slug: string };
+  materials?: LessonMaterial[];
+}
+
+export interface LessonDetailResponse {
+  success: boolean;
+  data: Lesson;
+}
+
+export interface LessonsListResponse {
+  success: boolean;
+  data: Lesson[];
+}
+
+export interface LessonMutationResponse {
+  success: boolean;
+  message?: string;
+  data?: Lesson;
+}
+
+// --- Functions ---
+
+export async function getLessonById(id: string) {
+  return request<LessonDetailResponse>(`/api/lessons/${id}`, {
+    method: 'GET',
+  });
+}
+
+export async function getLessonsByCourse(courseId: string) {
+  return request<LessonsListResponse>(`/api/courses/${courseId}/lessons`, {
+    method: 'GET',
+  });
+}
+
+export async function createLesson(
+  courseId: string,
+  data: {
+    title: string;
+    sort_order?: number;
+    lesson_type?: 'video' | 'text' | 'quiz' | 'live';
+    content_url?: string;
+    content_text?: string;
+    duration_minutes?: number;
+    is_preview?: boolean;
+  },
+) {
+  return request<LessonMutationResponse>(`/api/courses/${courseId}/lessons`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export async function updateLesson(
+  id: string,
+  data: {
+    title?: string;
+    sort_order?: number;
+    lesson_type?: 'video' | 'text' | 'quiz' | 'live';
+    content_url?: string;
+    content_text?: string;
+    duration_minutes?: number;
+    is_preview?: boolean;
+    is_published?: boolean;
+  },
+) {
+  return request<LessonMutationResponse>(`/api/lessons/${id}`, {
+    method: 'PUT',
+    data,
+  });
+}
+
+export async function deleteLesson(id: string) {
+  return request<{ success: boolean; message?: string }>(`/api/lessons/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function reorderLessons(courseId: string, lessonIds: string[]) {
+  return request<{ success: boolean; message?: string }>(
+    `/api/courses/${courseId}/lessons/reorder`,
+    {
+      method: 'PUT',
+      data: { lessonIds },
+    },
+  );
+}
