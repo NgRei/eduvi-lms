@@ -10,6 +10,7 @@ import { Enrollment } from './Enrollment.model';
 import { LessonProgress } from './LessonProgress.model';
 import { Assignment } from './Assignment.model';
 import { QuizQuestion } from './QuizQuestion.model';
+import { Video } from './Video.model';
 
 // User 1-to-1 StudentProfile
 User.hasOne(StudentProfile, { foreignKey: 'user_id', as: 'studentProfile', onDelete: 'CASCADE' });
@@ -81,6 +82,14 @@ Assignment.belongsTo(Lesson, { foreignKey: 'lesson_id', as: 'lesson' });
 Assignment.hasMany(QuizQuestion, { foreignKey: 'assignment_id', as: 'questions', onDelete: 'CASCADE' });
 QuizQuestion.belongsTo(Assignment, { foreignKey: 'assignment_id', as: 'assignment' });
 
+// Video associations
+Video.belongsTo(Course, { foreignKey: 'course_id', as: 'course' });
+Video.belongsTo(User, { foreignKey: 'uploaded_by', as: 'uploader' });
+Video.belongsTo(Lesson, { foreignKey: 'lesson_id', as: 'lesson' });
+Course.hasMany(Video, { foreignKey: 'course_id', as: 'videos', onDelete: 'CASCADE' });
+User.hasMany(Video, { foreignKey: 'uploaded_by', as: 'uploadedVideos', onDelete: 'CASCADE' });
+Lesson.hasOne(Video, { foreignKey: 'lesson_id', as: 'video', onDelete: 'SET NULL' });
+
 export {
   User,
   StudentProfile,
@@ -93,5 +102,6 @@ export {
   Enrollment,
   LessonProgress,
   Assignment,
-  QuizQuestion
+  QuizQuestion,
+  Video
 };

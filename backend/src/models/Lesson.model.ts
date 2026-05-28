@@ -12,6 +12,7 @@ export class Lesson extends Model {
   declare duration_minutes: number | null;
   declare is_preview: boolean;
   declare is_published: boolean;
+  declare video_id: string | null;
   declare deleted_at: Date | null;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
@@ -75,6 +76,14 @@ Lesson.init(
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: null,
+    },
+    video_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'videos',
+        key: 'id',
+      },
     },
   },
   {
