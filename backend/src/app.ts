@@ -3,6 +3,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { sequelize } from './config/database';
 import authRoutes from './routes/auth.routes';
+import courseRoutes from './routes/course.routes';
+import lessonRoutes from './routes/lesson.routes';
+import enrollmentRoutes from './routes/enrollment.routes';
+import lessonProgressRoutes from './routes/lessonProgress.routes';
 
 // Load env vars
 dotenv.config();
@@ -28,6 +32,10 @@ app.get('/health', (req, res) => {
 
 // Register api routes
 app.use('/api/auth', authRoutes);
+app.use('/api/courses', courseRoutes);
+app.use('/api/lessons', lessonRoutes);
+app.use('/api/enrollments', enrollmentRoutes);
+app.use('/api/lesson-progress', lessonProgressRoutes);
 
 // Global Error Handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

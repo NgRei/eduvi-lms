@@ -144,3 +144,6 @@ vite.config.ts.timestamp-*
 
 # Ignore markdown files
 *.md
+
+#ignore database file
+*.sql
