@@ -429,6 +429,208 @@ backend/src/
 
 ---
 
+## Khả năng mở rộng — Tính năng bổ sung khi dự án hoàn thành sớm
+
+> Các tính năng dưới đây xếp theo **mức giá trị khi bảo vệ tiểu luận** (hội đồng chấm điểm). Mỗi tính năng có thể thêm độc lập sau khi hoàn thành Ưu tiên 1-3, không ảnh hưởng kiến trúc hiện có.
+
+### Mức giá trị cao ⭐
+
+#### E1. Hệ thống Quiz/Bài tập (Tuần 4 trong kế hoạch DB)
+
+**Giá trị bảo vệ:** Thể hiện luồng học tập hoàn chỉnh (đăng ký → học → làm quiz → hoàn thành). Hội đồng thường hỏi "học viên làm bài kiểm tra như thế nào?"
+
+**Hiện có:**
+- Models `Assignment` và `QuizQuestion` đã tồn tại trong backend
+- Associations đã thiết lập (Course 1:N Assignment, Assignment 1:N QuizQuestion)
+
+**Cần xây:**
+
+Backend:
+- `controllers/assignment.controller.ts` — CRUD bài tập, CRUD câu hỏi, chấm điểm tự động
+- `routes/assignment.routes.ts`
+
+API endpoints mới:
+| Method | Path | Mô tả |
+|---|---|---|
+| POST | `/api/courses/:courseId/assignments` | Giảng viên tạo bài tập |
+| GET | `/api/courses/:courseId/assignments` | Danh sách bài tập theo khóa |
+| GET | `/api/assignments/:id` | Chi tiết bài tập kèm câu hỏi |
+| PUT | `/api/assignments/:id` | Sửa bài tập |
+| DELETE | `/api/assignments/:id` | Xóa bài tập |
+| POST | `/api/assignments/:id/questions` | Thêm câu hỏi |
+| PUT | `/api/questions/:id` | Sửa câu hỏi |
+| DELETE | `/api/questions/:id` | Xóa câu hỏi |
+| POST | `/api/assignments/:id/submit` | Học viên nộp bài |
+| GET | `/api/submissions/:id/result` | Xem kết quả bài nộp |
+
+Frontend:
+- Trang giảng viên quản lý bài tập (tạo quiz, thêm câu hỏi)
+- Trang học viên làm quiz (hiển thị câu hỏi, đếm giờ, nộp bài)
+- Trang kết quả quiz (điểm, đáp án, giải thích)
+
+**Ước lượng:** 3-4 ngày
+
+---
+
+#### E2. Hệ thống Chứng chỉ (Tuần 5 trong kế hoạch DB)
+
+**Giá trị bảo vệ:** Output trực quan, dễ demo. Hội đồng đánh giá cao tính năng "đầu ra" của khóa học.
+
+**Hiện có:**
+- Bảng `certificates` và `user_certificates` đã được thiết kế trong DB v3
+
+**Cần xây:**
+
+Backend:
+- Migration tạo bảng `certificates`, `user_certificates`
+- `controllers/certificate.controller.ts`
+- Logic tự động cấp chứng chỉ khi `progress_percentage = 100`
+- API xác thực chứng chỉ theo `cert_code` (public, không cần đăng nhập)
+
+API endpoints mới:
+| Method | Path | Mô tả |
+|---|---|---|
+| POST | `/api/courses/:courseId/certificate` | Giảng viên tạo template chứng chỉ |
+| GET | `/api/courses/:courseId/certificate` | Xem template chứng chỉ |
+| GET | `/api/certificates/verify/:cert_code` | Xác thực chứng chỉ (public) |
+| GET | `/api/users/me/certificates` | Danh chứng chỉ của học viên |
+
+Frontend:
+- Trang quản lý chứng chỉ cho giảng viên
+- Trang danh sách chứng chỉ cho học viên
+- Trang xác thực chứng chỉ public (ai cũng tra cứu được)
+
+**Ước lượng:** 2-3 ngày
+
+---
+
+#### E3. Refresh Tokens (Bảo mật JWT)
+
+**Giá trị bảo vệ:** Hội đồng hay hỏi "access token hết hạn thì xử lý thế nào?" — cần có câu trả lời thực tế.
+
+**Hiện có:**
+- Bảng `refresh_tokens` đã được thiết kế trong DB v3
+
+**Cần xây:**
+
+Backend:
+- Migration tạo bảng `refresh_tokens`
+- Sửa logic login: trả thêm `refresh_token` (7 ngày)
+- API `POST /api/auth/refresh` — refresh access token
+- API `POST /api/auth/logout` — thu hồi refresh token
+- Middleware kiểm tra refresh token chưa bị revoke
+
+Frontend:
+- Interceptor tự động gọi refresh khi access token hết hạn (401)
+- Logout thu hồi refresh token thay vì chỉ xóa localStorage
+
+**Ước lượng:** 1-2 ngày
+
+---
+
+### Mức giá trị trung bình 🔵
+
+#### E4. Đánh giá khóa học (Course Reviews)
+
+**Giá trị bảo vệ:** Tính năng phổ biến, thể hiện hệ thống feedback. Dễ implement.
+
+**Cần xây:**
+
+Backend:
+- Migration tạo bảng `course_reviews`
+- `controllers/review.controller.ts`
+
+API endpoints mới:
+| Method | Path | Mô tả |
+|---|---|---|
+| POST | `/api/courses/:courseId/reviews` | Học viên đánh giá khóa học |
+| GET | `/api/courses/:courseId/reviews` | Danh sách đánh giá |
+| PUT | `/api/reviews/:id` | Sửa đánh giá |
+| DELETE | `/api/reviews/:id` | Xóa đánh giá |
+
+Frontend:
+- Component đánh giá (stars + comment) trên trang chi tiết khóa học
+- Danh sách đánh giá
+- Tự động cập nhật `rating_avg` trong bảng `courses`
+
+**Ước lượng:** 1 ngày
+
+---
+
+#### E5. Audit Logs (Nhật ký bảo mật)
+
+**Giá trị bảo vệ:** Tiêu chí bảo mật cơ bản. Thể hiện hệ thống có theo dõi thao tác nhạy cảm.
+
+**Cần xây:**
+
+Backend:
+- Migration tạo bảng `audit_logs`
+- Middleware ghi log tự động cho các action: `login`, `logout`, `grade_update`, `user_delete`, `enroll`, `cert_issued`
+- API xem audit log cho admin
+
+| Method | Path | Mô tả |
+|---|---|---|
+| GET | `/api/admin/audit-logs` | Danh sách nhật ký (admin only) |
+
+**Ước lượng:** 1 ngày
+
+---
+
+#### E6. Admin quản lý khóa học
+
+**Giá trị bảo vệ:** Thể hiện quyền quản trị đầy đủ. Hiện admin chỉ quản lý người dùng.
+
+**Cần xây:**
+
+Backend (mở rộng admin.controller.ts):
+| Method | Path | Mô tả |
+|---|---|---|
+| GET | `/api/admin/courses` | Danh sách tất cả khóa học |
+| PUT | `/api/admin/courses/:id/status` | Duyệt/từ chối khóa học |
+| DELETE | `/api/admin/courses/:id` | Xóa khóa học bất kỳ |
+
+Frontend:
+- Trang `/admin/courses` — bảng quản lý khóa học
+
+**Ước lượng:** 1 ngày
+
+---
+
+### Mức giá trị thấp 🟡
+
+#### E7. Hệ thống thông báo
+
+**Cần xây:**
+- Bảng `notifications` (in-app)
+- API tạo/đánh dấu đã đọc/thông báo chưa đọc
+- Component chuông thông báo trong header
+
+**Ước lượng:** 1-2 ngày
+
+---
+
+### Bảng tổng hợp mở rộng
+
+| STT | Tính năng | Ước lượng | Giá trị bảo vệ | Phụ thuộc |
+|---|---|---|---|---|
+| E1 | Quiz/Bài tập | 3-4 ngày | ⭐ Cao | Hoàn thành Ưu tiên 1 |
+| E2 | Chứng chỉ | 2-3 ngày | ⭐ Cao | E1 (cần quiz để hoàn thành khóa) |
+| E3 | Refresh Tokens | 1-2 ngày | ⭐ Cao | Không |
+| E4 | Đánh giá khóa học | 1 ngày | 🔵 Trung bình | Hoàn thành Ưu tiên 1 |
+| E5 | Audit Logs | 1 ngày | 🔵 Trung bình | Không |
+| E6 | Admin quản lý khóa học | 1 ngày | 🔵 Trung bình | Hoàn thành Ưu tiên 3 |
+| E7 | Thông báo | 1-2 ngày | 🟡 Thấp | Không |
+
+**Tổng thời gian ước lượng nếu làm tất cả:** 10-14 ngày
+
+### Lưu ý kiến trúc khi mở rộng
+
+- **State management:** Khi số lượng tính năng tăng, nên bổ sung `@tanstack/react-query` (đã có trong project) để quản lý server state thay vì `useEffect` + `useState` thủ công. Hiện chỉ trang Register dùng react-query.
+- **Middleware phân quyền:** Logic kiểm tra "giảng viên chỉ sửa khóa học của mình" nằm rải rác trong controller. Khi thêm nhiều API, nên tách thành middleware `authorizeCourseOwner` tái sử dụng.
+- **Error handling thống nhất:** Backend nên có error handler middleware chung, trả về format `{ error: string, code: string }` nhất quán cho tất cả API.
+
+---
+
 ## Thứ tự thực hiện đề xuất
 
 ```
