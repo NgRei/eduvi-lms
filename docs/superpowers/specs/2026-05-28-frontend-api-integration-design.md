@@ -142,8 +142,9 @@ GET /api/enrollments/me?status=active&page=1&limit=10
 ```
 
 **Bảo vệ route:**
-- Kiểm tra enrollment trước khi hiển thị bài giảng
-- Nếu chưa đăng ký → chuyển hướng về trang chi tiết khóa học
+- Khi trang load, gọi `GET /api/enrollments/check/:courseId` để xác nhận đã đăng ký
+- Nếu chưa đăng ký và bài không phải `is_preview` → chuyển hướng về trang chi tiết khóa học
+- Nếu bài là `is_preview = true` → cho phép xem mà không cần đăng ký
 
 ### 1.5 API Services mới trong frontend
 
