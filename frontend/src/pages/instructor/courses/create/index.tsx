@@ -1,157 +1,185 @@
-import { 
+import {
   StepsForm,
   ProFormText,
   ProFormSelect,
   ProFormDigit,
   ProFormTextArea,
+  PageContainer,
 } from '@ant-design/pro-components';
-import { PageContainer } from '@ant-design/pro-components';
-import { Card, Form, Input, Button, Space, List, message } from 'antd';
+import { Card, Col, Input, InputNumber, message, Row, Select, Button, Space, List } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { history } from '@umijs/max';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { createCourse, getCategories, type CourseCategory } from '@/services/ant-design-pro/courses';
+import { createLesson } from '@/services/ant-design-pro/lessons';
 
 const CreateCourse: React.FC = () => {
-  const [syllabus, setSyllabus] = useState<string[]>([
-    'Bài 1: Giới thiệu tổng quan môn học',
-    'Bài 2: Hướng dẫn cài đặt môi trường phát triển',
-    'Bài 3: Viết ứng dụng đầu tiên Hello World',
-  ]);
+  const [categories, setCategories] = useState<CourseCategory[]>([]);
+  const [createdCourseId, setCreatedCourseId] = useState<string | null>(null);
+  const [syllabus, setSyllabus] = useState<string[]>([]);
   const [newLesson, setNewLesson] = useState('');
+
+  useEffect(() => {
+    getCategories()
+      .then((res) => {
+        if (res.success) setCategories(res.data);
+      })
+      .catch(console.error);
+  }, []);
 
   const addLesson = () => {
     if (!newLesson.trim()) return;
     setSyllabus([...syllabus, newLesson.trim()]);
     setNewLesson('');
-    message.success('Đã thêm bài giảng vào giáo trình nháp!');
   };
 
   const removeLesson = (index: number) => {
     setSyllabus(syllabus.filter((_, i) => i !== index));
-    message.info('Đã xóa bài giảng khỏi giáo trình.');
   };
 
-  const handleFinish = async (values: any) => {
-    await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API Call
-    console.log('Created Course Data:', { ...values, syllabus });
-    message.success('Đăng ký tạo khóa học mới thành công!');
-    history.push('/instructor/courses');
+  const handleStep1 = async (values: any) => {
+    try {
+      const res = await createCourse({
+        title: values.title,
+        category_id: values.category_id,
+        short_description: values.description,
+        description: values.description,
+        price: values.price || 0,
+        target_level: values.target_level || 'all',
+      });
+      if (res.success && res.data) {
+        setCreatedCourseId(res.data.id);
+        message.success('Tạo khóa học thành công!');
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      message.error(err?.data?.error || 'Không thể tạo khóa học');
+      return false;
+    }
+  };
+
+  const handleStep2 = async () => {
+    if (!createdCourseId) {
+      message.error('Không tìm thấy khóa học');
+      return false;
+    }
+    if (syllabus.length === 0) {
+      message.warning('Vui lòng tạo ít nhất 1 bài giảng!');
+      return false;
+    }
+    try {
+      for (let i = 0; i < syllabus.length; i++) {
+        await createLesson(createdCourseId, {
+          title: syllabus[i],
+          lesson_type: 'video',
+        });
+      }
+      message.success(`Đã thêm ${syllabus.length} bài giảng!`);
+      return true;
+    } catch (err: any) {
+      message.error(err?.data?.error || 'Không thể thêm bài giảng');
+      return false;
+    }
   };
 
   return (
     <PageContainer title="Tạo khóa học mới">
-      <Card hoverable>
+      <Card>
         <StepsForm
-          onFinish={handleFinish}
+          onFinish={async () => {
+            message.success('Tạo khóa học thành công!');
+            history.push('/instructor/courses');
+            return true;
+          }}
           formProps={{
             validateMessages: {
               required: 'Trường này là bắt buộc!',
             },
           }}
         >
-          <StepsForm.StepForm
-            name="basic"
-            title="Thông tin cơ bản"
-            onFinish={async () => true}
-          >
+          <StepsForm.StepForm name="basic" title="Thông tin cơ bản" onFinish={handleStep1}>
             <ProFormText
               name="title"
               label="Tên khóa học"
-              placeholder="Nhập tên khóa học gợi cảm hứng (Ví dụ: Lập trình ReactJS nâng cao)"
+              placeholder="Nhập tên khóa học"
               rules={[{ required: true }]}
             />
-            
             <ProFormSelect
-              name="category"
-              label="Danh mục phân loại"
-              valueEnum={{
-                backend: 'Lập trình Backend',
-                frontend: 'Lập trình Frontend / Di động',
-                database: 'Cơ sở dữ liệu & DevOps',
-              }}
-              placeholder="Chọn danh mục phù hợp"
-              rules={[{ required: true }]}
+              name="category_id"
+              label="Danh mục"
+              placeholder="Chọn danh mục"
+              options={categories.map((c) => ({ label: c.name, value: c.id }))}
             />
-
             <ProFormTextArea
               name="description"
-              label="Mô tả tóm tắt khóa học"
-              placeholder="Viết mô tả ngắn để học viên dễ hiểu mục tiêu khóa học..."
-              rules={[{ required: true }]}
+              label="Mô tả khóa học"
+              placeholder="Mô tả ngắn về khóa học"
             />
-
-            <ProFormDigit
-              name="price"
-              label="Học phí (đơn vị: VNĐ)"
-              placeholder="Nhập học phí mong muốn. Điền 0 nếu miễn phí."
-              rules={[{ required: true }]}
-              min={0}
-            />
+            <Row gutter={16}>
+              <Col span={8}>
+                <ProFormDigit name="price" label="Giá (VNĐ)" min={0} initialValue={0} />
+              </Col>
+              <Col span={8}>
+                <ProFormSelect
+                  name="target_level"
+                  label="Cấp độ"
+                  initialValue="all"
+                  options={[
+                    { label: 'Tất cả', value: 'all' },
+                    { label: 'Cơ bản', value: 'beginner' },
+                    { label: 'Trung bình', value: 'intermediate' },
+                    { label: 'Nâng cao', value: 'advanced' },
+                  ]}
+                />
+              </Col>
+            </Row>
           </StepsForm.StepForm>
 
-          <StepsForm.StepForm
-            name="syllabus"
-            title="Thiết lập giáo trình bài giảng"
-            onFinish={async () => {
-              if (syllabus.length === 0) {
-                message.warning('Vui lòng tạo ít nhất 1 bài giảng trong giáo trình!');
-                return false;
-              }
-              return true;
-            }}
-          >
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>Giáo trình nháp hiện tại:</label>
+          <StepsForm.StepForm name="syllabus" title="Giáo trình bài giảng" onFinish={handleStep2}>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>
+                Danh sách bài giảng:
+              </label>
               <List
                 bordered
                 dataSource={syllabus}
+                locale={{ emptyText: 'Chưa có bài giảng nào' }}
                 renderItem={(item, index) => (
                   <List.Item
                     actions={[
-                      <Button 
+                      <Button
                         key="delete"
-                        type="text" 
-                        danger 
-                        icon={<DeleteOutlined />} 
+                        type="text"
+                        danger
+                        icon={<DeleteOutlined />}
                         onClick={() => removeLesson(index)}
-                      />
+                      />,
                     ]}
                   >
-                    {item}
+                    {index + 1}. {item}
                   </List.Item>
                 )}
               />
             </div>
-
-            <Space.Compact style={{ width: '100%', marginTop: 10 }}>
-              <Input 
+            <Space.Compact style={{ width: '100%' }}>
+              <Input
                 value={newLesson}
                 onChange={(e) => setNewLesson(e.target.value)}
-                placeholder="Nhập tên bài giảng tiếp theo (Ví dụ: Bài 4: Tìm hiểu cấu trúc Route)" 
+                placeholder="Nhập tên bài giảng"
                 onPressEnter={addLesson}
               />
               <Button type="primary" onClick={addLesson} icon={<PlusOutlined />}>
-                Thêm bài giảng
+                Thêm
               </Button>
             </Space.Compact>
           </StepsForm.StepForm>
 
-          <StepsForm.StepForm
-            name="publish"
-            title="Đăng tải & Ảnh đại diện"
-          >
-            <ProFormText
-              name="thumbnail"
-              label="Đường dẫn ảnh đại diện (Thumbnail URL)"
-              placeholder="Nhập URL ảnh đại diện khóa học (ví dụ: https://image.com/course.jpg)"
-              rules={[{ required: true }]}
-              initialValue="https://images.unsplash.com/photo-1516321318423-f06f85e504b3"
-            />
-            <ProFormTextArea
-              name="welcomeMessage"
-              label="Lời chào mừng học viên"
-              placeholder="Viết lời khích lệ học viên khi họ đăng ký thành công khóa học của bạn..."
-            />
+          <StepsForm.StepForm name="publish" title="Hoàn tất">
+            <div style={{ textAlign: 'center', padding: 40 }}>
+              <h3>Khóa học đã sẵn sàng!</h3>
+              <p>Nhấn "Hoàn tất" để lưu và chuyển về trang quản lý.</p>
+            </div>
           </StepsForm.StepForm>
         </StepsForm>
       </Card>
