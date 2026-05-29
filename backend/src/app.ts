@@ -9,6 +9,7 @@ import enrollmentRoutes from './routes/enrollment.routes';
 import lessonProgressRoutes from './routes/lessonProgress.routes';
 import uploadRoutes from './routes/upload.routes';
 import dashboardRoutes from './routes/dashboard.routes';
+import adminRoutes from './routes/admin.routes';
 
 // Load env vars
 dotenv.config();
@@ -40,6 +41,7 @@ app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/lesson-progress', lessonProgressRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Global Error Handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
