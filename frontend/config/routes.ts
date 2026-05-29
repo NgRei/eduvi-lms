@@ -38,6 +38,23 @@ export default [
       },
     ],
   },
+  // ================= PUBLIC COURSES =================
+  {
+    path: '/courses',
+    routes: [
+      {
+        path: '/courses',
+        name: 'Danh sách khóa học',
+        component: './courses/list',
+      },
+      {
+        path: '/courses/:id',
+        name: 'Chi tiết khóa học',
+        component: './courses/detail',
+        hideInMenu: true,
+      },
+    ],
+  },
   // ================= STUDENT PORTAL =================
   {
     path: '/student',
