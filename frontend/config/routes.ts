@@ -115,6 +115,12 @@ export default [
         component: './instructor/courses/create',
         hideInMenu: true,
       },
+      {
+        path: '/instructor/courses/:id/edit',
+        name: 'Chỉnh sửa khóa học',
+        component: './instructor/courses/edit',
+        hideInMenu: true,
+      },
     ],
   },
   // ================= ADMIN PORTAL =================
