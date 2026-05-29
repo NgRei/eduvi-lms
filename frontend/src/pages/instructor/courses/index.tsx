@@ -2,123 +2,116 @@ import { PlusOutlined } from '@ant-design/icons';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { history } from '@umijs/max';
 import { Button, Popconfirm, Space, Tag, message } from 'antd';
-import React, { useState } from 'react';
-
-interface CourseItem {
-  id: string;
-  title: string;
-  category: string;
-  studentsCount: number;
-  lessonsCount: number;
-  price: number;
-  status: 'draft' | 'published';
-  rating: number;
-}
-
-const initialCourses: CourseItem[] = [
-  { id: '1', title: 'Lập trình Node.js thực chiến từ Zero đến Hero', category: 'Lập trình Backend', studentsCount: 450, lessonsCount: 42, price: 599000, status: 'published', rating: 4.8 },
-  { id: '2', title: 'Xây dựng RESTful API với Express và TypeScript', category: 'Lập trình Backend', studentsCount: 280, lessonsCount: 15, price: 350000, status: 'published', rating: 4.7 },
-  { id: '3', title: 'Cơ sở dữ liệu MySQL nâng cao cho Lập trình viên', category: 'Cơ sở dữ liệu', studentsCount: 180, lessonsCount: 25, price: 290000, status: 'published', rating: 4.9 },
-  { id: '4', title: 'Lập trình Fullstack Web với Next.js và TailwindCSS', category: 'Lập trình Web', studentsCount: 0, lessonsCount: 50, price: 799000, status: 'draft', rating: 0 },
-];
+import React, { useRef } from 'react';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
+import { getInstructorCourses, updateCourse, deleteCourse, type CourseItem } from '@/services/ant-design-pro/courses';
 
 const CourseManagement: React.FC = () => {
-  const [courses, setCourses] = useState<CourseItem[]>(initialCourses);
+  const actionRef = useRef<ActionType>(null);
 
-  const handleDelete = (id: string) => {
-    setCourses(courses.filter(course => course.id !== id));
-    message.success('Đã xóa khóa học thành công!');
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteCourse(id);
+      message.success('Đã xóa khóa học thành công!');
+      actionRef.current?.reload();
+    } catch (err: any) {
+      message.error(err?.data?.error || 'Không thể xóa khóa học');
+    }
   };
 
-  const togglePublish = (id: string) => {
-    setCourses(
-      courses.map(course => {
-        if (course.id === id) {
-          const newStatus = course.status === 'published' ? 'draft' : 'published';
-          message.success(
-            newStatus === 'published'
-              ? 'Đã xuất bản khóa học công khai!'
-              : 'Đã chuyển khóa học về dạng bản nháp!'
-          );
-          return { ...course, status: newStatus };
-        }
-        return course;
-      })
-    );
+  const togglePublish = async (record: CourseItem) => {
+    try {
+      await updateCourse(record.id, { is_published: !record.is_published });
+      message.success(
+        !record.is_published
+          ? 'Đã xuất bản khóa học công khai!'
+          : 'Đã chuyển khóa học về dạng bản nháp!'
+      );
+      actionRef.current?.reload();
+    } catch (err: any) {
+      message.error(err?.data?.error || 'Không thể cập nhật trạng thái');
+    }
   };
 
-  const columns = [
+  const columns: ProColumns<CourseItem>[] = [
     {
       title: 'Tên khóa học',
       dataIndex: 'title',
       copyable: true,
       ellipsis: true,
-      render: (text: string) => <strong>{text}</strong>,
+      render: (_, record) => <strong>{record.title}</strong>,
     },
     {
       title: 'Danh mục',
-      dataIndex: 'category',
+      dataIndex: ['category', 'name'],
       valueType: 'select',
-      valueEnum: {
-        all: { text: 'Tất cả' },
-        'Lập trình Backend': { text: 'Lập trình Backend' },
-        'Lập trình Web': { text: 'Lập trình Web' },
-        'Cơ sở dữ liệu': { text: 'Cơ sở dữ liệu' },
-      },
+      hideInTable: true,
+      fieldProps: { showSearch: true },
+    },
+    {
+      title: 'Danh mục',
+      dataIndex: ['category', 'name'],
+      search: false,
+      render: (_, record) => record.category?.name || '-',
     },
     {
       title: 'Số bài học',
-      dataIndex: 'lessonsCount',
+      dataIndex: 'total_lessons',
       search: false,
-      render: (val: number) => `${val} bài giảng`,
+      render: (_, record) => `${record.total_lessons} bài giảng`,
     },
     {
       title: 'Số học viên',
-      dataIndex: 'studentsCount',
+      dataIndex: 'total_students',
       search: false,
-      sorter: (a: CourseItem, b: CourseItem) => a.studentsCount - b.studentsCount,
-      render: (val: number) => <Tag color="blue">{val} học viên</Tag>,
+      sorter: true,
+      render: (_, record) => <Tag color="blue">{record.total_students} học viên</Tag>,
     },
     {
       title: 'Học phí',
       dataIndex: 'price',
       search: false,
-      render: (val: number) => <strong>{val === 0 ? 'Miễn phí' : `${val.toLocaleString()} đ`}</strong>,
+      render: (_, record) => (
+        <strong>{record.price === 0 ? 'Miễn phí' : `${record.price.toLocaleString()} đ`}</strong>
+      ),
     },
     {
       title: 'Đánh giá',
-      dataIndex: 'rating',
+      dataIndex: 'rating_avg',
       search: false,
-      render: (val: number) => (val === 0 ? <span style={{ color: '#9CA3AF' }}>Chưa có</span> : `⭐ ${val}`),
+      render: (_, record) =>
+        record.rating_avg === 0 ? <span style={{ color: '#9CA3AF' }}>Chưa có</span> : `⭐ ${record.rating_avg}`,
     },
     {
       title: 'Trạng thái',
-      dataIndex: 'status',
+      dataIndex: 'is_published',
       valueType: 'select',
       valueEnum: {
-        published: { text: 'Đã xuất bản', status: 'Success' },
-        draft: { text: 'Bản nháp', status: 'Default' },
+        true: { text: 'Đã xuất bản', status: 'Success' },
+        false: { text: 'Bản nháp', status: 'Default' },
       },
+      render: (_, record) => (
+        <Tag color={record.is_published ? 'green' : 'default'}>
+          {record.is_published ? 'Đã xuất bản' : 'Bản nháp'}
+        </Tag>
+      ),
     },
     {
-      title: 'Thao tác',
+      title: 'Hành động',
       valueType: 'option',
-      key: 'option',
-      render: (_text: any, record: CourseItem) => (
-        <Space size="middle">
-          <Button 
-            type="link" 
-            onClick={() => togglePublish(record.id)}
-          >
-            {record.status === 'published' ? 'Hạ xuống nháp' : 'Xuất bản'}
-          </Button>
+      render: (_, record) => (
+        <Space>
+          <a onClick={() => history.push(`/instructor/courses/${record.id}/edit`)}>Chỉnh sửa</a>
+          <a onClick={() => togglePublish(record)}>
+            {record.is_published ? 'Gỡ xuất bản' : 'Xuất bản'}
+          </a>
           <Popconfirm
-            title="Bạn có chắc chắn muốn xóa khóa học này?"
+            title="Bạn có chắc muốn xóa khóa học này?"
             onConfirm={() => handleDelete(record.id)}
-            okText="Có"
-            cancelText="Không"
+            okText="Xóa"
+            cancelText="Hủy"
           >
-            <Button type="link" danger>Xóa</Button>
+            <a style={{ color: '#EF4444' }}>Xóa</a>
           </Popconfirm>
         </Space>
       ),
@@ -126,28 +119,41 @@ const CourseManagement: React.FC = () => {
   ];
 
   return (
-    <PageContainer title="Quản lý Khóa học">
+    <PageContainer title="Quản lý khóa học">
       <ProTable<CourseItem>
-        headerTitle="Các khóa học bạn đang giảng dạy"
+        headerTitle="Danh sách khóa học"
+        actionRef={actionRef}
         rowKey="id"
-        search={{
-          labelWidth: 'auto',
-        }}
+        search={{ labelWidth: 120 }}
         toolBarRender={() => [
           <Button
-            key="button"
+            key="create"
+            type="primary"
             icon={<PlusOutlined />}
             onClick={() => history.push('/instructor/courses/create')}
-            type="primary"
           >
             Tạo khóa học mới
           </Button>,
         ]}
-        dataSource={courses}
-        columns={columns as any}
-        pagination={{
-          pageSize: 5,
+        request={async (params, sort) => {
+          try {
+            const sortField = sort && Object.keys(sort)[0];
+            const sortOrder = sortField ? (sort[sortField] === 'ascend' ? 'asc' : 'desc') : undefined;
+            const res = await getInstructorCourses({
+              page: params.current || 1,
+              limit: params.pageSize || 10,
+              status: params.is_published === 'true' ? 'published' : params.is_published === 'false' ? 'draft' : undefined,
+            });
+            return {
+              data: res.data || [],
+              total: res.pagination?.total || 0,
+              success: true,
+            };
+          } catch (err) {
+            return { data: [], total: 0, success: false };
+          }
         }}
+        columns={columns}
       />
     </PageContainer>
   );
