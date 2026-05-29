@@ -78,6 +78,12 @@ export default [
         icon: 'book',
         component: './student/my-courses',
       },
+      {
+        path: '/student/courses/:courseId/lessons/:lessonId',
+        name: 'Xem bài giảng',
+        component: './student/lesson-view',
+        hideInMenu: true,
+      },
     ],
   },
   // ================= INSTRUCTOR PORTAL =================
