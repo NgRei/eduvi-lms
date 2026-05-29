@@ -1,249 +1,159 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
-import { Button, Form, Input, Modal, Select, Space, Tag, message } from 'antd';
-import React, { useState } from 'react';
-
-interface UserItem {
-  id: string;
-  name: string;
-  username: string;
-  email: string;
-  role: 'student' | 'instructor' | 'admin';
-  status: 'active' | 'inactive';
-  createdAt: string;
-}
-
-const initialUsers: UserItem[] = [
-  { id: '1', name: 'Nguyễn Văn An', username: 'annv@102', email: 'annv@gmail.com', role: 'student', status: 'active', createdAt: '2026-05-25' },
-  { id: '2', name: 'Trần Thị Bình', username: 'binhtt@394', email: 'binhtt@gmail.com', role: 'instructor', status: 'active', createdAt: '2026-05-24' },
-  { id: '3', name: 'Lê Hoàng Cường', username: 'cuonglh@441', email: 'cuonglh@gmail.com', role: 'student', status: 'inactive', createdAt: '2026-05-24' },
-  { id: '4', name: 'Phạm Minh Đức', username: 'ducpm@782', email: 'ducpm@gmail.com', role: 'student', status: 'active', createdAt: '2026-05-23' },
-  { id: '5', name: 'Vũ Thị Hồng', username: 'hongvt@921', email: 'hongvt@gmail.com', role: 'instructor', status: 'active', createdAt: '2026-05-22' },
-  { id: '6', name: 'Admin Toàn Quyền', username: 'admin', email: 'admin@eduvi.com', role: 'admin', status: 'active', createdAt: '2026-05-01' },
-];
+import { Button, Form, Input, message, Modal, Popconfirm, Select, Space, Tag } from 'antd';
+import React, { useRef, useState } from 'react';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
+import { getUsers, createUser, updateUserStatus, deleteUser, type AdminUser } from '@/services/ant-design-pro/admin';
 
 const UserManagement: React.FC = () => {
-  const [users, setUsers] = useState<UserItem[]>(initialUsers);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [form] = Form.useForm();
+  const actionRef = useRef<ActionType>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createForm] = Form.useForm();
 
-  // Helper to remove accents from Vietnamese strings (for username generation)
-  const removeAccents = (str: string) => {
-    return str
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/đ/g, 'd')
-      .replace(/Đ/g, 'd');
+  const handleToggleStatus = async (record: AdminUser) => {
+    try {
+      await updateUserStatus(record.id, !record.is_active);
+      message.success(record.is_active ? 'Đã khóa tài khoản!' : 'Đã kích hoạt tài khoản!');
+      actionRef.current?.reload();
+    } catch (err: any) {
+      message.error(err?.data?.error || 'Không thể cập nhật trạng thái');
+    }
   };
 
-  // Logic to auto-generate username: name + initials of middle/last names + @ + random digits (e.g. annv@123)
-  const generateUsername = (fullName: string): string => {
-    if (!fullName) return '';
-    const cleanName = removeAccents(fullName).trim().toLowerCase();
-    const parts = cleanName.split(/\s+/);
-    if (parts.length === 0) return '';
-    
-    // An Nguyen Van -> name is "an", middle/last initials are "nv" -> annv
-    const firstName = parts[parts.length - 1]; // "an"
-    const initials = parts
-      .slice(0, parts.length - 1)
-      .map(part => part.charAt(0))
-      .join(''); // "nv"
-      
-    const randomDigits = Math.floor(100 + Math.random() * 900); // 3 random digits
-    return `${firstName}${initials}@${randomDigits}`;
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteUser(id);
+      message.success('Đã xóa người dùng!');
+      actionRef.current?.reload();
+    } catch (err: any) {
+      message.error(err?.data?.error || 'Không thể xóa người dùng');
+    }
   };
 
-  const handleCreateUser = (values: any) => {
-    const username = values.username || generateUsername(values.name);
-    const newUser: UserItem = {
-      id: Date.now().toString(),
-      name: values.name,
-      username,
-      email: values.email,
-      role: values.role,
-      status: 'active',
-      createdAt: new Date().toISOString().split('T')[0],
-    };
-
-    setUsers([newUser, ...users]);
-    message.success(`Tạo thành công tài khoản ${newUser.name} với username: ${newUser.username}`);
-    setIsModalOpen(false);
-    form.resetFields();
+  const handleCreate = async (values: any) => {
+    try {
+      await createUser(values);
+      message.success('Tạo người dùng thành công!');
+      setShowCreateModal(false);
+      createForm.resetFields();
+      actionRef.current?.reload();
+    } catch (err: any) {
+      message.error(err?.data?.error || 'Không thể tạo người dùng');
+    }
   };
 
-  const toggleStatus = (id: string) => {
-    setUsers(
-      users.map(user => {
-        if (user.id === id) {
-          const newStatus = user.status === 'active' ? 'inactive' : 'active';
-          message.info(`Đã chuyển trạng thái tài khoản ${user.name} sang ${newStatus === 'active' ? 'Hoạt động' : 'Bị khóa'}`);
-          return { ...user, status: newStatus };
-        }
-        return user;
-      })
-    );
-  };
-
-  const columns = [
+  const columns: ProColumns<AdminUser>[] = [
     {
-      title: 'Họ và tên',
-      dataIndex: 'name',
-      copyable: true,
-      ellipsis: true,
-      formItemProps: {
-        rules: [{ required: true, message: 'Vui lòng nhập họ tên' }],
-      },
+      title: 'Họ tên',
+      dataIndex: 'full_name',
+      render: (_, record) => <strong>{record.full_name}</strong>,
     },
-    {
-      title: 'Tài khoản (Username)',
-      dataIndex: 'username',
-      render: (text: string) => <Tag color="blue">{text}</Tag>,
-    },
-    {
-      title: 'Email',
-      dataIndex: 'email',
-      copyable: true,
-    },
+    { title: 'Email', dataIndex: 'email', copyable: true },
+    { title: 'Tên đăng nhập', dataIndex: 'username', copyable: true },
     {
       title: 'Vai trò',
-      dataIndex: 'role',
+      dataIndex: 'user_type',
       valueType: 'select',
       valueEnum: {
-        all: { text: 'Tất cả' },
-        student: { text: 'Học viên' },
-        instructor: { text: 'Giảng viên' },
-        admin: { text: 'Quản trị' },
+        student: { text: 'Học viên', status: 'Processing' },
+        instructor: { text: 'Giảng viên', status: 'Warning' },
+        admin: { text: 'Quản trị', status: 'Error' },
       },
-      render: (role: string) => (
-        <Tag color={role === 'admin' ? 'red' : role === 'instructor' ? 'green' : 'orange'}>
-          {role === 'admin' ? 'Quản trị' : role === 'instructor' ? 'Giảng viên' : 'Học viên'}
+    },
+    {
+      title: 'Trạng thái',
+      dataIndex: 'is_active',
+      valueType: 'select',
+      valueEnum: {
+        true: { text: 'Hoạt động', status: 'Success' },
+        false: { text: 'Đã khóa', status: 'Default' },
+      },
+      render: (_, record) => (
+        <Tag color={record.is_active ? 'green' : 'default'}>
+          {record.is_active ? 'Hoạt động' : 'Đã khóa'}
         </Tag>
       ),
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      valueType: 'select',
-      valueEnum: {
-        active: { text: 'Hoạt động', status: 'Success' },
-        inactive: { text: 'Đã khóa', status: 'Error' },
-      },
+      title: 'Ngày tạo',
+      dataIndex: 'created_at',
+      search: false,
+      render: (_, record) => new Date(record.created_at).toLocaleDateString('vi-VN'),
     },
     {
-      title: 'Ngày tham gia',
-      dataIndex: 'createdAt',
-      valueType: 'date',
-    },
-    {
-      title: 'Thao tác',
+      title: 'Hành động',
       valueType: 'option',
-      key: 'option',
-      render: (_text: any, record: UserItem) => (
-        <Space size="middle">
-          <Button 
-            type="link" 
-            danger={record.status === 'active'} 
-            onClick={() => toggleStatus(record.id)}
-          >
-            {record.status === 'active' ? 'Khóa' : 'Kích hoạt'}
-          </Button>
+      render: (_, record) => (
+        <Space>
+          <a onClick={() => handleToggleStatus(record)}>
+            {record.is_active ? 'Khóa' : 'Kích hoạt'}
+          </a>
+          <Popconfirm title="Xóa người dùng này?" onConfirm={() => handleDelete(record.id)}>
+            <a style={{ color: '#EF4444' }}>Xóa</a>
+          </Popconfirm>
         </Space>
       ),
     },
   ];
 
   return (
-    <PageContainer title="Quản lý Người dùng">
-      <ProTable<UserItem>
-        headerTitle="Danh sách tài khoản hệ thống"
-        actionRef={undefined}
+    <PageContainer title="Quản lý người dùng">
+      <ProTable<AdminUser>
+        headerTitle="Danh sách người dùng"
+        actionRef={actionRef}
         rowKey="id"
-        search={{
-          labelWidth: 'auto',
-        }}
+        search={{ labelWidth: 120 }}
         toolBarRender={() => [
-          <Button
-            key="button"
-            icon={<PlusOutlined />}
-            onClick={() => setIsModalOpen(true)}
-            type="primary"
-          >
-            Thêm tài khoản mới
+          <Button key="create" type="primary" icon={<PlusOutlined />} onClick={() => setShowCreateModal(true)}>
+            Tạo người dùng
           </Button>,
         ]}
-        dataSource={users}
-        columns={columns as any}
-        pagination={{
-          pageSize: 5,
+        request={async (params) => {
+          try {
+            const res = await getUsers({
+              page: params.current || 1,
+              limit: params.pageSize || 20,
+              user_type: params.user_type || undefined,
+              is_active: params.is_active || undefined,
+              search: params.full_name || params.email || undefined,
+            });
+            return { data: res.data || [], total: res.pagination?.total || 0, success: true };
+          } catch {
+            return { data: [], total: 0, success: false };
+          }
         }}
+        columns={columns}
       />
 
       <Modal
-        title="Tạo tài khoản người dùng mới"
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
+        title="Tạo người dùng mới"
+        open={showCreateModal}
+        onCancel={() => { setShowCreateModal(false); createForm.resetFields(); }}
         footer={null}
-        destroyOnClose
       >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleCreateUser}
-          initialValues={{ role: 'student' }}
-        >
-          <Form.Item
-            name="name"
-            label="Họ và tên"
-            rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
-          >
-            <Input 
-              placeholder="Ví dụ: Nguyễn Văn An" 
-              onChange={(e) => {
-                const name = e.target.value;
-                if (name) {
-                  form.setFieldsValue({ username: generateUsername(name) });
-                }
-              }}
+        <Form form={createForm} layout="vertical" onFinish={handleCreate}>
+          <Form.Item name="full_name" label="Họ tên" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="password" label="Mật khẩu" rules={[{ required: true, min: 6 }]}>
+            <Input.Password />
+          </Form.Item>
+          <Form.Item name="user_type" label="Vai trò" rules={[{ required: true }]}>
+            <Select
+              options={[
+                { label: 'Học viên', value: 'student' },
+                { label: 'Giảng viên', value: 'instructor' },
+                { label: 'Quản trị viên', value: 'admin' },
+              ]}
             />
           </Form.Item>
-
-          <Form.Item
-            name="username"
-            label="Tài khoản (Tự động sinh hoặc tự điền)"
-            help="Tên tài khoản tự động sinh theo cấu trúc: tên + họ đệm viết tắt + @ + số ngẫu nhiên (ví dụ: annv@123)"
-          >
-            <Input placeholder="Tự động sinh khi điền họ tên" />
-          </Form.Item>
-
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              { required: true, message: 'Vui lòng nhập email!' },
-              { type: 'email', message: 'Email không đúng định dạng!' }
-            ]}
-          >
-            <Input placeholder="Ví dụ: annv@gmail.com" />
-          </Form.Item>
-
-          <Form.Item
-            name="role"
-            label="Vai trò"
-            rules={[{ required: true }]}
-          >
-            <Select>
-              <Select.Option value="student">Học viên (Student)</Select.Option>
-              <Select.Option value="instructor">Giảng viên (Instructor)</Select.Option>
-              <Select.Option value="admin">Quản trị viên (Admin)</Select.Option>
-            </Select>
-          </Form.Item>
-
           <Form.Item>
-            <Space style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-              <Button onClick={() => setIsModalOpen(false)}>Hủy</Button>
-              <Button type="primary" htmlType="submit">Xác nhận tạo</Button>
-            </Space>
+            <Button type="primary" htmlType="submit" block>
+              Tạo người dùng
+            </Button>
           </Form.Item>
         </Form>
       </Modal>
