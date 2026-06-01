@@ -1,7 +1,7 @@
 import { PageContainer } from '@ant-design/pro-components';
-import { Button, Card, Col, List, message, Row, Spin, Typography } from 'antd';
+import { Button, Card, Col, List, Tag, message, Row, Spin, Typography } from 'antd';
 import { history, useParams } from '@umijs/max';
-import { BookOutlined, CheckCircleOutlined, PlayCircleOutlined } from '@ant-design/icons';
+import { BookOutlined, CheckCircleOutlined, ClockCircleOutlined, FileTextOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { getLessonById, getLessonsByCourse, type Lesson } from '@/services/ant-design-pro/lessons';
 import { getSignedVideoUrl } from '@/services/ant-design-pro/uploads';
@@ -10,6 +10,7 @@ import {
   updateWatchPosition, type LessonProgressItem
 } from '@/services/ant-design-pro/lessonProgress';
 import { checkEnrollment } from '@/services/ant-design-pro/enrollments';
+import { getAssignments, type Assignment } from '@/services/ant-design-pro/assignments';
 
 const { Title, Text } = Typography;
 
@@ -21,6 +22,7 @@ const LessonViewPage: React.FC = () => {
   const [progressMap, setProgressMap] = useState<Record<string, LessonProgressItem>>({});
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [assignment, setAssignment] = useState<Assignment | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -58,6 +60,19 @@ const LessonViewPage: React.FC = () => {
     }
   }, []);
 
+  const fetchAssignment = useCallback(async (lid: string) => {
+    try {
+      const res = await getAssignments({ lesson_id: lid, is_published: 'true' });
+      if (res.data && res.data.length > 0) {
+        setAssignment(res.data[0]);
+      } else {
+        setAssignment(null);
+      }
+    } catch (err) {
+      setAssignment(null);
+    }
+  }, []);
+
   useEffect(() => {
     if (!courseId || !lessonId) return;
 
@@ -75,6 +90,7 @@ const LessonViewPage: React.FC = () => {
           fetchLesson(lessonId),
           fetchLessons(courseId),
           fetchProgress(courseId),
+          fetchAssignment(lessonId),
         ]);
       } catch (err) {
         console.error('Init error:', err);
@@ -210,6 +226,34 @@ const LessonViewPage: React.FC = () => {
               </div>
             )}
           </Card>
+
+          {assignment && (
+            <Card
+              size="small"
+              style={{ marginTop: 16, borderColor: '#4F46E5' }}
+              title={<><FileTextOutlined /> Bài tập: {assignment.title}</>}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                <div>
+                  <Tag color="blue">
+                    {assignment.assignment_type === 'quiz' ? 'Trắc nghiệm' : assignment.assignment_type === 'essay' ? 'Tự luận' : 'Nộp file'}
+                  </Tag>
+                  <Text type="secondary">Điểm đạt: {assignment.passing_score}/{assignment.total_points}</Text>
+                  {assignment.time_limit_minutes && (
+                    <Text type="secondary" style={{ marginLeft: 8 }}>
+                      <ClockCircleOutlined /> {assignment.time_limit_minutes} phút
+                    </Text>
+                  )}
+                </div>
+                <Button
+                  type="primary"
+                  onClick={() => history.push(`/student/assignments/${assignment.id}`)}
+                >
+                  Làm bài tập
+                </Button>
+              </div>
+            </Card>
+          )}
         </Col>
 
         <Col xs={24} md={8}>

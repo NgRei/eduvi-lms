@@ -10,6 +10,8 @@ import lessonProgressRoutes from './routes/lessonProgress.routes';
 import uploadRoutes from './routes/upload.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import adminRoutes from './routes/admin.routes';
+import assignmentRoutes from './routes/assignment.routes';
+import submissionRoutes from './routes/submission.routes';
 
 // Load env vars
 dotenv.config();
@@ -42,6 +44,8 @@ app.use('/api/lesson-progress', lessonProgressRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/assignments', assignmentRoutes);
+app.use('/api', submissionRoutes);
 
 // Global Error Handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

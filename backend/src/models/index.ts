@@ -11,6 +11,7 @@ import { LessonProgress } from './LessonProgress.model';
 import { Assignment } from './Assignment.model';
 import { QuizQuestion } from './QuizQuestion.model';
 import { Video } from './Video.model';
+import { Submission } from './Submission.model';
 
 // User 1-to-1 StudentProfile
 User.hasOne(StudentProfile, { foreignKey: 'user_id', as: 'studentProfile', onDelete: 'CASCADE' });
@@ -82,6 +83,18 @@ Assignment.belongsTo(Lesson, { foreignKey: 'lesson_id', as: 'lesson' });
 Assignment.hasMany(QuizQuestion, { foreignKey: 'assignment_id', as: 'questions', onDelete: 'CASCADE' });
 QuizQuestion.belongsTo(Assignment, { foreignKey: 'assignment_id', as: 'assignment' });
 
+// Assignment 1-to-many Submission
+Assignment.hasMany(Submission, { foreignKey: 'assignment_id', as: 'submissions', onDelete: 'CASCADE' });
+Submission.belongsTo(Assignment, { foreignKey: 'assignment_id', as: 'assignment' });
+
+// User 1-to-many Submission
+User.hasMany(Submission, { foreignKey: 'user_id', as: 'submissions', onDelete: 'CASCADE' });
+Submission.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// User (grader) 1-to-many Submission
+User.hasMany(Submission, { foreignKey: 'graded_by', as: 'graded_submissions' });
+Submission.belongsTo(User, { foreignKey: 'graded_by', as: 'grader' });
+
 // Video associations
 Video.belongsTo(Course, { foreignKey: 'course_id', as: 'course' });
 Video.belongsTo(User, { foreignKey: 'uploaded_by', as: 'uploader' });
@@ -103,5 +116,6 @@ export {
   LessonProgress,
   Assignment,
   QuizQuestion,
-  Video
+  Video,
+  Submission
 };
