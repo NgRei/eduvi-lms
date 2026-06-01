@@ -1263,7 +1263,7 @@ git commit -m "feat(backend): add submission routes and register assignment/subm
 - Create: `backend/src/tests/assignment.test.ts`
 - Create: `backend/src/tests/submission.test.ts`
 
-- [ ] **Step 1: Create assignment test file**
+- [x] **Step 1: Create assignment test file**
 
 ```typescript
 // backend/src/tests/assignment.test.ts
@@ -1363,7 +1363,7 @@ describe('Assignment API', () => {
 });
 ```
 
-- [ ] **Step 2: Create submission test file**
+- [x] **Step 2: Create submission test file**
 
 ```typescript
 // backend/src/tests/submission.test.ts
@@ -1498,15 +1498,15 @@ describe('Submission API', () => {
 });
 ```
 
-- [ ] **Step 3: Verify tests compile**
+- [x] **Step 3: Verify tests compile**
 
 Run: `cd backend && npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
-git add backend/src/tests/assignment.test.ts backend/src/tests/submission.test.ts
+git add backend/src/__tests__/assignment.test.ts backend/src/__tests__/submission.test.ts backend/src/__tests__/helpers/app.helper.ts
 git commit -m "test(backend): add assignment and submission API tests"
 ```
 
@@ -3606,7 +3606,7 @@ git commit -m "feat: complete quiz/assignment feature implementation"
 
 ## Implementation Notes (2026-06-01)
 
-**Completed:** Tasks 1-6, 8-14 (commit `3c500e1`)
+**Completed:** Tasks 1-6, 7-14
 
 **Adjustments from plan:**
 1. `LessonProgress` model uses `is_completed` (boolean) + `completed_at`, not a `status` field — corrected in submission controller's `gradeQuizSubmission` and `gradeSubmission` functions
@@ -3614,7 +3614,7 @@ git commit -m "feat: complete quiz/assignment feature implementation"
 3. `QuizQuestion.max()` returns `number | null | {}` — added `as number` cast in `addQuestion` to fix TS2365 error
 4. Pre-existing TS2339 errors in `instructor/dashboard/index.tsx` and `student/dashboard/index.tsx` (unrelated to this feature)
 
-**Remaining:** Task 7 (tests), Task 15 (SQL/seeder), Task 16 (E2E verification)
+**Remaining:** Task 15 (SQL/seeder), Task 16 (E2E verification)
 
 ---
 
