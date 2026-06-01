@@ -3561,12 +3561,12 @@ git commit -m "feat: add submissions table SQL and extend seeder with essay/uplo
 
 ## Task 16: End-to-End Verification
 
-- [ ] **Step 1: Start backend and verify routes**
+- [x] **Step 1: Start backend and verify routes**
 
 Run: `cd backend && npm run dev`
 Expected: Server starts, shows "Eduvi LMS Backend server is running"
 
-- [ ] **Step 2: Test API endpoints manually**
+- [x] **Step 2: Test API endpoints manually**
 
 ```bash
 # Login as instructor
@@ -3582,12 +3582,12 @@ curl -X POST http://localhost:5000/api/assignments/<id>/questions -H "Authorizat
 curl -X PATCH http://localhost:5000/api/assignments/<id>/publish -H "Authorization: Bearer <token>"
 ```
 
-- [ ] **Step 3: Start frontend and verify pages load**
+- [x] **Step 3: Start frontend and verify pages load**
 
 Run: `cd frontend && npm start`
 Expected: Frontend starts on port 8000
 
-- [ ] **Step 4: Verify all pages accessible**
+- [x] **Step 4: Verify all pages accessible**
 
 - Navigate to `/instructor/assignments` — should show empty list
 - Navigate to `/instructor/assignments/create` — should show form
@@ -3595,7 +3595,7 @@ Expected: Frontend starts on port 8000
 - Navigate to `/student/assignments/<id>` — should show quiz
 - Submit quiz — should show results
 
-- [ ] **Step 5: Final commit**
+- [x] **Step 5: Final commit**
 
 ```bash
 git add -A
@@ -3606,7 +3606,7 @@ git commit -m "feat: complete quiz/assignment feature implementation"
 
 ## Implementation Notes (2026-06-01)
 
-**Completed:** Tasks 1-6, 7-14
+**Completed:** Tasks 1-16 (all tasks)
 
 **Adjustments from plan:**
 1. `LessonProgress` model uses `is_completed` (boolean) + `completed_at`, not a `status` field — corrected in submission controller's `gradeQuizSubmission` and `gradeSubmission` functions
@@ -3614,7 +3614,7 @@ git commit -m "feat: complete quiz/assignment feature implementation"
 3. `QuizQuestion.max()` returns `number | null | {}` — added `as number` cast in `addQuestion` to fix TS2365 error
 4. Pre-existing TS2339 errors in `instructor/dashboard/index.tsx` and `student/dashboard/index.tsx` (unrelated to this feature)
 
-**Remaining:** Task 15 (SQL/seeder), Task 16 (E2E verification)
+**Remaining:** None — all tasks completed
 
 ---
 
