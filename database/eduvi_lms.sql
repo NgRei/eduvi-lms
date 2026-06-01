@@ -319,26 +319,19 @@ INSERT INTO `quiz_questions` (`id`, `assignment_id`, `question_text`, `question_
 --
 
 CREATE TABLE `submissions` (
-  `id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `assignment_id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `user_id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `assignment_id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `user_id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `attempt_number` int NOT NULL DEFAULT 1,
   `answers` json NOT NULL,
   `score` float NULL DEFAULT NULL,
   `status` enum('in_progress','submitted','graded') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'submitted',
   `feedback` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
-  `graded_by` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `graded_by` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL,
   `graded_at` datetime NULL DEFAULT NULL,
   `submitted_at` datetime NOT NULL,
   `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uk_assignment_user_attempt`(`assignment_id`, `user_id`, `attempt_number`) USING BTREE,
-  INDEX `idx_submission_assignment`(`assignment_id`) USING BTREE,
-  INDEX `idx_submission_user`(`user_id`) USING BTREE,
-  CONSTRAINT `fk_submissions_assignment` FOREIGN KEY (`assignment_id`) REFERENCES `assignments` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
-  CONSTRAINT `fk_submissions_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
-  CONSTRAINT `fk_submissions_graded_by` FOREIGN KEY (`graded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
+  `updated_at` datetime NOT NULL
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
 --
@@ -501,7 +494,8 @@ ALTER TABLE `submissions`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uk_assignment_user_attempt` (`assignment_id`,`user_id`,`attempt_number`),
   ADD KEY `idx_submission_assignment` (`assignment_id`),
-  ADD KEY `idx_submission_user` (`user_id`);
+  ADD KEY `idx_submission_user` (`user_id`),
+  ADD KEY `idx_submission_graded_by` (`graded_by`);
 
 --
 -- Indexes for table `student_profiles`
