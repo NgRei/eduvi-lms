@@ -1,6 +1,6 @@
 # Quiz & Assignment Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Build a complete assignment system with Quiz (auto-grade), Essay (manual grade), and Upload (manual grade) types, integrated with the lesson flow.
 
@@ -50,7 +50,7 @@
 **Files:**
 - Create: `backend/src/models/Submission.model.ts`
 
-- [ ] **Step 1: Create Submission model file**
+- [x] **Step 1: Create Submission model file**
 
 ```typescript
 // backend/src/models/Submission.model.ts
@@ -147,12 +147,12 @@ Submission.init(
 );
 ```
 
-- [ ] **Step 2: Verify model compiles**
+- [x] **Step 2: Verify model compiles**
 
 Run: `cd backend && npx tsc --noEmit`
 Expected: No errors related to Submission.model.ts
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add backend/src/models/Submission.model.ts
@@ -166,7 +166,7 @@ git commit -m "feat(backend): add Submission model for quiz/essay/upload assignm
 **Files:**
 - Modify: `backend/src/models/index.ts`
 
-- [ ] **Step 1: Add Submission import and associations**
+- [x] **Step 1: Add Submission import and associations**
 
 Add to imports (after QuizQuestion import):
 ```typescript
@@ -196,12 +196,12 @@ export {
 };
 ```
 
-- [ ] **Step 2: Verify compilation**
+- [x] **Step 2: Verify compilation**
 
 Run: `cd backend && npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add backend/src/models/index.ts
@@ -215,7 +215,7 @@ git commit -m "feat(backend): add Submission associations to models index"
 **Files:**
 - Create: `backend/src/controllers/assignment.controller.ts`
 
-- [ ] **Step 1: Create assignment controller with CRUD operations**
+- [x] **Step 1: Create assignment controller with CRUD operations**
 
 ```typescript
 // backend/src/controllers/assignment.controller.ts
@@ -695,12 +695,12 @@ export const reorderQuestions = async (req: AuthRequest, res: Response) => {
 };
 ```
 
-- [ ] **Step 2: Verify compilation**
+- [x] **Step 2: Verify compilation**
 
 Run: `cd backend && npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add backend/src/controllers/assignment.controller.ts
@@ -714,7 +714,7 @@ git commit -m "feat(backend): add assignment controller with CRUD and question m
 **Files:**
 - Create: `backend/src/routes/assignment.routes.ts`
 
-- [ ] **Step 1: Create assignment routes file**
+- [x] **Step 1: Create assignment routes file**
 
 ```typescript
 // backend/src/routes/assignment.routes.ts
@@ -754,12 +754,12 @@ router.put('/:id/questions/reorder', authenticateToken as any, authorizeRole('in
 export default router;
 ```
 
-- [ ] **Step 2: Verify compilation**
+- [x] **Step 2: Verify compilation**
 
 Run: `cd backend && npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add backend/src/routes/assignment.routes.ts
@@ -773,7 +773,7 @@ git commit -m "feat(backend): add assignment routes with auth middleware"
 **Files:**
 - Create: `backend/src/controllers/submission.controller.ts`
 
-- [ ] **Step 1: Create submission controller**
+- [x] **Step 1: Create submission controller**
 
 ```typescript
 // backend/src/controllers/submission.controller.ts
@@ -1179,12 +1179,12 @@ export const gradeSubmission = async (req: AuthRequest, res: Response) => {
 };
 ```
 
-- [ ] **Step 2: Verify compilation**
+- [x] **Step 2: Verify compilation**
 
 Run: `cd backend && npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add backend/src/controllers/submission.controller.ts
@@ -1199,7 +1199,7 @@ git commit -m "feat(backend): add submission controller with auto-grading and ma
 - Create: `backend/src/routes/submission.routes.ts`
 - Modify: `backend/src/app.ts`
 
-- [ ] **Step 1: Create submission routes file**
+- [x] **Step 1: Create submission routes file**
 
 ```typescript
 // backend/src/routes/submission.routes.ts
@@ -1229,7 +1229,7 @@ router.put('/submissions/:id/grade', authenticateToken as any, authorizeRole('in
 export default router;
 ```
 
-- [ ] **Step 2: Register routes in app.ts**
+- [x] **Step 2: Register routes in app.ts**
 
 Add imports after admin routes import:
 ```typescript
@@ -1243,12 +1243,12 @@ app.use('/api/assignments', assignmentRoutes);
 app.use('/api', submissionRoutes);
 ```
 
-- [ ] **Step 3: Verify compilation**
+- [x] **Step 3: Verify compilation**
 
 Run: `cd backend && npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add backend/src/routes/submission.routes.ts backend/src/app.ts
@@ -1517,7 +1517,7 @@ git commit -m "test(backend): add assignment and submission API tests"
 **Files:**
 - Create: `frontend/src/services/ant-design-pro/assignments.ts`
 
-- [ ] **Step 1: Create assignments service file**
+- [x] **Step 1: Create assignments service file**
 
 ```typescript
 // frontend/src/services/ant-design-pro/assignments.ts
@@ -1744,12 +1744,12 @@ export async function gradeSubmission(id: string, data: { score: number; feedbac
 }
 ```
 
-- [ ] **Step 2: Verify frontend compiles**
+- [x] **Step 2: Verify frontend compiles**
 
 Run: `cd frontend && npx tsc --noEmit`
 Expected: No errors related to assignments.ts
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add frontend/src/services/ant-design-pro/assignments.ts
@@ -1763,7 +1763,7 @@ git commit -m "feat(frontend): add assignments service layer with types"
 **Files:**
 - Create: `frontend/src/pages/instructor/assignments/index.tsx`
 
-- [ ] **Step 1: Create assignment list page**
+- [x] **Step 1: Create assignment list page**
 
 ```typescript
 // frontend/src/pages/instructor/assignments/index.tsx
@@ -1943,12 +1943,12 @@ const AssignmentManagement: React.FC = () => {
 export default AssignmentManagement;
 ```
 
-- [ ] **Step 2: Verify compilation**
+- [x] **Step 2: Verify compilation**
 
 Run: `cd frontend && npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add frontend/src/pages/instructor/assignments/index.tsx
@@ -1963,7 +1963,7 @@ git commit -m "feat(frontend): add instructor assignment list page with ProTable
 - Create: `frontend/src/pages/instructor/assignments/create/index.tsx`
 - Create: `frontend/src/pages/instructor/assignments/edit/index.tsx`
 
-- [ ] **Step 1: Create assignment create page**
+- [x] **Step 1: Create assignment create page**
 
 ```typescript
 // frontend/src/pages/instructor/assignments/create/index.tsx
@@ -2226,7 +2226,7 @@ const CreateAssignmentPage: React.FC = () => {
 export default CreateAssignmentPage;
 ```
 
-- [ ] **Step 2: Create assignment edit page**
+- [x] **Step 2: Create assignment edit page**
 
 ```typescript
 // frontend/src/pages/instructor/assignments/edit/index.tsx
@@ -2544,12 +2544,12 @@ const EditAssignmentPage: React.FC = () => {
 export default EditAssignmentPage;
 ```
 
-- [ ] **Step 3: Verify compilation**
+- [x] **Step 3: Verify compilation**
 
 Run: `cd frontend && npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add frontend/src/pages/instructor/assignments/create/index.tsx frontend/src/pages/instructor/assignments/edit/index.tsx
@@ -2563,7 +2563,7 @@ git commit -m "feat(frontend): add instructor assignment create and edit pages"
 **Files:**
 - Create: `frontend/src/pages/instructor/assignments/submissions/index.tsx`
 
-- [ ] **Step 1: Create submissions page**
+- [x] **Step 1: Create submissions page**
 
 ```typescript
 // frontend/src/pages/instructor/assignments/submissions/index.tsx
@@ -2791,12 +2791,12 @@ const SubmissionsPage: React.FC = () => {
 export default SubmissionsPage;
 ```
 
-- [ ] **Step 2: Verify compilation**
+- [x] **Step 2: Verify compilation**
 
 Run: `cd frontend && npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add frontend/src/pages/instructor/assignments/submissions/index.tsx
@@ -2810,7 +2810,7 @@ git commit -m "feat(frontend): add instructor submissions view and grading page"
 **Files:**
 - Create: `frontend/src/pages/student/assignments/take/index.tsx`
 
-- [ ] **Step 1: Create take assignment page**
+- [x] **Step 1: Create take assignment page**
 
 ```typescript
 // frontend/src/pages/student/assignments/take/index.tsx
@@ -3127,12 +3127,12 @@ const TakeAssignmentPage: React.FC = () => {
 export default TakeAssignmentPage;
 ```
 
-- [ ] **Step 2: Verify compilation**
+- [x] **Step 2: Verify compilation**
 
 Run: `cd frontend && npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add frontend/src/pages/student/assignments/take/index.tsx
@@ -3146,7 +3146,7 @@ git commit -m "feat(frontend): add student take assignment page with quiz/essay/
 **Files:**
 - Create: `frontend/src/pages/student/assignments/result/index.tsx`
 
-- [ ] **Step 1: Create result page**
+- [x] **Step 1: Create result page**
 
 ```typescript
 // frontend/src/pages/student/assignments/result/index.tsx
@@ -3330,12 +3330,12 @@ const AssignmentResultPage: React.FC = () => {
 export default AssignmentResultPage;
 ```
 
-- [ ] **Step 2: Verify compilation**
+- [x] **Step 2: Verify compilation**
 
 Run: `cd frontend && npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add frontend/src/pages/student/assignments/result/index.tsx
@@ -3350,7 +3350,7 @@ git commit -m "feat(frontend): add student assignment result page with quiz deta
 - Modify: `frontend/config/routes.ts`
 - Modify: `frontend/src/pages/student/lesson-view/index.tsx`
 
-- [ ] **Step 1: Add assignment routes to config**
+- [x] **Step 1: Add assignment routes to config**
 
 Add after the instructor courses routes:
 ```typescript
@@ -3368,7 +3368,7 @@ Add after the student lesson-view route:
 { path: '/student/assignments/:id/result', name: 'Kết quả bài tập', component: './student/assignments/result', hideInMenu: true },
 ```
 
-- [ ] **Step 2: Update lesson view to show assignment card**
+- [x] **Step 2: Update lesson view to show assignment card**
 
 In `frontend/src/pages/student/lesson-view/index.tsx`, add import:
 ```typescript
@@ -3429,12 +3429,12 @@ Add import for icons:
 import { FileTextOutlined, ClockCircleOutlined } from '@ant-design/icons';
 ```
 
-- [ ] **Step 3: Verify compilation**
+- [x] **Step 3: Verify compilation**
 
 Run: `cd frontend && npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add frontend/config/routes.ts frontend/src/pages/student/lesson-view/index.tsx
@@ -3601,6 +3601,20 @@ Expected: Frontend starts on port 8000
 git add -A
 git commit -m "feat: complete quiz/assignment feature implementation"
 ```
+
+---
+
+## Implementation Notes (2026-06-01)
+
+**Completed:** Tasks 1-6, 8-14 (commit `3c500e1`)
+
+**Adjustments from plan:**
+1. `LessonProgress` model uses `is_completed` (boolean) + `completed_at`, not a `status` field — corrected in submission controller's `gradeQuizSubmission` and `gradeSubmission` functions
+2. Student upload uses existing `uploadImage` from `@/services/ant-design-pro/uploads` instead of non-existent `uploadsService.uploadFile`
+3. `QuizQuestion.max()` returns `number | null | {}` — added `as number` cast in `addQuestion` to fix TS2365 error
+4. Pre-existing TS2339 errors in `instructor/dashboard/index.tsx` and `student/dashboard/index.tsx` (unrelated to this feature)
+
+**Remaining:** Task 7 (tests), Task 15 (SQL/seeder), Task 16 (E2E verification)
 
 ---
 
