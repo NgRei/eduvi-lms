@@ -1,5 +1,5 @@
 import { sequelize } from '../config/database';
-import { Category, Course, Lesson, CourseMaterial, CourseInstructor, Enrollment, LessonProgress, Assignment, QuizQuestion } from '../models';
+import { Category, Course, Lesson, CourseMaterial, CourseInstructor, Enrollment, LessonProgress, Assignment, QuizQuestion, Submission } from '../models';
 import { User } from '../models';
 
 const seedCourseData = async () => {
@@ -175,6 +175,60 @@ const seedCourseData = async () => {
     ]);
     console.log('- Seeded 2 quiz questions');
 
+    // 9. Seed Essay & Upload Assignments
+    console.log('Seeding essay & upload assignments...');
+    const essayAssignment = await Assignment.create({
+      course_id: courses[1].id, // Express course
+      lesson_id: lessons[4].id, // Bài 2: Middleware
+      title: 'Bài luận về Express Middleware',
+      description: 'Viết bài luận giải thích cách middleware hoạt động trong Express.js',
+      assignment_type: 'essay',
+      total_points: 100,
+      passing_score: 60,
+      attempts_allowed: 1,
+      due_date: new Date('2026-06-30'),
+      is_published: true,
+    });
+
+    const uploadAssignment = await Assignment.create({
+      course_id: courses[0].id, // Node.js course
+      lesson_id: lessons[1].id, // Bài 2: NPM
+      title: 'Bài nộp project cuối khóa',
+      description: 'Upload file source code project cuối khóa',
+      assignment_type: 'upload',
+      total_points: 100,
+      passing_score: 50,
+      attempts_allowed: 1,
+      due_date: new Date('2026-07-15'),
+      is_published: true,
+    });
+    console.log('- Seeded 2 essay/upload assignments');
+
+    // 10. Seed Sample Submissions
+    console.log('Seeding sample submissions...');
+    await Submission.create({
+      assignment_id: assignments[0].id,
+      user_id: student1.id,
+      attempt_number: 1,
+      answers: [
+        { question_id: 'd6ed85b9-4a1c-4b30-8f23-6994371b8748', selected_options: ['A'] },
+        { question_id: 'e772a082-b7b2-487d-a8c3-26beaece2c86', selected_options: ['B'] },
+      ],
+      score: 10,
+      status: 'graded',
+      submitted_at: new Date(),
+    });
+
+    await Submission.create({
+      assignment_id: essayAssignment.id,
+      user_id: student1.id,
+      attempt_number: 1,
+      answers: { text: 'Middleware trong Express.js là các hàm có thể truy cập vào đối tượng request, response và hàm next. Middleware được sử dụng để xử lý các tác vụ như xác thực, logging, parse body request, xử lý lỗi và nhiều tác vụ khác.' },
+      status: 'submitted',
+      submitted_at: new Date(),
+    });
+    console.log('- Seeded 2 sample submissions');
+
     console.log('\n=========================================');
     console.log('Eduvi LMS Course Data seeded successfully!');
     console.log('=========================================');
@@ -183,8 +237,9 @@ const seedCourseData = async () => {
     console.log(`Lessons: ${lessons.length}`);
     console.log(`Enrollments: 4`);
     console.log(`Lesson Progress: 4`);
-    console.log(`Assignments: ${assignments.length}`);
+    console.log(`Assignments: ${assignments.length + 2}`);
     console.log(`Quiz Questions: 2`);
+    console.log(`Submissions: 2`);
     console.log('=========================================');
     
     process.exit(0);

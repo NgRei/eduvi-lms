@@ -51,7 +51,9 @@ CREATE TABLE `assignments` (
 --
 
 INSERT INTO `assignments` (`id`, `course_id`, `lesson_id`, `title`, `description`, `assignment_type`, `total_points`, `passing_score`, `time_limit_minutes`, `attempts_allowed`, `show_answer_after`, `due_date`, `is_published`, `deleted_at`, `created_at`, `updated_at`) VALUES
-('b8c94ad3-5056-4882-871d-72aab6e77595', 'a5dafe62-f677-415a-8d96-a50c3cc99fa3', '59a07842-d53b-4feb-9c23-bf6c71e54164', 'Bài trắc nghiệm ôn tập chương 1', 'Kiểm tra kiến thức cơ bản về HTTP Server và NodeJS Architecture', 'quiz', 10, 5, NULL, 1, 0, NULL, 1, NULL, '2026-05-27 08:54:01', '2026-05-27 08:54:01');
+('b8c94ad3-5056-4882-871d-72aab6e77595', 'a5dafe62-f677-415a-8d96-a50c3cc99fa3', '59a07842-d53b-4feb-9c23-bf6c71e54164', 'Bài trắc nghiệm ôn tập chương 1', 'Kiểm tra kiến thức cơ bản về HTTP Server và NodeJS Architecture', 'quiz', 10, 5, NULL, 1, 0, NULL, 1, NULL, '2026-05-27 08:54:01', '2026-05-27 08:54:01'),
+('e1a2b3c4-d5e6-f7a8-b9c0-d1e2f3a4b5c6', '4dd4e920-1e5d-47ec-a760-f9347c84cbd1', 'a57bc2c1-7e76-4144-a6ff-9d4ad4fda038', 'Bài luận về Express Middleware', 'Viết bài luận giải thích cách middleware hoạt động trong Express.js', 'essay', 100, 60, NULL, 1, 0, '2026-06-30 23:59:59', 1, NULL, '2026-06-01 00:00:00', '2026-06-01 00:00:00'),
+('f2b3c4d5-e6f7-a8b9-c0d1-e2f3a4b5c6d7', 'a5dafe62-f677-415a-8d96-a50c3cc99fa3', '98008d63-71de-4975-8f6f-a396a424f882', 'Bài nộp project cuối khóa', 'Upload file source code project cuối khóa', 'upload', 100, 50, NULL, 1, 0, '2026-07-15 23:59:59', 1, NULL, '2026-06-01 00:00:00', '2026-06-01 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -313,6 +315,43 @@ INSERT INTO `quiz_questions` (`id`, `assignment_id`, `question_text`, `question_
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `submissions`
+--
+
+CREATE TABLE `submissions` (
+  `id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `assignment_id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `attempt_number` int NOT NULL DEFAULT 1,
+  `answers` json NOT NULL,
+  `score` float NULL DEFAULT NULL,
+  `status` enum('in_progress','submitted','graded') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'submitted',
+  `feedback` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
+  `graded_by` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `graded_at` datetime NULL DEFAULT NULL,
+  `submitted_at` datetime NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_assignment_user_attempt`(`assignment_id`, `user_id`, `attempt_number`) USING BTREE,
+  INDEX `idx_submission_assignment`(`assignment_id`) USING BTREE,
+  INDEX `idx_submission_user`(`user_id`) USING BTREE,
+  CONSTRAINT `fk_submissions_assignment` FOREIGN KEY (`assignment_id`) REFERENCES `assignments` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `fk_submissions_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `fk_submissions_graded_by` FOREIGN KEY (`graded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+
+--
+-- Dumping data for table `submissions`
+--
+
+INSERT INTO `submissions` (`id`, `assignment_id`, `user_id`, `attempt_number`, `answers`, `score`, `status`, `feedback`, `graded_by`, `graded_at`, `submitted_at`, `created_at`, `updated_at`) VALUES
+('sub00001-0000-0000-0000-000000000001', 'b8c94ad3-5056-4882-871d-72aab6e77595', 'u-studen-000000000000000000000000001', 1, '[{\"question_id\":\"d6ed85b9-4a1c-4b30-8f23-6994371b8748\",\"selected_options\":[\"A\"]},{\"question_id\":\"e772a082-b7b2-487d-a8c3-26beaece2c86\",\"selected_options\":[\"B\"]}]', 10, 'graded', NULL, NULL, '2026-06-01 10:00:00', '2026-06-01 10:00:00', '2026-06-01 10:00:00', '2026-06-01 10:00:00'),
+('sub00001-0000-0000-0000-000000000002', 'e1a2b3c4-d5e6-f7a8-b9c0-d1e2f3a4b5c6', 'u-studen-000000000000000000000000001', 1, '{\"text\":\"Middleware trong Express.js là các hàm có thể truy cập vào đối tượng request, response và hàm next. Middleware được sử dụng để xử lý các tác vụ như xác thực, logging, parse body request, xử lý lỗi và nhiều tác vụ khác.\"}', NULL, 'submitted', NULL, NULL, NULL, '2026-06-01 11:00:00', '2026-06-01 11:00:00', '2026-06-01 11:00:00');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `student_profiles`
 --
 
@@ -456,6 +495,15 @@ ALTER TABLE `quiz_questions`
   ADD KEY `assignment_id` (`assignment_id`);
 
 --
+-- Indexes for table `submissions`
+--
+ALTER TABLE `submissions`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_assignment_user_attempt` (`assignment_id`,`user_id`,`attempt_number`),
+  ADD KEY `idx_submission_assignment` (`assignment_id`),
+  ADD KEY `idx_submission_user` (`user_id`);
+
+--
 -- Indexes for table `student_profiles`
 --
 ALTER TABLE `student_profiles`
@@ -539,6 +587,14 @@ ALTER TABLE `lesson_progress`
 --
 ALTER TABLE `quiz_questions`
   ADD CONSTRAINT `quiz_questions_ibfk_1` FOREIGN KEY (`assignment_id`) REFERENCES `assignments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `submissions`
+--
+ALTER TABLE `submissions`
+  ADD CONSTRAINT `fk_submissions_assignment` FOREIGN KEY (`assignment_id`) REFERENCES `assignments` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  ADD CONSTRAINT `fk_submissions_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  ADD CONSTRAINT `fk_submissions_graded_by` FOREIGN KEY (`graded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT;
 
 --
 -- Constraints for table `student_profiles`

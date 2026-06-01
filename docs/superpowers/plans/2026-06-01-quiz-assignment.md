@@ -3449,7 +3449,7 @@ git commit -m "feat(frontend): add assignment routes and lesson view integration
 - Modify: `database/eduvi_lms.sql`
 - Modify: `backend/src/seeders/course-seeder.ts`
 
-- [ ] **Step 1: Add submissions table to SQL**
+- [x] **Step 1: Add submissions table to SQL**
 
 Add after quiz_questions table:
 ```sql
@@ -3480,7 +3480,7 @@ CREATE TABLE `submissions`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 ```
 
-- [ ] **Step 2: Add seed data for essay and upload assignments**
+- [x] **Step 2: Add seed data for essay and upload assignments**
 
 Add to the INSERT statements for assignments:
 ```sql
@@ -3488,7 +3488,7 @@ INSERT INTO `assignments` VALUES ('e1a2b3c4-d5e6-f7a8-b9c0-d1e2f3a4b5c6', 'c0a80
 INSERT INTO `assignments` VALUES ('f2b3c4d5-e6f7-a8b9-c0d1-e2f3a4b5c6d7', 'c0a80101-0001-0001-0001-000000000001', 'c0a80101-0001-0001-0001-000000000007', 'Bài nộp project cuối khóa', 'Upload file source code project cuối khóa', 'upload', 100, 50, NULL, 1, 0, '2026-07-15 23:59:59', 1, NULL, '2026-06-01 00:00:00', '2026-06-01 00:00:00');
 ```
 
-- [ ] **Step 3: Update seeder**
+- [x] **Step 3: Update seeder**
 
 Add to `backend/src/seeders/course-seeder.ts` after existing assignment:
 ```typescript
@@ -3545,12 +3545,12 @@ await Submission.create({
 });
 ```
 
-- [ ] **Step 4: Verify backend compiles**
+- [x] **Step 4: Verify backend compiles**
 
 Run: `cd backend && npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add database/eduvi_lms.sql backend/src/seeders/course-seeder.ts
