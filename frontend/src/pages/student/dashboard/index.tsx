@@ -1,6 +1,7 @@
 import { BookOutlined, ClockCircleOutlined, StarOutlined, TrophyOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
-import { Card, Col, Progress, Row, Statistic, Table, Tag, Spin, message } from 'antd';
+import { Button, Card, Col, Progress, Row, Statistic, Table, Tag, Spin, message } from 'antd';
+import { history } from '@umijs/max';
 import React, { useEffect, useState } from 'react';
 import { getStudentDashboard, StudentDashboardData } from '@/services/ant-design-pro/dashboard';
 
@@ -105,6 +106,39 @@ const StudentDashboard: React.FC = () => {
             </Card>
           </Col>
         ))}
+      </Row>
+
+      <Row gutter={16} style={{ marginTop: 24 }}>
+        <Col span={24}>
+          <Card
+            style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              border: 'none',
+              borderRadius: 12,
+            }}
+            styles={{ body: { padding: '24px 32px' } }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ color: '#fff', margin: 0, fontSize: 18, fontWeight: 600 }}>
+                  Khám phá khóa học mới
+                </h3>
+                <p style={{ color: 'rgba(255,255,255,0.85)', margin: '8px 0 0', fontSize: 14 }}>
+                  Hàng trăm khóa học đang chờ bạn khám phá
+                </p>
+              </div>
+              <Button
+                type="primary"
+                ghost
+                size="large"
+                style={{ borderColor: '#fff', color: '#fff', fontWeight: 500 }}
+                onClick={() => history.push('/courses')}
+              >
+                Tìm khóa học
+              </Button>
+            </div>
+          </Card>
+        </Col>
       </Row>
 
       <Row gutter={16} style={{ marginTop: 24 }}>
