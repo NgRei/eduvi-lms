@@ -79,10 +79,10 @@ export default [
         component: './student/my-courses',
       },
       {
-        path: '/courses',
+        path: '/student/courses',
         name: 'Danh sách khóa học',
         icon: 'search',
-        component: './courses/list',
+        redirect: '/courses',
       },
       {
         path: '/student/courses/:courseId/lessons/:lessonId',
