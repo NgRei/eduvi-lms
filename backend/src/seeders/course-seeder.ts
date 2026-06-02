@@ -227,7 +227,68 @@ const seedCourseData = async () => {
       status: 'submitted',
       submitted_at: new Date(),
     });
-    console.log('- Seeded 2 sample submissions');
+
+    // Quiz submission - student2 (graded, score 5/10)
+    await Submission.create({
+      assignment_id: assignments[0].id,
+      user_id: student2.id,
+      attempt_number: 1,
+      answers: [
+        { question_id: 'd6ed85b9-4a1c-4b30-8f23-6994371b8748', selected_options: ['C'] },
+        { question_id: 'e772a082-b7b2-487d-a8c3-26beaece2c86', selected_options: ['B'] },
+      ],
+      score: 5,
+      status: 'graded',
+      submitted_at: new Date(),
+    });
+
+    // Quiz submission - student3 (submitted, awaiting grading)
+    await Submission.create({
+      assignment_id: assignments[0].id,
+      user_id: student3.id,
+      attempt_number: 1,
+      answers: [
+        { question_id: 'd6ed85b9-4a1c-4b30-8f23-6994371b8748', selected_options: ['A'] },
+        { question_id: 'e772a082-b7b2-487d-a8c3-26beaece2c86', selected_options: ['B'] },
+      ],
+      status: 'submitted',
+      submitted_at: new Date(),
+    });
+
+    // Essay submission - student2 (graded, score 75/100)
+    await Submission.create({
+      assignment_id: essayAssignment.id,
+      user_id: student2.id,
+      attempt_number: 1,
+      answers: { text: 'Middleware trong Express.js đóng vai trò trung gian xử lý request và response. Nó có thể thực hiện các tác vụ như xác thực, logging, xử lý lỗi, và chuyển tiếp request đến handler tiếp theo thông qua hàm next().' },
+      score: 75,
+      status: 'graded',
+      feedback: 'Bài viết tốt, cần bổ sung thêm ví dụ code minh họa.',
+      submitted_at: new Date(),
+    });
+
+    // Upload submission - student1 (submitted, awaiting grading)
+    await Submission.create({
+      assignment_id: uploadAssignment.id,
+      user_id: student1.id,
+      attempt_number: 1,
+      answers: { file_url: '/uploads/project-student1.zip', file_name: 'project-student1.zip' },
+      status: 'submitted',
+      submitted_at: new Date(),
+    });
+
+    // Upload submission - student2 (graded, score 85/100)
+    await Submission.create({
+      assignment_id: uploadAssignment.id,
+      user_id: student2.id,
+      attempt_number: 1,
+      answers: { file_url: '/uploads/project-student2.zip', file_name: 'project-student2.zip' },
+      score: 85,
+      status: 'graded',
+      feedback: 'Project tốt, code sạch sẽ.',
+      submitted_at: new Date(),
+    });
+    console.log('- Seeded 7 sample submissions');
 
     console.log('\n=========================================');
     console.log('Eduvi LMS Course Data seeded successfully!');
@@ -239,7 +300,7 @@ const seedCourseData = async () => {
     console.log(`Lesson Progress: 4`);
     console.log(`Assignments: ${assignments.length + 2}`);
     console.log(`Quiz Questions: 2`);
-    console.log(`Submissions: 2`);
+    console.log(`Submissions: 7`);
     console.log('=========================================');
     
     process.exit(0);
