@@ -143,40 +143,19 @@ catch (err: any) {
 
 **File:** `frontend/src/pages/instructor/assignments/submissions/index.tsx`
 
-ProTable hiện tại không có prop `locale` để tùy chỉnh text trống. Sử dụng cách thêm `tableRender` hoặc `emptyText` trong request:
-
-Trong hàm request (sau dòng 146), khi trả về data rỗng:
-
-```typescript
-return {
-  data: res.data || [],
-  total: res.pagination?.total || 0,
-  success: true,
-};
-```
-
-Thêm prop `rowKey="id"` đã có. Thêm prop `locale` cho ProTable:
+Thêm prop `locale` cho ProTable để hiển thị thông báo rõ ràng khi bảng trống (không có bài nộp nào):
 
 ```tsx
 <ProTable<Submission>
   headerTitle="Danh sách bài nộp"
   // ... existing props ...
-  tableAlertRender={false}
-  search={false}
-  options={false}
-/>
-```
-
-Hoặc đơn giản hơn: hiển thị `Empty` component khi bảng trống bằng cách kiểm tra `dataSource` sau khi load xong. Tuy nhiên, cách tốt hơn là để ProTable tự xử lý với message rõ ràng qua prop `locale`:
-
-```tsx
-<ProTable<Submission>
   locale={{
     emptyText: <Empty description="Chưa có học sinh nào nộp bài tập này" />,
   }}
-  // ... rest of props
 />
 ```
+
+Cần thêm import `Empty` từ antd (dòng 3): `import { ..., Empty } from 'antd';`
 
 ---
 
