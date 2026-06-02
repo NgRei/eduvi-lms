@@ -1,6 +1,6 @@
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { useParams } from '@umijs/max';
-import { Button, Card, Form, Input, InputNumber, Modal, Space, Tag, Typography, message } from 'antd';
+import { Button, Card, Empty, Form, Input, InputNumber, Modal, Space, Tag, Typography, message } from 'antd';
 import React, { useRef, useState } from 'react';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import {
@@ -132,6 +132,9 @@ const SubmissionsPage: React.FC = () => {
         actionRef={actionRef}
         rowKey="id"
         search={{ labelWidth: 120 }}
+        locale={{
+          emptyText: <Empty description="Chưa có học sinh nào nộp bài tập này" />,
+        }}
         request={async (params, sort) => {
           try {
             const res = await getSubmissionsForGrading(id!, {
@@ -144,7 +147,15 @@ const SubmissionsPage: React.FC = () => {
               total: res.pagination?.total || 0,
               success: true,
             };
-          } catch (err) {
+          } catch (err: any) {
+            const statusCode = err?.response?.status || err?.status;
+            if (statusCode === 403) {
+              message.error('Bạn không có quyền xem bài nộp của khóa học này');
+            } else if (statusCode === 404) {
+              message.error('Không tìm thấy bài tập này');
+            } else {
+              message.error('Không thể tải danh sách bài nộp');
+            }
             return { data: [], total: 0, success: false };
           }
         }}
