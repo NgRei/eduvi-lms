@@ -32,7 +32,15 @@ const MyCourses: React.FC = () => {
 
   const renderCourseGrid = (enrollments: Enrollment[], isCompleted: boolean) => {
     if (enrollments.length === 0) {
-      return <Empty description={isCompleted ? 'Bạn chưa hoàn thành khóa học nào.' : 'Bạn chưa đăng ký khóa học nào.'} />;
+      return (
+        <Empty description={isCompleted ? 'Bạn chưa hoàn thành khóa học nào.' : 'Bạn chưa đăng ký khóa học nào.'}>
+          {!isCompleted && (
+            <Button type="primary" onClick={() => history.push('/courses')}>
+              Khám phá khóa học
+            </Button>
+          )}
+        </Empty>
+      );
     }
 
     return (
