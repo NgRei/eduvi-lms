@@ -79,6 +79,12 @@ export default [
         component: './student/my-courses',
       },
       {
+        path: '/courses',
+        name: '📚 Danh sách khóa học',
+        icon: 'SearchOutlined',
+        component: './courses/list',
+      },
+      {
         path: '/student/courses/:courseId/lessons/:lessonId',
         name: 'Xem bài giảng',
         component: './student/lesson-view',
