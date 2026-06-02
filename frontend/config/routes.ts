@@ -80,8 +80,8 @@ export default [
       },
       {
         path: '/courses',
-        name: '📚 Danh sách khóa học',
-        icon: 'SearchOutlined',
+        name: 'Danh sách khóa học',
+        icon: 'search',
         component: './courses/list',
       },
       {
