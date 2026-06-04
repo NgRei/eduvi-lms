@@ -176,7 +176,21 @@ const LessonViewPage: React.FC = () => {
   }
 
   return (
-    <PageContainer title={lesson.title}>
+    <PageContainer
+      title={lesson.title}
+      breadcrumb={{
+        routes: [
+          { path: '/student/my-courses', breadcrumbName: 'Khóa học của tôi' },
+          { path: '', breadcrumbName: lesson.title },
+        ],
+        itemRender: (route) => {
+          if (route.path) {
+            return <a onClick={() => history.push(route.path!)}>{route.breadcrumbName}</a>;
+          }
+          return <span>{route.breadcrumbName}</span>;
+        },
+      }}
+    >
       <Row gutter={[24, 24]}>
         <Col xs={24} md={16}>
           <Card>

@@ -16,14 +16,14 @@ import {
   deleteLesson,
   reorderLessons
 } from '../controllers/lesson.controller';
-import { authenticateToken, authorizeRole } from '../middlewares/auth.middleware';
+import { authenticateToken, authorizeRole, optionalAuth } from '../middlewares/auth.middleware';
 
 const router = Router();
 
 // Public routes
 router.get('/categories', getCategories as any);
 router.get('/', getCourses as any);
-router.get('/:id', getCourseById as any);
+router.get('/:id', optionalAuth as any, getCourseById as any);
 
 // Protected routes - Instructor & Admin
 router.get('/instructor/me', authenticateToken as any, authorizeRole('instructor', 'admin') as any, getInstructorCourses as any);

@@ -1,7 +1,7 @@
 import { PageContainer } from '@ant-design/pro-components';
 import {
   Avatar, Button, Card, Col, Divider, Empty, List, message,
-  Row, Spin, Statistic, Tag, Typography
+  Progress, Row, Spin, Statistic, Tag, Typography
 } from 'antd';
 import { history, useParams, useModel } from '@umijs/max';
 import {
@@ -85,7 +85,7 @@ const CourseDetailPage: React.FC = () => {
   }
 
   const isEnrolled = course.is_enrolled === true;
-  const isCompleted = course.enrollment?.status === 'completed';
+  const isCompleted = isEnrolled && course.enrollment?.status === 'completed';
 
   return (
     <PageContainer title={course.title}>
@@ -171,22 +171,37 @@ const CourseDetailPage: React.FC = () => {
               />
             </div>
 
-            <div style={{ textAlign: 'center', marginBottom: 16 }}>
-              <Title level={3} style={{ color: '#EF4444', margin: 0 }}>
-                {course.price === 0 ? 'Miễn phí' : `${course.price.toLocaleString()} đ`}
-              </Title>
-              {course.sale_price && course.sale_price < course.price && (
-                <Text delete type="secondary">{course.price.toLocaleString()} đ</Text>
-              )}
-            </div>
+            {!isEnrolled && (
+              <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                <Title level={3} style={{ color: '#EF4444', margin: 0 }}>
+                  {course.price === 0 ? 'Miễn phí' : `${course.price.toLocaleString()} đ`}
+                </Title>
+                {course.sale_price && course.sale_price < course.price && (
+                  <Text delete type="secondary">{course.price.toLocaleString()} đ</Text>
+                )}
+              </div>
+            )}
 
-            {isEnrolled ? (
-              <Button type="primary" block size="large" icon={<PlayCircleOutlined />} onClick={handleStartLearning}>
-                Tiếp tục học
-              </Button>
-            ) : isCompleted ? (
+            {isEnrolled && course.enrollment && (
+              <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                <div style={{ marginBottom: 8 }}>
+                  <Text strong>Tiến độ học tập</Text>
+                </div>
+                <Progress
+                  percent={Math.round(course.enrollment.progress_percentage)}
+                  status={isCompleted ? 'success' : 'active'}
+                  style={{ maxWidth: 200, margin: '0 auto' }}
+                />
+              </div>
+            )}
+
+            {isCompleted ? (
               <Button block size="large" icon={<CheckCircleOutlined />} onClick={handleStartLearning}>
                 Xem lại bài học
+              </Button>
+            ) : isEnrolled ? (
+              <Button type="primary" block size="large" icon={<PlayCircleOutlined />} onClick={handleStartLearning}>
+                Tiếp tục học
               </Button>
             ) : (
               <Button

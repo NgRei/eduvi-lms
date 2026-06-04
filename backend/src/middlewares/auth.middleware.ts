@@ -35,6 +35,31 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
   });
 };
 
+export const optionalAuth = (req: AuthRequest, res: Response, next: NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return next();
+  }
+
+  const jwtSecret = process.env.JWT_SECRET || 'eduvi_lms_jwt_secret_key_2026_super_secure';
+
+  jwt.verify(token, jwtSecret, (err, decoded: any) => {
+    if (err) {
+      return next();
+    }
+
+    req.user = {
+      id: decoded.id,
+      email: decoded.email,
+      username: decoded.username,
+      user_type: decoded.user_type,
+    };
+    next();
+  });
+};
+
 export const authorizeRole = (...allowedRoles: ('student' | 'instructor' | 'admin')[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
