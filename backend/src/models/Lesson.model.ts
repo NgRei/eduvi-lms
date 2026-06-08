@@ -92,5 +92,9 @@ Lesson.init(
     underscored: true,
     paranoid: true,
     deletedAt: 'deleted_at',
+    indexes: [
+      { fields: ['course_id', 'sort_order'] },
+      { fields: ['lesson_type'] },
+    ],
   }
 );

@@ -1,0 +1,172 @@
+import { PageContainer } from '@ant-design/pro-components';
+import { Button, Card, Col, Empty, Input, message, Modal, Row, Spin, Tag, Typography } from 'antd';
+import { history } from '@umijs/max';
+import { SafetyCertificateOutlined, SearchOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from 'react';
+import { getMyCertificates, verifyCertificate, type UserCertificate, type CertificateVerifyResult } from '@/services/ant-design-pro/certificates';
+
+const { Title, Text } = Typography;
+
+const CertificatesPage: React.FC = () => {
+  const [loading, setLoading] = useState(true);
+  const [certificates, setCertificates] = useState<UserCertificate[]>([]);
+  const [verifyModalOpen, setVerifyModalOpen] = useState(false);
+  const [verifyCode, setVerifyCode] = useState('');
+  const [verifyResult, setVerifyResult] = useState<CertificateVerifyResult | null>(null);
+  const [verifying, setVerifying] = useState(false);
+
+  useEffect(() => {
+    fetchCertificates();
+  }, []);
+
+  const fetchCertificates = async () => {
+    try {
+      setLoading(true);
+      const res = await getMyCertificates();
+      if (res.success) setCertificates(res.data);
+    } catch (err) {
+      console.error('Failed to fetch certificates:', err);
+      message.error('Không thể tải danh sách chứng chỉ');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerify = async () => {
+    if (!verifyCode.trim()) {
+      message.warning('Vui lòng nhập mã chứng chỉ');
+      return;
+    }
+    try {
+      setVerifying(true);
+      const res = await verifyCertificate(verifyCode.trim());
+      if (res.success) setVerifyResult(res.data);
+    } catch (err: any) {
+      setVerifyResult(null);
+      message.error(err?.data?.error || 'Mã chứng chỉ không hợp lệ');
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <PageContainer title="Chứng chỉ của tôi">
+        <div style={{ textAlign: 'center', padding: 100 }}>
+          <Spin size="large" />
+        </div>
+      </PageContainer>
+    );
+  }
+
+  return (
+    <PageContainer
+      title="Chứng chỉ của tôi"
+      extra={
+        <Button icon={<SearchOutlined />} onClick={() => setVerifyModalOpen(true)}>
+          Xác thực chứng chỉ
+        </Button>
+      }
+    >
+      {certificates.length === 0 ? (
+        <Empty description="Bạn chưa có chứng chỉ nào.">
+          <Button type="primary" onClick={() => history.push('/student/my-courses')}>
+            Khóa học của tôi
+          </Button>
+        </Empty>
+      ) : (
+        <Row gutter={[16, 16]}>
+          {certificates.map((cert) => (
+            <Col xs={24} sm={12} md={8} key={cert.id}>
+              <Card
+                hoverable
+                style={{ borderTop: '3px solid #4F46E5' }}
+                cover={
+                  <div style={{ padding: 24, textAlign: 'center', background: 'linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%)' }}>
+                    <SafetyCertificateOutlined style={{ fontSize: 48, color: '#4F46E5' }} />
+                  </div>
+                }
+              >
+                <Card.Meta
+                  title={cert.certificate?.title || 'Chứng chỉ'}
+                  description={
+                    <div>
+                      <div style={{ marginBottom: 8 }}>
+                        <Text strong>Khóa học: </Text>
+                        <Text>{cert.course?.title}</Text>
+                      </div>
+                      <div style={{ marginBottom: 8 }}>
+                        <Text strong>Mã chứng chỉ: </Text>
+                        <Tag color="blue">{cert.cert_code}</Tag>
+                      </div>
+                      <div style={{ marginBottom: 8 }}>
+                        <Text strong>Ngày cấp: </Text>
+                        <Text>{new Date(cert.issued_at).toLocaleDateString('vi-VN')}</Text>
+                      </div>
+                      {cert.expires_at && (
+                        <div>
+                          <Text strong>Hạn: </Text>
+                          <Text>{new Date(cert.expires_at).toLocaleDateString('vi-VN')}</Text>
+                        </div>
+                      )}
+                    </div>
+                  }
+                />
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      )}
+
+      {/* Verify Modal */}
+      <Modal
+        title="Xác thực chứng chỉ"
+        open={verifyModalOpen}
+        onCancel={() => {
+          setVerifyModalOpen(false);
+          setVerifyResult(null);
+          setVerifyCode('');
+        }}
+        footer={null}
+      >
+        <div style={{ marginBottom: 16 }}>
+          <Input.Search
+            placeholder="Nhập mã chứng chỉ (VD: CERT-XXXXXX)"
+            value={verifyCode}
+            onChange={(e) => setVerifyCode(e.target.value)}
+            onSearch={handleVerify}
+            enterButton="Xác thực"
+            loading={verifying}
+            size="large"
+          />
+        </div>
+
+        {verifyResult && (
+          <Card size="small">
+            <div style={{ textAlign: 'center', marginBottom: 16 }}>
+              {verifyResult.is_valid ? (
+                <CheckCircleOutlined style={{ fontSize: 48, color: '#10B981' }} />
+              ) : (
+                <CloseCircleOutlined style={{ fontSize: 48, color: '#EF4444' }} />
+              )}
+              <div style={{ marginTop: 8 }}>
+                <Tag color={verifyResult.is_valid ? 'success' : 'error'} style={{ fontSize: 14 }}>
+                  {verifyResult.is_valid ? 'HỢP LỆ' : 'KHÔNG HỢP LỆ'}
+                </Tag>
+              </div>
+            </div>
+            <div><Text strong>Người nhận: </Text><Text>{verifyResult.holder_name}</Text></div>
+            <div><Text strong>Khóa học: </Text><Text>{verifyResult.course_title}</Text></div>
+            <div><Text strong>Chứng chỉ: </Text><Text>{verifyResult.certificate_title}</Text></div>
+            <div><Text strong>Ngày cấp: </Text><Text>{new Date(verifyResult.issued_at).toLocaleDateString('vi-VN')}</Text></div>
+            {verifyResult.expires_at && (
+              <div><Text strong>Hạn: </Text><Text>{new Date(verifyResult.expires_at).toLocaleDateString('vi-VN')}</Text></div>
+            )}
+          </Card>
+        )}
+      </Modal>
+    </PageContainer>
+  );
+};
+
+export default CertificatesPage;

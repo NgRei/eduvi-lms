@@ -1,16 +1,19 @@
 import { PageContainer } from '@ant-design/pro-components';
 import {
   Avatar, Button, Card, Col, Divider, Empty, List, message,
-  Progress, Row, Spin, Statistic, Tag, Typography
+  Progress, Row, Spin, Statistic, Tag, Typography, Rate, Input, Form, Pagination
 } from 'antd';
 import { history, useParams, useModel } from '@umijs/max';
 import {
   BookOutlined, CheckCircleOutlined, ClockCircleOutlined,
-  PlayCircleOutlined, StarOutlined, TeamOutlined, UserOutlined
+  PlayCircleOutlined, StarOutlined, TeamOutlined, UserOutlined,
+  SafetyCertificateOutlined
 } from '@ant-design/icons';
 import React, { useEffect, useState } from 'react';
 import { getCourseById, type CourseDetail } from '@/services/ant-design-pro/courses';
 import { enrollCourse } from '@/services/ant-design-pro/enrollments';
+import { getCourseReviews, createReview, type Review } from '@/services/ant-design-pro/reviews';
+import { issueCertificate } from '@/services/ant-design-pro/certificates';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -21,10 +24,66 @@ const CourseDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
   const [course, setCourse] = useState<CourseDetail | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewTotal, setReviewTotal] = useState(0);
+  const [reviewPage, setReviewPage] = useState(1);
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [issuingCert, setIssuingCert] = useState(false);
+  const [form] = Form.useForm();
 
   useEffect(() => {
-    if (id) fetchCourse(id);
+    if (id) {
+      fetchCourse(id);
+      fetchReviews(id, 1);
+    }
   }, [id]);
+
+  const fetchReviews = async (courseId: string, page: number) => {
+    try {
+      const res = await getCourseReviews(courseId, { page, limit: 5 });
+      if (res.success) {
+        setReviews(res.data);
+        setReviewTotal(res.pagination.total);
+        setReviewPage(page);
+      }
+    } catch (err) {
+      console.error('Failed to fetch reviews:', err);
+    }
+  };
+
+  const handleSubmitReview = async (values: { rating: number; comment: string }) => {
+    if (!id) return;
+    try {
+      setSubmittingReview(true);
+      const res = await createReview(id, values);
+      if (res.success) {
+        message.success('Đánh giá thành công!');
+        form.resetFields();
+        fetchReviews(id, 1);
+        fetchCourse(id);
+      }
+    } catch (err: any) {
+      message.error(err?.data?.error || 'Không thể gửi đánh giá');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const handleIssueCertificate = async () => {
+    if (!id) return;
+    try {
+      setIssuingCert(true);
+      const res = await issueCertificate(id);
+      if (res.success) {
+        message.success('Cấp chứng chỉ thành công!');
+        history.push('/student/certificates');
+      }
+    } catch (err: any) {
+      message.error(err?.data?.error || 'Không thể cấp chứng chỉ');
+    } finally {
+      setIssuingCert(false);
+    }
+  };
 
   const fetchCourse = async (courseId: string) => {
     try {
@@ -158,6 +217,69 @@ const CourseDetailPage: React.FC = () => {
                 />
               </>
             )}
+
+            {/* Reviews Section */}
+            <Divider />
+            <Title level={5}>Đánh giá từ học viên ({reviewTotal})</Title>
+
+            {isEnrolled && (
+              <Card size="small" style={{ marginBottom: 16, backgroundColor: '#FAFAFA' }}>
+                <Form form={form} onFinish={handleSubmitReview} layout="vertical">
+                  <Form.Item name="rating" label="Đánh giá sao" rules={[{ required: true, message: 'Vui lòng chọn số sao' }]}>
+                    <Rate />
+                  </Form.Item>
+                  <Form.Item name="comment" label="Nhận xét">
+                    <Input.TextArea rows={3} placeholder="Chia sẻ cảm nhận về khóa học..." />
+                  </Form.Item>
+                  <Form.Item style={{ marginBottom: 0 }}>
+                    <Button type="primary" htmlType="submit" loading={submittingReview}>
+                      Gửi đánh giá
+                    </Button>
+                  </Form.Item>
+                </Form>
+              </Card>
+            )}
+
+            {reviews.length > 0 ? (
+              <List
+                dataSource={reviews}
+                renderItem={(review) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      avatar={<Avatar icon={<UserOutlined />} />}
+                      title={
+                        <span>
+                          {review.user?.full_name || 'Học viên'}
+                          <Rate disabled value={review.rating} style={{ marginLeft: 12, fontSize: 14 }} />
+                        </span>
+                      }
+                      description={
+                        <div>
+                          {review.comment && <div style={{ marginBottom: 4 }}>{review.comment}</div>}
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            {new Date(review.created_at).toLocaleDateString('vi-VN')}
+                          </Text>
+                        </div>
+                      }
+                    />
+                  </List.Item>
+                )}
+              />
+            ) : (
+              <Text type="secondary">Chưa có đánh giá nào.</Text>
+            )}
+
+            {reviewTotal > 5 && (
+              <div style={{ textAlign: 'center', marginTop: 16 }}>
+                <Pagination
+                  current={reviewPage}
+                  total={reviewTotal}
+                  pageSize={5}
+                  onChange={(page) => id && fetchReviews(id, page)}
+                  size="small"
+                />
+              </div>
+            )}
           </Card>
         </Col>
 
@@ -196,9 +318,20 @@ const CourseDetailPage: React.FC = () => {
             )}
 
             {isCompleted ? (
-              <Button block size="large" icon={<CheckCircleOutlined />} onClick={handleStartLearning}>
-                Xem lại bài học
-              </Button>
+              <>
+                <Button block size="large" icon={<CheckCircleOutlined />} onClick={handleStartLearning} style={{ marginBottom: 8 }}>
+                  Xem lại bài học
+                </Button>
+                <Button
+                  block
+                  size="large"
+                  icon={<SafetyCertificateOutlined />}
+                  loading={issuingCert}
+                  onClick={handleIssueCertificate}
+                >
+                  Nhận chứng chỉ
+                </Button>
+              </>
             ) : isEnrolled ? (
               <Button type="primary" block size="large" icon={<PlayCircleOutlined />} onClick={handleStartLearning}>
                 Tiếp tục học

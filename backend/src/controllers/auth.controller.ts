@@ -6,6 +6,7 @@ import { Op } from 'sequelize';
 import { User, StudentProfile, InstructorProfile } from '../models';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import { sendPasswordResetEmail } from '../utils/email.util';
+import { createAuditLog, getClientIp } from '../services/audit.service';
 
 // Helper to remove accents from Vietnamese text
 const removeAccents = (str: string): string => {
@@ -154,6 +155,16 @@ export const login = async (req: Request, res: Response) => {
       jwtSecret,
       { expiresIn: jwtExpires } as jwt.SignOptions
     );
+
+    // Audit log — đăng nhập thành công
+    createAuditLog({
+      user_id: user.id,
+      action: 'login',
+      entity_type: 'user',
+      entity_id: user.id,
+      detail: { email: user.email, user_type: user.user_type },
+      ip_address: getClientIp(req),
+    });
 
     return res.status(200).json({
       success: true,

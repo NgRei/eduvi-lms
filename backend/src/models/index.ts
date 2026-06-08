@@ -12,6 +12,10 @@ import { Assignment } from './Assignment.model';
 import { QuizQuestion } from './QuizQuestion.model';
 import { Video } from './Video.model';
 import { Submission } from './Submission.model';
+import { Certificate } from './Certificate.model';
+import { UserCertificate } from './UserCertificate.model';
+import { CourseReview } from './CourseReview.model';
+import { AuditLog } from './AuditLog.model';
 
 // User 1-to-1 StudentProfile
 User.hasOne(StudentProfile, { foreignKey: 'user_id', as: 'studentProfile', onDelete: 'CASCADE' });
@@ -103,6 +107,28 @@ Course.hasMany(Video, { foreignKey: 'course_id', as: 'videos', onDelete: 'CASCAD
 User.hasMany(Video, { foreignKey: 'uploaded_by', as: 'uploadedVideos', onDelete: 'CASCADE' });
 Lesson.hasOne(Video, { foreignKey: 'lesson_id', as: 'video', onDelete: 'SET NULL' });
 
+// Certificate associations
+Course.hasOne(Certificate, { foreignKey: 'course_id', as: 'certificate', onDelete: 'CASCADE' });
+Certificate.belongsTo(Course, { foreignKey: 'course_id', as: 'course' });
+
+// UserCertificate associations
+User.hasMany(UserCertificate, { foreignKey: 'user_id', as: 'certificates', onDelete: 'CASCADE' });
+UserCertificate.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+Certificate.hasMany(UserCertificate, { foreignKey: 'certificate_id', as: 'userCertificates', onDelete: 'CASCADE' });
+UserCertificate.belongsTo(Certificate, { foreignKey: 'certificate_id', as: 'certificate' });
+Course.hasMany(UserCertificate, { foreignKey: 'course_id', as: 'userCertificates', onDelete: 'CASCADE' });
+UserCertificate.belongsTo(Course, { foreignKey: 'course_id', as: 'course' });
+
+// CourseReview associations
+Course.hasMany(CourseReview, { foreignKey: 'course_id', as: 'reviews', onDelete: 'CASCADE' });
+CourseReview.belongsTo(Course, { foreignKey: 'course_id', as: 'course' });
+User.hasMany(CourseReview, { foreignKey: 'user_id', as: 'reviews', onDelete: 'CASCADE' });
+CourseReview.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// AuditLog associations
+User.hasMany(AuditLog, { foreignKey: 'user_id', as: 'auditLogs', onDelete: 'SET NULL' });
+AuditLog.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
 export {
   User,
   StudentProfile,
@@ -117,5 +143,9 @@ export {
   Assignment,
   QuizQuestion,
   Video,
-  Submission
+  Submission,
+  Certificate,
+  UserCertificate,
+  CourseReview,
+  AuditLog
 };

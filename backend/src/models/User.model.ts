@@ -68,5 +68,10 @@ User.init(
     sequelize,
     tableName: 'users',
     underscored: true,
+    indexes: [
+      { fields: ['email'] },
+      { fields: ['user_type'] },
+      { fields: ['is_active'] },
+    ],
   }
 );

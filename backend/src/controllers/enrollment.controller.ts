@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { Op } from 'sequelize';
 import { Enrollment, Course, User, Lesson, LessonProgress } from '../models';
 import { AuthRequest } from '../middlewares/auth.middleware';
+import { createAuditLog, getClientIp } from '../services/audit.service';
 
 // POST /api/enrollments - Đăng ký khóa học
 export const enrollCourse = async (req: AuthRequest, res: Response) => {
@@ -73,6 +74,16 @@ export const enrollCourse = async (req: AuthRequest, res: Response) => {
     // Update total_students count in course
     await course.update({
       total_students: (course.total_students || 0) + 1,
+    });
+
+    // Audit log — đăng ký khóa học
+    createAuditLog({
+      user_id: req.user.id,
+      action: 'enroll',
+      entity_type: 'enrollment',
+      entity_id: enrollment.id,
+      detail: { course_id, course_title: course.title },
+      ip_address: getClientIp(req),
     });
 
     return res.status(201).json({

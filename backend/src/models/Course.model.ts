@@ -126,5 +126,10 @@ Course.init(
     underscored: true,
     paranoid: true,
     deletedAt: 'deleted_at',
+    indexes: [
+      { fields: ['category_id'] },
+      { fields: ['is_published', 'deleted_at'] },
+      { fields: ['slug'] },
+    ],
   }
 );

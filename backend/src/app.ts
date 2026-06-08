@@ -12,6 +12,9 @@ import dashboardRoutes from './routes/dashboard.routes';
 import adminRoutes from './routes/admin.routes';
 import assignmentRoutes from './routes/assignment.routes';
 import submissionRoutes from './routes/submission.routes';
+import certificateRoutes from './routes/certificate.routes';
+import reviewRoutes from './routes/review.routes';
+import auditRoutes from './routes/audit.routes';
 
 // Load env vars
 dotenv.config();
@@ -46,6 +49,9 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/assignments', assignmentRoutes);
 app.use('/api', submissionRoutes);
+app.use('/api/certificates', certificateRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/audit-logs', auditRoutes);
 
 // Global Error Handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

@@ -102,6 +102,12 @@ export default [
         component: './student/assignments/result',
         hideInMenu: true,
       },
+      {
+        path: '/student/certificates',
+        name: 'Chứng chỉ',
+        icon: 'safety-certificate',
+        component: './student/certificates',
+      },
     ],
   },
   // ================= INSTRUCTOR PORTAL =================
@@ -187,6 +193,12 @@ export default [
         name: 'Quản lý người dùng',
         icon: 'team',
         component: './admin/users',
+      },
+      {
+        path: '/admin/audit-logs',
+        name: 'Nhật ký hệ thống',
+        icon: 'file-text',
+        component: './admin/audit-logs',
       },
     ],
   },
