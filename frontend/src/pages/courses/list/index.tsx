@@ -1,9 +1,26 @@
-import { PageContainer } from '@ant-design/pro-components';
 import { BookOutlined, StarOutlined, TeamOutlined } from '@ant-design/icons';
-import { Card, Col, Empty, Input, Pagination, Row, Select, Spin, Tag, Typography } from 'antd';
+import { PageContainer } from '@ant-design/pro-components';
 import { history } from '@umijs/max';
+import {
+  Card,
+  Col,
+  Empty,
+  Input,
+  Pagination,
+  Row,
+  Select,
+  Spin,
+  Tag,
+  Typography,
+} from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
-import { getCourses, getCategories, type CourseItem, type CourseCategory } from '@/services/ant-design-pro/courses';
+import { COURSE_PLACEHOLDER_IMG } from '@/constants/placeholder';
+import {
+  type CourseCategory,
+  type CourseItem,
+  getCategories,
+  getCourses,
+} from '@/services/ant-design-pro/courses';
 
 const { Search } = Input;
 const { Text } = Typography;
@@ -81,11 +98,11 @@ const CoursesList: React.FC = () => {
               allowClear
               style={{ width: '100%' }}
               value={categoryId}
-              onChange={(v) => { setCategoryId(v); setPage(1); }}
-              options={[
-                { label: 'Tất cả danh mục', value: undefined },
-                ...categories.map((c) => ({ label: c.name, value: c.id })),
-              ]}
+              onChange={(v) => {
+                setCategoryId(v);
+                setPage(1);
+              }}
+              options={categories.map((c) => ({ label: c.name, value: c.id }))}
             />
           </Col>
           <Col xs={12} md={4}>
@@ -94,9 +111,11 @@ const CoursesList: React.FC = () => {
               allowClear
               style={{ width: '100%' }}
               value={targetLevel}
-              onChange={(v) => { setTargetLevel(v); setPage(1); }}
+              onChange={(v) => {
+                setTargetLevel(v);
+                setPage(1);
+              }}
               options={[
-                { label: 'Tất cả', value: undefined },
                 { label: 'Cơ bản', value: 'beginner' },
                 { label: 'Trung bình', value: 'intermediate' },
                 { label: 'Nâng cao', value: 'advanced' },
@@ -107,7 +126,10 @@ const CoursesList: React.FC = () => {
             <Select
               style={{ width: '100%' }}
               value={sort}
-              onChange={(v) => { setSort(v); setPage(1); }}
+              onChange={(v) => {
+                setSort(v);
+                setPage(1);
+              }}
               options={[
                 { label: 'Mới nhất', value: 'newest' },
                 { label: 'Giá tăng dần', value: 'price_asc' },
@@ -138,7 +160,7 @@ const CoursesList: React.FC = () => {
                   cover={
                     <img
                       alt={course.title}
-                      src={course.thumbnail || 'https://via.placeholder.com/300x160?text=Course'}
+                      src={course.thumbnail || COURSE_PLACEHOLDER_IMG}
                       style={{ height: 160, objectFit: 'cover' }}
                     />
                   }
@@ -146,7 +168,14 @@ const CoursesList: React.FC = () => {
                 >
                   <Card.Meta
                     title={
-                      <div style={{ whiteSpace: 'normal', height: 44, overflow: 'hidden', fontSize: 14 }}>
+                      <div
+                        style={{
+                          whiteSpace: 'normal',
+                          height: 44,
+                          overflow: 'hidden',
+                          fontSize: 14,
+                        }}
+                      >
                         {course.title}
                       </div>
                     }
@@ -157,7 +186,13 @@ const CoursesList: React.FC = () => {
                             {course.category.name}
                           </Tag>
                         )}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            marginTop: 8,
+                          }}
+                        >
                           <Text type="secondary" style={{ fontSize: 12 }}>
                             <TeamOutlined /> {course.total_students}
                           </Text>
@@ -171,8 +206,13 @@ const CoursesList: React.FC = () => {
                           )}
                         </div>
                         <div style={{ marginTop: 8 }}>
-                          <Text strong style={{ color: '#EF4444', fontSize: 16 }}>
-                            {course.price === 0 ? 'Miễn phí' : `${course.price.toLocaleString()} đ`}
+                          <Text
+                            strong
+                            style={{ color: '#EF4444', fontSize: 16 }}
+                          >
+                            {course.price === 0
+                              ? 'Miễn phí'
+                              : `${course.price.toLocaleString()} đ`}
                           </Text>
                         </div>
                       </div>

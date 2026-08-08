@@ -1,10 +1,15 @@
 import { PlusOutlined } from '@ant-design/icons';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { history } from '@umijs/max';
-import { Button, Popconfirm, Space, Tag, message } from 'antd';
+import { Button, message, Popconfirm, Space, Tag } from 'antd';
 import React, { useRef } from 'react';
-import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { getInstructorCourses, updateCourse, deleteCourse, type CourseItem } from '@/services/ant-design-pro/courses';
+import {
+  type CourseItem,
+  deleteCourse,
+  getInstructorCourses,
+  updateCourse,
+} from '@/services/ant-design-pro/courses';
 
 const CourseManagement: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
@@ -25,7 +30,7 @@ const CourseManagement: React.FC = () => {
       message.success(
         !record.is_published
           ? 'Đã xuất bản khóa học công khai!'
-          : 'Đã chuyển khóa học về dạng bản nháp!'
+          : 'Đã chuyển khóa học về dạng bản nháp!',
       );
       actionRef.current?.reload();
     } catch (err: any) {
@@ -65,14 +70,20 @@ const CourseManagement: React.FC = () => {
       dataIndex: 'total_students',
       search: false,
       sorter: true,
-      render: (_, record) => <Tag color="blue">{record.total_students} học viên</Tag>,
+      render: (_, record) => (
+        <Tag color="blue">{record.total_students} học viên</Tag>
+      ),
     },
     {
       title: 'Học phí',
       dataIndex: 'price',
       search: false,
       render: (_, record) => (
-        <strong>{record.price === 0 ? 'Miễn phí' : `${record.price.toLocaleString()} đ`}</strong>
+        <strong>
+          {record.price === 0
+            ? 'Miễn phí'
+            : `${record.price.toLocaleString()} đ`}
+        </strong>
       ),
     },
     {
@@ -80,7 +91,11 @@ const CourseManagement: React.FC = () => {
       dataIndex: 'rating_avg',
       search: false,
       render: (_, record) =>
-        record.rating_avg === 0 ? <span style={{ color: '#9CA3AF' }}>Chưa có</span> : `⭐ ${record.rating_avg}`,
+        record.rating_avg === 0 ? (
+          <span style={{ color: '#9CA3AF' }}>Chưa có</span>
+        ) : (
+          `⭐ ${record.rating_avg}`
+        ),
     },
     {
       title: 'Trạng thái',
@@ -101,7 +116,13 @@ const CourseManagement: React.FC = () => {
       valueType: 'option',
       render: (_, record) => (
         <Space>
-          <a onClick={() => history.push(`/instructor/courses/${record.id}/edit`)}>Chỉnh sửa</a>
+          <a
+            onClick={() =>
+              history.push(`/instructor/courses/${record.id}/edit`)
+            }
+          >
+            Chỉnh sửa
+          </a>
           <a onClick={() => togglePublish(record)}>
             {record.is_published ? 'Gỡ xuất bản' : 'Xuất bản'}
           </a>
@@ -138,11 +159,20 @@ const CourseManagement: React.FC = () => {
         request={async (params, sort) => {
           try {
             const sortField = sort && Object.keys(sort)[0];
-            const sortOrder = sortField ? (sort[sortField] === 'ascend' ? 'asc' : 'desc') : undefined;
+            const sortOrder = sortField
+              ? sort[sortField] === 'ascend'
+                ? 'asc'
+                : 'desc'
+              : undefined;
             const res = await getInstructorCourses({
               page: params.current || 1,
               limit: params.pageSize || 10,
-              status: params.is_published === 'true' ? 'published' : params.is_published === 'false' ? 'draft' : undefined,
+              status:
+                params.is_published === 'true'
+                  ? 'published'
+                  : params.is_published === 'false'
+                    ? 'draft'
+                    : undefined,
             });
             return {
               data: res.data || [],

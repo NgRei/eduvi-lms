@@ -25,7 +25,9 @@ export interface RegisterResult {
   };
 }
 
-export async function fakeRegister(params: UserRegisterParams): Promise<RegisterResult> {
+export async function fakeRegister(
+  params: UserRegisterParams,
+): Promise<RegisterResult> {
   return request('/api/auth/register', {
     method: 'POST',
     data: params,

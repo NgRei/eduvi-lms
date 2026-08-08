@@ -1,11 +1,22 @@
+import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { history, useParams } from '@umijs/max';
 import {
-  Button, Card, List, Space, Tag, Typography, message, Spin, Result,
+  Button,
+  Card,
+  List,
+  message,
+  Result,
+  Space,
+  Spin,
+  Tag,
+  Typography,
 } from 'antd';
-import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import React, { useCallback, useEffect, useState } from 'react';
-import { getSubmission, type Submission } from '@/services/ant-design-pro/assignments';
+import {
+  getSubmission,
+  type Submission,
+} from '@/services/ant-design-pro/assignments';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -51,7 +62,11 @@ const AssignmentResultPage: React.FC = () => {
 
   const assignment = submission.assignment;
   const isGraded = submission.status === 'graded';
-  const passed = isGraded && submission.score !== null && assignment && submission.score >= assignment.passing_score;
+  const passed =
+    isGraded &&
+    submission.score !== null &&
+    assignment &&
+    submission.score >= assignment.passing_score;
 
   return (
     <PageContainer title="Kết quả bài tập">
@@ -61,7 +76,9 @@ const AssignmentResultPage: React.FC = () => {
           <Result
             status={passed ? 'success' : 'warning'}
             title={`${submission.score}/${assignment?.total_points || 0} điểm`}
-            subTitle={passed ? 'Chúc mừng! Bạn đã đạt!' : 'Bạn chưa đạt điểm tối thiểu.'}
+            subTitle={
+              passed ? 'Chúc mừng! Bạn đã đạt!' : 'Bạn chưa đạt điểm tối thiểu.'
+            }
           />
         )}
 
@@ -75,93 +92,121 @@ const AssignmentResultPage: React.FC = () => {
 
         {/* Feedback */}
         {submission.feedback && (
-          <Card size="small" title="Nhận xét của giảng viên" style={{ marginBottom: 16 }}>
+          <Card
+            size="small"
+            title="Nhận xét của giảng viên"
+            style={{ marginBottom: 16 }}
+          >
             <Paragraph>{submission.feedback}</Paragraph>
           </Card>
         )}
 
         {/* Quiz question results */}
-        {assignment?.assignment_type === 'quiz' && submission.question_results && submission.question_results.length > 0 && (
-          <Card title="Chi tiết câu hỏi">
-            <List
-              dataSource={submission.question_results}
-              renderItem={(item: any, index: number) => (
-                <List.Item>
-                  <div style={{ width: '100%' }}>
-                    <div style={{ marginBottom: 8 }}>
-                      <Space>
-                        {item.is_correct ? (
-                          <CheckCircleOutlined style={{ color: '#52c41a' }} />
-                        ) : (
-                          <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
-                        )}
-                        <Text strong>Câu {index + 1}:</Text>
-                        <Text>{item.question_text}</Text>
-                        <Tag color={item.is_correct ? 'green' : 'red'}>
-                          {item.is_correct ? `+${item.points}` : '0'} điểm
-                        </Tag>
-                      </Space>
-                    </div>
-                    <div style={{ marginLeft: 24 }}>
-                      {item.options?.map((opt: any) => {
-                        const isSelected = item.selected_options?.includes(opt.id);
-                        const isCorrect = opt.is_correct;
-                        let bgColor = 'transparent';
-                        if (isCorrect) bgColor = '#f6ffed';
-                        if (isSelected && !isCorrect) bgColor = '#fff2f0';
+        {assignment?.assignment_type === 'quiz' &&
+          submission.question_results &&
+          submission.question_results.length > 0 && (
+            <Card title="Chi tiết câu hỏi">
+              <List
+                dataSource={submission.question_results}
+                renderItem={(item: any, index: number) => (
+                  <List.Item>
+                    <div style={{ width: '100%' }}>
+                      <div style={{ marginBottom: 8 }}>
+                        <Space>
+                          {item.is_correct ? (
+                            <CheckCircleOutlined style={{ color: '#52c41a' }} />
+                          ) : (
+                            <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
+                          )}
+                          <Text strong>Câu {index + 1}:</Text>
+                          <Text>{item.question_text}</Text>
+                          <Tag color={item.is_correct ? 'green' : 'red'}>
+                            {item.is_correct ? `+${item.points}` : '0'} điểm
+                          </Tag>
+                        </Space>
+                      </div>
+                      <div style={{ marginLeft: 24 }}>
+                        {item.options?.map((opt: any) => {
+                          const isSelected = item.selected_options?.includes(
+                            opt.id,
+                          );
+                          const isCorrect = opt.is_correct;
+                          let bgColor = 'transparent';
+                          if (isCorrect) bgColor = '#f6ffed';
+                          if (isSelected && !isCorrect) bgColor = '#fff2f0';
 
-                        return (
-                          <div
-                            key={opt.id}
-                            style={{
-                              padding: '4px 8px',
-                              marginBottom: 4,
-                              backgroundColor: bgColor,
-                              borderRadius: 4,
-                            }}
-                          >
-                            <Space>
-                              {isSelected && <Tag color="blue">Đã chọn</Tag>}
-                              {isCorrect && <Tag color="green">Đáp án đúng</Tag>}
-                              <Text>{opt.text}</Text>
-                            </Space>
+                          return (
+                            <div
+                              key={opt.id}
+                              style={{
+                                padding: '4px 8px',
+                                marginBottom: 4,
+                                backgroundColor: bgColor,
+                                borderRadius: 4,
+                              }}
+                            >
+                              <Space>
+                                {isSelected && <Tag color="blue">Đã chọn</Tag>}
+                                {isCorrect && (
+                                  <Tag color="green">Đáp án đúng</Tag>
+                                )}
+                                <Text>{opt.text}</Text>
+                              </Space>
+                            </div>
+                          );
+                        })}
+                        {item.explanation && (
+                          <div style={{ marginTop: 8 }}>
+                            <Text type="secondary">
+                              Giải thích: {item.explanation}
+                            </Text>
                           </div>
-                        );
-                      })}
-                      {item.explanation && (
-                        <div style={{ marginTop: 8 }}>
-                          <Text type="secondary">Giải thích: {item.explanation}</Text>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </List.Item>
-              )}
-            />
-          </Card>
-        )}
+                  </List.Item>
+                )}
+              />
+            </Card>
+          )}
 
         {/* Essay content */}
-        {assignment?.assignment_type === 'essay' && submission.answers?.text && (
-          <Card size="small" title="Bài viết của bạn" style={{ marginTop: 16 }}>
-            <div style={{ whiteSpace: 'pre-wrap' }}>{submission.answers.text}</div>
-          </Card>
-        )}
+        {assignment?.assignment_type === 'essay' &&
+          submission.answers?.text && (
+            <Card
+              size="small"
+              title="Bài viết của bạn"
+              style={{ marginTop: 16 }}
+            >
+              <div style={{ whiteSpace: 'pre-wrap' }}>
+                {submission.answers.text}
+              </div>
+            </Card>
+          )}
 
         {/* Upload file */}
-        {assignment?.assignment_type === 'upload' && submission.answers?.file_url && (
-          <Card size="small" title="File đã nộp" style={{ marginTop: 16 }}>
-            <a href={submission.answers.file_url} target="_blank" rel="noopener noreferrer">
-              {submission.answers.file_name || 'Xem file'}
-            </a>
-          </Card>
-        )}
+        {assignment?.assignment_type === 'upload' &&
+          submission.answers?.file_url && (
+            <Card size="small" title="File đã nộp" style={{ marginTop: 16 }}>
+              <a
+                href={submission.answers.file_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {submission.answers.file_name || 'Xem file'}
+              </a>
+            </Card>
+          )}
 
         <div style={{ textAlign: 'center', marginTop: 24 }}>
           <Space>
             <Button
               type="primary"
-              onClick={() => history.push(`/student/courses/${assignment?.course_id}/lessons/${assignment?.lesson_id}`)}
+              onClick={() =>
+                history.push(
+                  `/student/courses/${assignment?.course_id}/lessons/${assignment?.lesson_id}`,
+                )
+              }
             >
               Quay lại bài học
             </Button>

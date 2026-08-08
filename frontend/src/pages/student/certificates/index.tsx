@@ -1,9 +1,31 @@
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  SafetyCertificateOutlined,
+  SearchOutlined,
+} from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
-import { Button, Card, Col, Empty, Input, message, Modal, Row, Spin, Tag, Typography } from 'antd';
 import { history } from '@umijs/max';
-import { SafetyCertificateOutlined, SearchOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import {
+  Button,
+  Card,
+  Col,
+  Empty,
+  Input,
+  Modal,
+  message,
+  Row,
+  Spin,
+  Tag,
+  Typography,
+} from 'antd';
 import React, { useEffect, useState } from 'react';
-import { getMyCertificates, verifyCertificate, type UserCertificate, type CertificateVerifyResult } from '@/services/ant-design-pro/certificates';
+import {
+  type CertificateVerifyResult,
+  getMyCertificates,
+  type UserCertificate,
+  verifyCertificate,
+} from '@/services/ant-design-pro/certificates';
 
 const { Title, Text } = Typography;
 
@@ -12,7 +34,8 @@ const CertificatesPage: React.FC = () => {
   const [certificates, setCertificates] = useState<UserCertificate[]>([]);
   const [verifyModalOpen, setVerifyModalOpen] = useState(false);
   const [verifyCode, setVerifyCode] = useState('');
-  const [verifyResult, setVerifyResult] = useState<CertificateVerifyResult | null>(null);
+  const [verifyResult, setVerifyResult] =
+    useState<CertificateVerifyResult | null>(null);
   const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
@@ -63,14 +86,20 @@ const CertificatesPage: React.FC = () => {
     <PageContainer
       title="Chứng chỉ của tôi"
       extra={
-        <Button icon={<SearchOutlined />} onClick={() => setVerifyModalOpen(true)}>
+        <Button
+          icon={<SearchOutlined />}
+          onClick={() => setVerifyModalOpen(true)}
+        >
           Xác thực chứng chỉ
         </Button>
       }
     >
       {certificates.length === 0 ? (
         <Empty description="Bạn chưa có chứng chỉ nào.">
-          <Button type="primary" onClick={() => history.push('/student/my-courses')}>
+          <Button
+            type="primary"
+            onClick={() => history.push('/student/my-courses')}
+          >
             Khóa học của tôi
           </Button>
         </Empty>
@@ -82,8 +111,17 @@ const CertificatesPage: React.FC = () => {
                 hoverable
                 style={{ borderTop: '3px solid #4F46E5' }}
                 cover={
-                  <div style={{ padding: 24, textAlign: 'center', background: 'linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%)' }}>
-                    <SafetyCertificateOutlined style={{ fontSize: 48, color: '#4F46E5' }} />
+                  <div
+                    style={{
+                      padding: 24,
+                      textAlign: 'center',
+                      background:
+                        'linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%)',
+                    }}
+                  >
+                    <SafetyCertificateOutlined
+                      style={{ fontSize: 48, color: '#4F46E5' }}
+                    />
                   </div>
                 }
               >
@@ -101,12 +139,18 @@ const CertificatesPage: React.FC = () => {
                       </div>
                       <div style={{ marginBottom: 8 }}>
                         <Text strong>Ngày cấp: </Text>
-                        <Text>{new Date(cert.issued_at).toLocaleDateString('vi-VN')}</Text>
+                        <Text>
+                          {new Date(cert.issued_at).toLocaleDateString('vi-VN')}
+                        </Text>
                       </div>
                       {cert.expires_at && (
                         <div>
                           <Text strong>Hạn: </Text>
-                          <Text>{new Date(cert.expires_at).toLocaleDateString('vi-VN')}</Text>
+                          <Text>
+                            {new Date(cert.expires_at).toLocaleDateString(
+                              'vi-VN',
+                            )}
+                          </Text>
                         </div>
                       )}
                     </div>
@@ -145,22 +189,50 @@ const CertificatesPage: React.FC = () => {
           <Card size="small">
             <div style={{ textAlign: 'center', marginBottom: 16 }}>
               {verifyResult.is_valid ? (
-                <CheckCircleOutlined style={{ fontSize: 48, color: '#10B981' }} />
+                <CheckCircleOutlined
+                  style={{ fontSize: 48, color: '#10B981' }}
+                />
               ) : (
-                <CloseCircleOutlined style={{ fontSize: 48, color: '#EF4444' }} />
+                <CloseCircleOutlined
+                  style={{ fontSize: 48, color: '#EF4444' }}
+                />
               )}
               <div style={{ marginTop: 8 }}>
-                <Tag color={verifyResult.is_valid ? 'success' : 'error'} style={{ fontSize: 14 }}>
+                <Tag
+                  color={verifyResult.is_valid ? 'success' : 'error'}
+                  style={{ fontSize: 14 }}
+                >
                   {verifyResult.is_valid ? 'HỢP LỆ' : 'KHÔNG HỢP LỆ'}
                 </Tag>
               </div>
             </div>
-            <div><Text strong>Người nhận: </Text><Text>{verifyResult.holder_name}</Text></div>
-            <div><Text strong>Khóa học: </Text><Text>{verifyResult.course_title}</Text></div>
-            <div><Text strong>Chứng chỉ: </Text><Text>{verifyResult.certificate_title}</Text></div>
-            <div><Text strong>Ngày cấp: </Text><Text>{new Date(verifyResult.issued_at).toLocaleDateString('vi-VN')}</Text></div>
+            <div>
+              <Text strong>Người nhận: </Text>
+              <Text>{verifyResult.holder_name}</Text>
+            </div>
+            <div>
+              <Text strong>Khóa học: </Text>
+              <Text>{verifyResult.course_title}</Text>
+            </div>
+            <div>
+              <Text strong>Chứng chỉ: </Text>
+              <Text>{verifyResult.certificate_title}</Text>
+            </div>
+            <div>
+              <Text strong>Ngày cấp: </Text>
+              <Text>
+                {new Date(verifyResult.issued_at).toLocaleDateString('vi-VN')}
+              </Text>
+            </div>
             {verifyResult.expires_at && (
-              <div><Text strong>Hạn: </Text><Text>{new Date(verifyResult.expires_at).toLocaleDateString('vi-VN')}</Text></div>
+              <div>
+                <Text strong>Hạn: </Text>
+                <Text>
+                  {new Date(verifyResult.expires_at).toLocaleDateString(
+                    'vi-VN',
+                  )}
+                </Text>
+              </div>
             )}
           </Card>
         )}

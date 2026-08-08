@@ -1,19 +1,48 @@
-import { PageContainer } from '@ant-design/pro-components';
 import {
-  Avatar, Button, Card, Col, Divider, Empty, List, message,
-  Progress, Row, Spin, Statistic, Tag, Typography, Rate, Input, Form, Pagination
-} from 'antd';
-import { history, useParams, useModel } from '@umijs/max';
-import {
-  BookOutlined, CheckCircleOutlined, ClockCircleOutlined,
-  PlayCircleOutlined, StarOutlined, TeamOutlined, UserOutlined,
-  SafetyCertificateOutlined
+  BookOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  PlayCircleOutlined,
+  SafetyCertificateOutlined,
+  StarOutlined,
+  TeamOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
+import { PageContainer } from '@ant-design/pro-components';
+import { history, useModel, useParams } from '@umijs/max';
+import {
+  Avatar,
+  Button,
+  Card,
+  Col,
+  Divider,
+  Empty,
+  Form,
+  Input,
+  List,
+  message,
+  Pagination,
+  Progress,
+  Rate,
+  Row,
+  Spin,
+  Statistic,
+  Tag,
+  Typography,
+} from 'antd';
 import React, { useEffect, useState } from 'react';
-import { getCourseById, type CourseDetail } from '@/services/ant-design-pro/courses';
-import { enrollCourse } from '@/services/ant-design-pro/enrollments';
-import { getCourseReviews, createReview, type Review } from '@/services/ant-design-pro/reviews';
+import { COURSE_PLACEHOLDER_IMG } from '@/constants/placeholder';
 import { issueCertificate } from '@/services/ant-design-pro/certificates';
+import {
+  type CourseDetail,
+  getCourseById,
+} from '@/services/ant-design-pro/courses';
+import { enrollCourse } from '@/services/ant-design-pro/enrollments';
+import {
+  createReview,
+  getCourseReviews,
+  type Review,
+} from '@/services/ant-design-pro/reviews';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -51,7 +80,10 @@ const CourseDetailPage: React.FC = () => {
     }
   };
 
-  const handleSubmitReview = async (values: { rating: number; comment: string }) => {
+  const handleSubmitReview = async (values: {
+    rating: number;
+    comment: string;
+  }) => {
     if (!id) return;
     try {
       setSubmittingReview(true);
@@ -152,7 +184,9 @@ const CourseDetailPage: React.FC = () => {
         <Col xs={24} md={16}>
           <Card>
             <div style={{ marginBottom: 16 }}>
-              {course.category && <Tag color="purple">{course.category.name}</Tag>}
+              {course.category && (
+                <Tag color="purple">{course.category.name}</Tag>
+              )}
               <Tag color="blue">{course.target_level}</Tag>
             </div>
             <Title level={3}>{course.title}</Title>
@@ -161,13 +195,39 @@ const CourseDetailPage: React.FC = () => {
             )}
 
             <Row gutter={16} style={{ margin: '16px 0' }}>
-              <Col><Statistic title="Bài giảng" value={course.total_lessons} prefix={<BookOutlined />} /></Col>
-              <Col><Statistic title="Học viên" value={course.total_students} prefix={<TeamOutlined />} /></Col>
+              <Col>
+                <Statistic
+                  title="Bài giảng"
+                  value={course.total_lessons}
+                  prefix={<BookOutlined />}
+                />
+              </Col>
+              <Col>
+                <Statistic
+                  title="Học viên"
+                  value={course.total_students}
+                  prefix={<TeamOutlined />}
+                />
+              </Col>
               {course.rating_avg > 0 && (
-                <Col><Statistic title="Đánh giá" value={course.rating_avg} prefix={<StarOutlined />} precision={1} /></Col>
+                <Col>
+                  <Statistic
+                    title="Đánh giá"
+                    value={course.rating_avg}
+                    prefix={<StarOutlined />}
+                    precision={1}
+                  />
+                </Col>
               )}
               {course.duration_weeks && (
-                <Col><Statistic title="Thời lượng" value={course.duration_weeks} suffix="tuần" prefix={<ClockCircleOutlined />} /></Col>
+                <Col>
+                  <Statistic
+                    title="Thời lượng"
+                    value={course.duration_weeks}
+                    suffix="tuần"
+                    prefix={<ClockCircleOutlined />}
+                  />
+                </Col>
               )}
             </Row>
 
@@ -190,26 +250,38 @@ const CourseDetailPage: React.FC = () => {
                       style={{ cursor: isEnrolled ? 'pointer' : 'default' }}
                       onClick={() => {
                         if (isEnrolled) {
-                          history.push(`/student/courses/${course.id}/lessons/${lesson.id}`);
+                          history.push(
+                            `/student/courses/${course.id}/lessons/${lesson.id}`,
+                          );
                         }
                       }}
                     >
                       <List.Item.Meta
                         avatar={
                           lesson.lesson_type === 'video' ? (
-                            <PlayCircleOutlined style={{ fontSize: 20, color: '#4F46E5' }} />
+                            <PlayCircleOutlined
+                              style={{ fontSize: 20, color: '#4F46E5' }}
+                            />
                           ) : (
-                            <BookOutlined style={{ fontSize: 20, color: '#10B981' }} />
+                            <BookOutlined
+                              style={{ fontSize: 20, color: '#10B981' }}
+                            />
                           )
                         }
                         title={
                           <span>
                             {lesson.title}
-                            {lesson.is_preview && <Tag color="green" style={{ marginLeft: 8 }}>Xem trước</Tag>}
+                            {lesson.is_preview && (
+                              <Tag color="green" style={{ marginLeft: 8 }}>
+                                Xem trước
+                              </Tag>
+                            )}
                           </span>
                         }
                         description={
-                          lesson.duration_minutes ? `${lesson.duration_minutes} phút` : lesson.lesson_type
+                          lesson.duration_minutes
+                            ? `${lesson.duration_minutes} phút`
+                            : lesson.lesson_type
                         }
                       />
                     </List.Item>
@@ -223,16 +295,36 @@ const CourseDetailPage: React.FC = () => {
             <Title level={5}>Đánh giá từ học viên ({reviewTotal})</Title>
 
             {isEnrolled && (
-              <Card size="small" style={{ marginBottom: 16, backgroundColor: '#FAFAFA' }}>
-                <Form form={form} onFinish={handleSubmitReview} layout="vertical">
-                  <Form.Item name="rating" label="Đánh giá sao" rules={[{ required: true, message: 'Vui lòng chọn số sao' }]}>
+              <Card
+                size="small"
+                style={{ marginBottom: 16, backgroundColor: '#FAFAFA' }}
+              >
+                <Form
+                  form={form}
+                  onFinish={handleSubmitReview}
+                  layout="vertical"
+                >
+                  <Form.Item
+                    name="rating"
+                    label="Đánh giá sao"
+                    rules={[
+                      { required: true, message: 'Vui lòng chọn số sao' },
+                    ]}
+                  >
                     <Rate />
                   </Form.Item>
                   <Form.Item name="comment" label="Nhận xét">
-                    <Input.TextArea rows={3} placeholder="Chia sẻ cảm nhận về khóa học..." />
+                    <Input.TextArea
+                      rows={3}
+                      placeholder="Chia sẻ cảm nhận về khóa học..."
+                    />
                   </Form.Item>
                   <Form.Item style={{ marginBottom: 0 }}>
-                    <Button type="primary" htmlType="submit" loading={submittingReview}>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      loading={submittingReview}
+                    >
                       Gửi đánh giá
                     </Button>
                   </Form.Item>
@@ -250,14 +342,24 @@ const CourseDetailPage: React.FC = () => {
                       title={
                         <span>
                           {review.user?.full_name || 'Học viên'}
-                          <Rate disabled value={review.rating} style={{ marginLeft: 12, fontSize: 14 }} />
+                          <Rate
+                            disabled
+                            value={review.rating}
+                            style={{ marginLeft: 12, fontSize: 14 }}
+                          />
                         </span>
                       }
                       description={
                         <div>
-                          {review.comment && <div style={{ marginBottom: 4 }}>{review.comment}</div>}
+                          {review.comment && (
+                            <div style={{ marginBottom: 4 }}>
+                              {review.comment}
+                            </div>
+                          )}
                           <Text type="secondary" style={{ fontSize: 12 }}>
-                            {new Date(review.created_at).toLocaleDateString('vi-VN')}
+                            {new Date(review.created_at).toLocaleDateString(
+                              'vi-VN',
+                            )}
                           </Text>
                         </div>
                       }
@@ -287,19 +389,28 @@ const CourseDetailPage: React.FC = () => {
           <Card>
             <div style={{ textAlign: 'center', marginBottom: 24 }}>
               <img
-                src={course.thumbnail || 'https://via.placeholder.com/300x200?text=Course'}
+                src={course.thumbnail || COURSE_PLACEHOLDER_IMG}
                 alt={course.title}
-                style={{ width: '100%', borderRadius: 8, maxHeight: 200, objectFit: 'cover' }}
+                style={{
+                  width: '100%',
+                  borderRadius: 8,
+                  maxHeight: 200,
+                  objectFit: 'cover',
+                }}
               />
             </div>
 
             {!isEnrolled && (
               <div style={{ textAlign: 'center', marginBottom: 16 }}>
                 <Title level={3} style={{ color: '#EF4444', margin: 0 }}>
-                  {course.price === 0 ? 'Miễn phí' : `${course.price.toLocaleString()} đ`}
+                  {course.price === 0
+                    ? 'Miễn phí'
+                    : `${course.price.toLocaleString()} đ`}
                 </Title>
                 {course.sale_price && course.sale_price < course.price && (
-                  <Text delete type="secondary">{course.price.toLocaleString()} đ</Text>
+                  <Text delete type="secondary">
+                    {course.price.toLocaleString()} đ
+                  </Text>
                 )}
               </div>
             )}
@@ -319,7 +430,13 @@ const CourseDetailPage: React.FC = () => {
 
             {isCompleted ? (
               <>
-                <Button block size="large" icon={<CheckCircleOutlined />} onClick={handleStartLearning} style={{ marginBottom: 8 }}>
+                <Button
+                  block
+                  size="large"
+                  icon={<CheckCircleOutlined />}
+                  onClick={handleStartLearning}
+                  style={{ marginBottom: 8 }}
+                >
                   Xem lại bài học
                 </Button>
                 <Button
@@ -333,7 +450,13 @@ const CourseDetailPage: React.FC = () => {
                 </Button>
               </>
             ) : isEnrolled ? (
-              <Button type="primary" block size="large" icon={<PlayCircleOutlined />} onClick={handleStartLearning}>
+              <Button
+                type="primary"
+                block
+                size="large"
+                icon={<PlayCircleOutlined />}
+                onClick={handleStartLearning}
+              >
                 Tiếp tục học
               </Button>
             ) : (
@@ -356,8 +479,18 @@ const CourseDetailPage: React.FC = () => {
                   <Text strong>Giảng viên</Text>
                 </div>
                 {course.instructors.map((inst) => (
-                  <div key={inst.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                    <Avatar icon={<UserOutlined />} style={{ marginRight: 8 }} />
+                  <div
+                    key={inst.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginBottom: 8,
+                    }}
+                  >
+                    <Avatar
+                      icon={<UserOutlined />}
+                      style={{ marginRight: 8 }}
+                    />
                     <Text>{inst.full_name}</Text>
                   </div>
                 ))}
@@ -373,7 +506,11 @@ const CourseDetailPage: React.FC = () => {
                   dataSource={course.materials}
                   renderItem={(mat) => (
                     <List.Item>
-                      <a href={mat.file_url} target="_blank" rel="noopener noreferrer">
+                      <a
+                        href={mat.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         {mat.title} ({mat.material_type.toUpperCase()})
                       </a>
                     </List.Item>

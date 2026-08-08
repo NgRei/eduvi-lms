@@ -1,16 +1,31 @@
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import {
-  StepsForm,
-  ProFormText,
-  ProFormSelect,
-  ProFormDigit,
-  ProFormTextArea,
   PageContainer,
+  ProFormDigit,
+  ProFormSelect,
+  ProFormText,
+  ProFormTextArea,
+  StepsForm,
 } from '@ant-design/pro-components';
-import { Card, Col, Input, InputNumber, message, Row, Select, Button, Space, List } from 'antd';
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { history } from '@umijs/max';
+import {
+  Button,
+  Card,
+  Col,
+  Input,
+  InputNumber,
+  List,
+  message,
+  Row,
+  Select,
+  Space,
+} from 'antd';
 import React, { useEffect, useState } from 'react';
-import { createCourse, getCategories, type CourseCategory } from '@/services/ant-design-pro/courses';
+import {
+  type CourseCategory,
+  createCourse,
+  getCategories,
+} from '@/services/ant-design-pro/courses';
 import { createLesson } from '@/services/ant-design-pro/lessons';
 
 const CreateCourse: React.FC = () => {
@@ -98,7 +113,11 @@ const CreateCourse: React.FC = () => {
             },
           }}
         >
-          <StepsForm.StepForm name="basic" title="Thông tin cơ bản" onFinish={handleStep1}>
+          <StepsForm.StepForm
+            name="basic"
+            title="Thông tin cơ bản"
+            onFinish={handleStep1}
+          >
             <ProFormText
               name="title"
               label="Tên khóa học"
@@ -118,7 +137,12 @@ const CreateCourse: React.FC = () => {
             />
             <Row gutter={16}>
               <Col span={8}>
-                <ProFormDigit name="price" label="Giá (VNĐ)" min={0} initialValue={0} />
+                <ProFormDigit
+                  name="price"
+                  label="Giá (VNĐ)"
+                  min={0}
+                  initialValue={0}
+                />
               </Col>
               <Col span={8}>
                 <ProFormSelect
@@ -136,9 +160,19 @@ const CreateCourse: React.FC = () => {
             </Row>
           </StepsForm.StepForm>
 
-          <StepsForm.StepForm name="syllabus" title="Giáo trình bài giảng" onFinish={handleStep2}>
+          <StepsForm.StepForm
+            name="syllabus"
+            title="Giáo trình bài giảng"
+            onFinish={handleStep2}
+          >
             <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>
+              <label
+                style={{
+                  display: 'block',
+                  marginBottom: 8,
+                  fontWeight: 'bold',
+                }}
+              >
                 Danh sách bài giảng:
               </label>
               <List
@@ -169,7 +203,11 @@ const CreateCourse: React.FC = () => {
                 placeholder="Nhập tên bài giảng"
                 onPressEnter={addLesson}
               />
-              <Button type="primary" onClick={addLesson} icon={<PlusOutlined />}>
+              <Button
+                type="primary"
+                onClick={addLesson}
+                icon={<PlusOutlined />}
+              >
                 Thêm
               </Button>
             </Space.Compact>

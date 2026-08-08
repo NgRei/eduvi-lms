@@ -1,7 +1,10 @@
 import { PageContainer } from '@ant-design/pro-components';
 import { Card, Select, Spin, Table, Tag, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { getAuditLogs, type AuditLogEntry } from '@/services/ant-design-pro/auditLogs';
+import {
+  type AuditLogEntry,
+  getAuditLogs,
+} from '@/services/ant-design-pro/auditLogs';
 
 const { Text } = Typography;
 
@@ -19,7 +22,9 @@ const AuditLogsPage: React.FC = () => {
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [actionFilter, setActionFilter] = useState<string | undefined>(undefined);
+  const [actionFilter, setActionFilter] = useState<string | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     fetchLogs(1, actionFilter);
@@ -65,7 +70,9 @@ const AuditLogsPage: React.FC = () => {
       render: (_: any, record: AuditLogEntry) => (
         <div>
           <div>{record.user?.full_name || '—'}</div>
-          <Text type="secondary" style={{ fontSize: 12 }}>{record.user?.email}</Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            {record.user?.email}
+          </Text>
         </div>
       ),
     },
@@ -77,7 +84,10 @@ const AuditLogsPage: React.FC = () => {
         <div>
           {record.entity_type && <Tag>{record.entity_type}</Tag>}
           {record.entity_id && (
-            <Text type="secondary" style={{ fontSize: 11, fontFamily: 'monospace' }}>
+            <Text
+              type="secondary"
+              style={{ fontSize: 11, fontFamily: 'monospace' }}
+            >
               {record.entity_id.substring(0, 8)}...
             </Text>
           )}

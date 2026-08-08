@@ -1,13 +1,33 @@
-import { BookOutlined, ClockCircleOutlined, StarOutlined, TrophyOutlined } from '@ant-design/icons';
+import {
+  BookOutlined,
+  ClockCircleOutlined,
+  StarOutlined,
+  TrophyOutlined,
+} from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
-import { Button, Card, Col, Progress, Row, Statistic, Table, Tag, Spin, message } from 'antd';
 import { history } from '@umijs/max';
+import {
+  Button,
+  Card,
+  Col,
+  message,
+  Progress,
+  Row,
+  Spin,
+  Statistic,
+  Table,
+  Tag,
+} from 'antd';
 import React, { useEffect, useState } from 'react';
-import { getStudentDashboard, StudentDashboardData } from '@/services/ant-design-pro/dashboard';
+import {
+  getStudentDashboard,
+  type StudentDashboardData,
+} from '@/services/ant-design-pro/dashboard';
 
 const StudentDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const [dashboardData, setDashboardData] = useState<StudentDashboardData | null>(null);
+  const [dashboardData, setDashboardData] =
+    useState<StudentDashboardData | null>(null);
 
   useEffect(() => {
     fetchDashboard();
@@ -37,7 +57,13 @@ const StudentDashboard: React.FC = () => {
     );
   }
 
-  const stats = [
+  const stats: Array<{
+    title: string;
+    value: number;
+    icon: React.ReactNode;
+    prefix?: React.ReactNode;
+    suffix?: React.ReactNode;
+  }> = [
     {
       title: 'Khóa học đang học',
       value: dashboardData?.stats.active_courses || 0,
@@ -61,15 +87,21 @@ const StudentDashboard: React.FC = () => {
     },
   ];
 
-  const currentCourses = dashboardData?.recent_courses.map((course) => ({
-    key: course.course_id,
-    title: course.title,
-    progress: course.progress_percentage,
-    instructors: course.instructors.join(', '),
-  })) || [];
+  const currentCourses =
+    dashboardData?.recent_courses.map((course) => ({
+      key: course.course_id,
+      title: course.title,
+      progress: course.progress_percentage,
+      instructors: course.instructors.join(', '),
+    })) || [];
 
   const columns = [
-    { title: 'Tên khóa học', dataIndex: 'title', key: 'title', render: (text: string) => <strong>{text}</strong> },
+    {
+      title: 'Tên khóa học',
+      dataIndex: 'title',
+      key: 'title',
+      render: (text: string) => <strong>{text}</strong>,
+    },
     { title: 'Giảng viên', dataIndex: 'instructors', key: 'instructors' },
     {
       title: 'Tiến độ học tập',
@@ -77,7 +109,11 @@ const StudentDashboard: React.FC = () => {
       key: 'progress',
       render: (progress: number) => (
         <div style={{ width: 150 }}>
-          <Progress percent={progress} size="small" status={progress === 100 ? 'success' : 'active'} />
+          <Progress
+            percent={progress}
+            size="small"
+            status={progress === 100 ? 'success' : 'active'}
+          />
         </div>
       ),
     },
@@ -89,17 +125,37 @@ const StudentDashboard: React.FC = () => {
         {stats.map((stat, i) => (
           <Col xs={24} sm={12} md={6} key={i}>
             <Card hoverable styles={{ body: { padding: 20 } }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
                 <div>
-                  <div style={{ color: '#6B7280', fontSize: 14, marginBottom: 8 }}>{stat.title}</div>
+                  <div
+                    style={{ color: '#6B7280', fontSize: 14, marginBottom: 8 }}
+                  >
+                    {stat.title}
+                  </div>
                   <Statistic
                     value={stat.value}
                     prefix={stat.prefix}
                     suffix={stat.suffix}
-                    valueStyle={{ fontSize: 24, fontWeight: 'bold', color: '#111827' }}
+                    valueStyle={{
+                      fontSize: 24,
+                      fontWeight: 'bold',
+                      color: '#111827',
+                    }}
                   />
                 </div>
-                <div style={{ background: '#F3F4F6', borderRadius: 8, padding: 12 }}>
+                <div
+                  style={{
+                    background: '#F3F4F6',
+                    borderRadius: 8,
+                    padding: 12,
+                  }}
+                >
                   {stat.icon}
                 </div>
               </div>
@@ -118,12 +174,31 @@ const StudentDashboard: React.FC = () => {
             }}
             styles={{ body: { padding: '24px 32px' } }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <div>
-                <h3 style={{ color: '#fff', margin: 0, fontSize: 18, fontWeight: 600 }}>
+                <h3
+                  style={{
+                    color: '#fff',
+                    margin: 0,
+                    fontSize: 18,
+                    fontWeight: 600,
+                  }}
+                >
                   Khám phá khóa học mới
                 </h3>
-                <p style={{ color: 'rgba(255,255,255,0.85)', margin: '8px 0 0', fontSize: 14 }}>
+                <p
+                  style={{
+                    color: 'rgba(255,255,255,0.85)',
+                    margin: '8px 0 0',
+                    fontSize: 14,
+                  }}
+                >
                   Hàng trăm khóa học đang chờ bạn khám phá
                 </p>
               </div>
@@ -144,42 +219,66 @@ const StudentDashboard: React.FC = () => {
       <Row gutter={16} style={{ marginTop: 24 }}>
         <Col span={24}>
           <Card title="Khóa học đang diễn ra" hoverable>
-            <Table dataSource={currentCourses} columns={columns} pagination={false} />
+            <Table
+              dataSource={currentCourses}
+              columns={columns}
+              pagination={false}
+            />
           </Card>
         </Col>
       </Row>
 
-      {dashboardData?.recent_activity && dashboardData.recent_activity.length > 0 && (
-        <Row gutter={16} style={{ marginTop: 24 }}>
-          <Col span={24}>
-            <Card title="Hoạt động gần đây" hoverable>
-              <Table
-                dataSource={dashboardData.recent_activity.map((activity, index) => ({
-                  key: index,
-                  lesson: activity.lesson_title,
-                  type: activity.lesson_type,
-                  status: activity.is_completed ? 'Hoàn thành' : 'Đang học',
-                  updated_at: new Date(activity.updated_at).toLocaleDateString('vi-VN'),
-                }))}
-                columns={[
-                  { title: 'Bài học', dataIndex: 'lesson', key: 'lesson' },
-                  { title: 'Loại', dataIndex: 'type', key: 'type', render: (type: string) => <Tag>{type}</Tag> },
-                  {
-                    title: 'Trạng thái',
-                    dataIndex: 'status',
-                    key: 'status',
-                    render: (status: string) => (
-                      <Tag color={status === 'Hoàn thành' ? 'success' : 'processing'}>{status}</Tag>
-                    ),
-                  },
-                  { title: 'Ngày', dataIndex: 'updated_at', key: 'updated_at' },
-                ]}
-                pagination={false}
-              />
-            </Card>
-          </Col>
-        </Row>
-      )}
+      {dashboardData?.recent_activity &&
+        dashboardData.recent_activity.length > 0 && (
+          <Row gutter={16} style={{ marginTop: 24 }}>
+            <Col span={24}>
+              <Card title="Hoạt động gần đây" hoverable>
+                <Table
+                  dataSource={dashboardData.recent_activity.map(
+                    (activity, index) => ({
+                      key: index,
+                      lesson: activity.lesson_title,
+                      type: activity.lesson_type,
+                      status: activity.is_completed ? 'Hoàn thành' : 'Đang học',
+                      updated_at: new Date(
+                        activity.updated_at,
+                      ).toLocaleDateString('vi-VN'),
+                    }),
+                  )}
+                  columns={[
+                    { title: 'Bài học', dataIndex: 'lesson', key: 'lesson' },
+                    {
+                      title: 'Loại',
+                      dataIndex: 'type',
+                      key: 'type',
+                      render: (type: string) => <Tag>{type}</Tag>,
+                    },
+                    {
+                      title: 'Trạng thái',
+                      dataIndex: 'status',
+                      key: 'status',
+                      render: (status: string) => (
+                        <Tag
+                          color={
+                            status === 'Hoàn thành' ? 'success' : 'processing'
+                          }
+                        >
+                          {status}
+                        </Tag>
+                      ),
+                    },
+                    {
+                      title: 'Ngày',
+                      dataIndex: 'updated_at',
+                      key: 'updated_at',
+                    },
+                  ]}
+                  pagination={false}
+                />
+              </Card>
+            </Col>
+          </Row>
+        )}
     </PageContainer>
   );
 };

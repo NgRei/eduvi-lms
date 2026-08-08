@@ -18,7 +18,10 @@ const BaseView: React.FC = () => {
   const profile = currentUser?.profile;
 
   const getAvatarURL = () => {
-    return currentUser?.avatar || 'https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png';
+    return (
+      currentUser?.avatar ||
+      'https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png'
+    );
   };
 
   const handleFinish = async () => {
@@ -62,16 +65,14 @@ const BaseView: React.FC = () => {
               <ProFormText
                 name="full_name"
                 label="Họ và tên"
-                rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
+                rules={[
+                  { required: true, message: 'Vui lòng nhập họ và tên!' },
+                ]}
                 placeholder="Nhập họ và tên"
               />
             </Col>
             <Col span={12}>
-              <ProFormText
-                name="email"
-                label="Địa chỉ Email"
-                disabled
-              />
+              <ProFormText name="email" label="Địa chỉ Email" disabled />
             </Col>
           </Row>
 
@@ -99,7 +100,16 @@ const BaseView: React.FC = () => {
 
           {isStudent && (
             <>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#4F46E5', margin: '16px 0 12px', borderTop: '1px solid #E5E7EB', paddingTop: 16 }}>
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: '#4F46E5',
+                  margin: '16px 0 12px',
+                  borderTop: '1px solid #E5E7EB',
+                  paddingTop: 16,
+                }}
+              >
                 Thông tin học viên
               </div>
               <Row gutter={24}>
@@ -155,7 +165,16 @@ const BaseView: React.FC = () => {
 
           {isInstructor && (
             <>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#4F46E5', margin: '16px 0 12px', borderTop: '1px solid #E5E7EB', paddingTop: 16 }}>
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: '#4F46E5',
+                  margin: '16px 0 12px',
+                  borderTop: '1px solid #E5E7EB',
+                  paddingTop: 16,
+                }}
+              >
                 Thông tin giảng viên
               </div>
               <Row gutter={24}>

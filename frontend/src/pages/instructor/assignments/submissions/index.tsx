@@ -1,11 +1,23 @@
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { useParams } from '@umijs/max';
-import { Button, Card, Empty, Form, Input, InputNumber, Modal, Space, Tag, Typography, message } from 'antd';
-import React, { useRef, useState } from 'react';
-import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import {
-  getSubmissionsForGrading,
+  Button,
+  Card,
+  Empty,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  message,
+  Space,
+  Tag,
+  Typography,
+} from 'antd';
+import React, { useRef, useState } from 'react';
+import {
   getSubmission,
+  getSubmissionsForGrading,
   gradeSubmission,
   type Submission,
 } from '@/services/ant-design-pro/assignments';
@@ -17,7 +29,8 @@ const SubmissionsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const actionRef = useRef<ActionType>(null);
   const [gradingModalVisible, setGradingModalVisible] = useState(false);
-  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
+  const [selectedSubmission, setSelectedSubmission] =
+    useState<Submission | null>(null);
   const [gradingLoading, setGradingLoading] = useState(false);
   const [gradeForm] = Form.useForm();
 
@@ -72,7 +85,8 @@ const SubmissionsPage: React.FC = () => {
       title: 'Học viên',
       dataIndex: ['user', 'full_name'],
       search: false,
-      render: (_, record) => record.user?.full_name || record.user?.username || '-',
+      render: (_, record) =>
+        record.user?.full_name || record.user?.username || '-',
     },
     {
       title: 'Lần nộp',
@@ -133,7 +147,9 @@ const SubmissionsPage: React.FC = () => {
         rowKey="id"
         search={{ labelWidth: 120 }}
         locale={{
-          emptyText: <Empty description="Chưa có học sinh nào nộp bài tập này" />,
+          emptyText: (
+            <Empty description="Chưa có học sinh nào nộp bài tập này" />
+          ),
         }}
         request={async (params, sort) => {
           try {
@@ -163,7 +179,11 @@ const SubmissionsPage: React.FC = () => {
       />
 
       <Modal
-        title={selectedSubmission?.status === 'graded' ? 'Chi tiết bài nộp' : 'Chấm bài'}
+        title={
+          selectedSubmission?.status === 'graded'
+            ? 'Chi tiết bài nộp'
+            : 'Chấm bài'
+        }
         open={gradingModalVisible}
         onCancel={() => {
           setGradingModalVisible(false);
@@ -175,21 +195,41 @@ const SubmissionsPage: React.FC = () => {
       >
         {selectedSubmission && (
           <>
-            {selectedSubmission.assignment?.assignment_type === 'essay' && selectedSubmission.answers?.text && (
-              <Card size="small" title="Bài viết" style={{ marginBottom: 16 }}>
-                <div style={{ whiteSpace: 'pre-wrap', maxHeight: 300, overflow: 'auto' }}>
-                  {selectedSubmission.answers.text}
-                </div>
-              </Card>
-            )}
+            {selectedSubmission.assignment?.assignment_type === 'essay' &&
+              selectedSubmission.answers?.text && (
+                <Card
+                  size="small"
+                  title="Bài viết"
+                  style={{ marginBottom: 16 }}
+                >
+                  <div
+                    style={{
+                      whiteSpace: 'pre-wrap',
+                      maxHeight: 300,
+                      overflow: 'auto',
+                    }}
+                  >
+                    {selectedSubmission.answers.text}
+                  </div>
+                </Card>
+              )}
 
-            {selectedSubmission.assignment?.assignment_type === 'upload' && selectedSubmission.answers?.file_url && (
-              <Card size="small" title="File đã nộp" style={{ marginBottom: 16 }}>
-                <a href={selectedSubmission.answers.file_url} target="_blank" rel="noopener noreferrer">
-                  {selectedSubmission.answers.file_name || 'Xem file'}
-                </a>
-              </Card>
-            )}
+            {selectedSubmission.assignment?.assignment_type === 'upload' &&
+              selectedSubmission.answers?.file_url && (
+                <Card
+                  size="small"
+                  title="File đã nộp"
+                  style={{ marginBottom: 16 }}
+                >
+                  <a
+                    href={selectedSubmission.answers.file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {selectedSubmission.answers.file_name || 'Xem file'}
+                  </a>
+                </Card>
+              )}
 
             <Form form={gradeForm} layout="vertical" onFinish={handleGrade}>
               <Form.Item
@@ -205,19 +245,28 @@ const SubmissionsPage: React.FC = () => {
               </Form.Item>
 
               <Form.Item name="feedback" label="Nhận xét">
-                <TextArea rows={4} placeholder="Nhận xét cho học viên (tùy chọn)" />
+                <TextArea
+                  rows={4}
+                  placeholder="Nhận xét cho học viên (tùy chọn)"
+                />
               </Form.Item>
 
               <Form.Item>
                 <Space>
-                  <Button type="primary" htmlType="submit" loading={gradingLoading}>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={gradingLoading}
+                  >
                     Lưu điểm
                   </Button>
-                  <Button onClick={() => {
-                    setGradingModalVisible(false);
-                    setSelectedSubmission(null);
-                    gradeForm.resetFields();
-                  }}>
+                  <Button
+                    onClick={() => {
+                      setGradingModalVisible(false);
+                      setSelectedSubmission(null);
+                      gradeForm.resetFields();
+                    }}
+                  >
                     Đóng
                   </Button>
                 </Space>

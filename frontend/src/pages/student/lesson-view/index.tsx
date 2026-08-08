@@ -1,46 +1,84 @@
-import { PageContainer } from '@ant-design/pro-components';
-import { Button, Card, Col, List, Tag, message, Row, Spin, Typography } from 'antd';
-import { history, useParams } from '@umijs/max';
-import { BookOutlined, CheckCircleOutlined, ClockCircleOutlined, FileTextOutlined, PlayCircleOutlined } from '@ant-design/icons';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { getLessonById, getLessonsByCourse, type Lesson } from '@/services/ant-design-pro/lessons';
-import { getSignedVideoUrl } from '@/services/ant-design-pro/uploads';
 import {
-  getLessonProgress, markLessonComplete, unmarkLessonComplete,
-  updateWatchPosition, type LessonProgressItem
-} from '@/services/ant-design-pro/lessonProgress';
+  BookOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  FileTextOutlined,
+  PlayCircleOutlined,
+} from '@ant-design/icons';
+import { PageContainer } from '@ant-design/pro-components';
+import { history, useParams } from '@umijs/max';
+import {
+  Button,
+  Card,
+  Col,
+  List,
+  message,
+  Row,
+  Spin,
+  Tag,
+  Typography,
+} from 'antd';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  type Assignment,
+  getAssignments,
+} from '@/services/ant-design-pro/assignments';
 import { checkEnrollment } from '@/services/ant-design-pro/enrollments';
-import { getAssignments, type Assignment } from '@/services/ant-design-pro/assignments';
+import {
+  getLessonProgress,
+  type LessonProgressItem,
+  markLessonComplete,
+  unmarkLessonComplete,
+  updateWatchPosition,
+} from '@/services/ant-design-pro/lessonProgress';
+import {
+  getLessonById,
+  getLessonsByCourse,
+  type Lesson,
+} from '@/services/ant-design-pro/lessons';
+import { getSignedVideoUrl } from '@/services/ant-design-pro/uploads';
 
 const { Title, Text } = Typography;
 
 const LessonViewPage: React.FC = () => {
-  const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
+  const { courseId, lessonId } = useParams<{
+    courseId: string;
+    lessonId: string;
+  }>();
   const [loading, setLoading] = useState(true);
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
-  const [progressMap, setProgressMap] = useState<Record<string, LessonProgressItem>>({});
+  const [progressMap, setProgressMap] = useState<
+    Record<string, LessonProgressItem>
+  >({});
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
   const [assignment, setAssignment] = useState<Assignment | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchLesson = useCallback(async (lid: string) => {
-    try {
-      const res = await getLessonById(lid);
-      if (res.success) {
-        setLesson(res.data);
-        if (res.data.lesson_type === 'video' && res.data.video_id && courseId) {
-          const urlRes = await getSignedVideoUrl(res.data.video_id, courseId);
-          if (urlRes.success && urlRes.data) setSignedUrl(urlRes.data.url);
+  const fetchLesson = useCallback(
+    async (lid: string) => {
+      try {
+        const res = await getLessonById(lid);
+        if (res.success) {
+          setLesson(res.data);
+          if (
+            res.data.lesson_type === 'video' &&
+            res.data.video_id &&
+            courseId
+          ) {
+            const urlRes = await getSignedVideoUrl(res.data.video_id, courseId);
+            if (urlRes.success && urlRes.data) setSignedUrl(urlRes.data.url);
+          }
         }
+      } catch (err) {
+        console.error('Failed to fetch lesson:', err);
+        message.error('Không thể tải bài giảng');
       }
-    } catch (err) {
-      console.error('Failed to fetch lesson:', err);
-      message.error('Không thể tải bài giảng');
-    }
-  }, [courseId]);
+    },
+    [courseId],
+  );
 
   const fetchProgress = useCallback(async (cid: string) => {
     try {
@@ -62,7 +100,10 @@ const LessonViewPage: React.FC = () => {
 
   const fetchAssignment = useCallback(async (lid: string) => {
     try {
-      const res = await getAssignments({ lesson_id: lid, is_published: 'true' });
+      const res = await getAssignments({
+        lesson_id: lid,
+        is_published: 'true',
+      });
       if (res.data && res.data.length > 0) {
         setAssignment(res.data[0]);
       } else {
@@ -110,19 +151,22 @@ const LessonViewPage: React.FC = () => {
     setSignedUrl(null);
   }, [lessonId, progressMap]);
 
-  const debouncedSavePosition = useCallback((position: number, duration: number) => {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(() => {
-      if (lessonId && courseId) {
-        updateWatchPosition({
-          lesson_id: lessonId,
-          course_id: courseId,
-          last_position: Math.floor(position),
-          watch_duration: Math.floor(duration),
-        }).catch((err) => console.error('Failed to save position:', err));
-      }
-    }, 5000);
-  }, [lessonId, courseId]);
+  const debouncedSavePosition = useCallback(
+    (position: number, duration: number) => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(() => {
+        if (lessonId && courseId) {
+          updateWatchPosition({
+            lesson_id: lessonId,
+            course_id: courseId,
+            last_position: Math.floor(position),
+            watch_duration: Math.floor(duration),
+          }).catch((err) => console.error('Failed to save position:', err));
+        }
+      }, 5000);
+    },
+    [lessonId, courseId],
+  );
 
   const handleVideoTimeUpdate = () => {
     const video = videoRef.current;
@@ -153,7 +197,9 @@ const LessonViewPage: React.FC = () => {
     history.push(`/student/courses/${courseId}/lessons/${lid}`);
   };
 
-  const completedCount = Object.values(progressMap).filter((p) => p.is_completed).length;
+  const completedCount = Object.values(progressMap).filter(
+    (p) => p.is_completed,
+  ).length;
 
   if (loading) {
     return (
@@ -185,7 +231,11 @@ const LessonViewPage: React.FC = () => {
         ],
         itemRender: (route) => {
           if (route.path) {
-            return <a onClick={() => history.push(route.path!)}>{route.breadcrumbName}</a>;
+            return (
+              <a onClick={() => history.push(route.path!)}>
+                {route.breadcrumbName}
+              </a>
+            );
           }
           return <span>{route.breadcrumbName}</span>;
         },
@@ -199,7 +249,11 @@ const LessonViewPage: React.FC = () => {
                 ref={videoRef}
                 src={signedUrl}
                 controls
-                style={{ width: '100%', borderRadius: 8, backgroundColor: '#000' }}
+                style={{
+                  width: '100%',
+                  borderRadius: 8,
+                  backgroundColor: '#000',
+                }}
                 onTimeUpdate={handleVideoTimeUpdate}
                 onEnded={handleToggleComplete}
               />
@@ -212,8 +266,17 @@ const LessonViewPage: React.FC = () => {
               />
             )}
 
-            <div style={{ marginTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Title level={5} style={{ margin: 0 }}>{lesson.title}</Title>
+            <div
+              style={{
+                marginTop: 24,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Title level={5} style={{ margin: 0 }}>
+                {lesson.title}
+              </Title>
               <Button
                 type={isCompleted ? 'default' : 'primary'}
                 icon={isCompleted ? <CheckCircleOutlined /> : undefined}
@@ -231,7 +294,11 @@ const LessonViewPage: React.FC = () => {
                   dataSource={lesson.materials}
                   renderItem={(mat) => (
                     <List.Item>
-                      <a href={mat.file_url} target="_blank" rel="noopener noreferrer">
+                      <a
+                        href={mat.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         {mat.title} ({mat.material_type.toUpperCase()})
                       </a>
                     </List.Item>
@@ -245,23 +312,45 @@ const LessonViewPage: React.FC = () => {
             <Card
               size="small"
               style={{ marginTop: 16, borderColor: '#4F46E5' }}
-              title={<><FileTextOutlined /> Bài tập: {assignment.title}</>}
+              title={
+                <>
+                  <FileTextOutlined /> Bài tập: {assignment.title}
+                </>
+              }
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: 8,
+                }}
+              >
                 <div>
                   <Tag color="blue">
-                    {assignment.assignment_type === 'quiz' ? 'Trắc nghiệm' : assignment.assignment_type === 'essay' ? 'Tự luận' : 'Nộp file'}
+                    {assignment.assignment_type === 'quiz'
+                      ? 'Trắc nghiệm'
+                      : assignment.assignment_type === 'essay'
+                        ? 'Tự luận'
+                        : 'Nộp file'}
                   </Tag>
-                  <Text type="secondary">Điểm đạt: {assignment.passing_score}/{assignment.total_points}</Text>
+                  <Text type="secondary">
+                    Điểm đạt: {assignment.passing_score}/
+                    {assignment.total_points}
+                  </Text>
                   {assignment.time_limit_minutes && (
                     <Text type="secondary" style={{ marginLeft: 8 }}>
-                      <ClockCircleOutlined /> {assignment.time_limit_minutes} phút
+                      <ClockCircleOutlined /> {assignment.time_limit_minutes}{' '}
+                      phút
                     </Text>
                   )}
                 </div>
                 <Button
                   type="primary"
-                  onClick={() => history.push(`/student/assignments/${assignment.id}`)}
+                  onClick={() =>
+                    history.push(`/student/assignments/${assignment.id}`)
+                  }
                 >
                   Làm bài tập
                 </Button>
@@ -294,19 +383,31 @@ const LessonViewPage: React.FC = () => {
                     <List.Item.Meta
                       avatar={
                         itemCompleted ? (
-                          <CheckCircleOutlined style={{ color: '#10B981', fontSize: 18 }} />
+                          <CheckCircleOutlined
+                            style={{ color: '#10B981', fontSize: 18 }}
+                          />
                         ) : item.lesson_type === 'video' ? (
-                          <PlayCircleOutlined style={{ color: '#6B7280', fontSize: 18 }} />
+                          <PlayCircleOutlined
+                            style={{ color: '#6B7280', fontSize: 18 }}
+                          />
                         ) : (
-                          <BookOutlined style={{ color: '#6B7280', fontSize: 18 }} />
+                          <BookOutlined
+                            style={{ color: '#6B7280', fontSize: 18 }}
+                          />
                         )
                       }
                       title={
-                        <Text style={{ fontWeight: isCurrent ? 'bold' : 'normal' }}>
+                        <Text
+                          style={{ fontWeight: isCurrent ? 'bold' : 'normal' }}
+                        >
                           {item.title}
                         </Text>
                       }
-                      description={item.duration_minutes ? `${item.duration_minutes} phút` : item.lesson_type}
+                      description={
+                        item.duration_minutes
+                          ? `${item.duration_minutes} phút`
+                          : item.lesson_type
+                      }
                     />
                   </List.Item>
                 );

@@ -1,9 +1,25 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { PageContainer, ProTable } from '@ant-design/pro-components';
-import { Button, Form, Input, message, Modal, Popconfirm, Select, Space, Tag } from 'antd';
-import React, { useRef, useState } from 'react';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { getUsers, createUser, updateUserStatus, deleteUser, type AdminUser } from '@/services/ant-design-pro/admin';
+import { PageContainer, ProTable } from '@ant-design/pro-components';
+import {
+  Button,
+  Form,
+  Input,
+  Modal,
+  message,
+  Popconfirm,
+  Select,
+  Space,
+  Tag,
+} from 'antd';
+import React, { useRef, useState } from 'react';
+import {
+  type AdminUser,
+  createUser,
+  deleteUser,
+  getUsers,
+  updateUserStatus,
+} from '@/services/ant-design-pro/admin';
 
 const UserManagement: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
@@ -13,7 +29,9 @@ const UserManagement: React.FC = () => {
   const handleToggleStatus = async (record: AdminUser) => {
     try {
       await updateUserStatus(record.id, !record.is_active);
-      message.success(record.is_active ? 'Đã khóa tài khoản!' : 'Đã kích hoạt tài khoản!');
+      message.success(
+        record.is_active ? 'Đã khóa tài khoản!' : 'Đã kích hoạt tài khoản!',
+      );
       actionRef.current?.reload();
     } catch (err: any) {
       message.error(err?.data?.error || 'Không thể cập nhật trạng thái');
@@ -78,7 +96,8 @@ const UserManagement: React.FC = () => {
       title: 'Ngày tạo',
       dataIndex: 'created_at',
       search: false,
-      render: (_, record) => new Date(record.created_at).toLocaleDateString('vi-VN'),
+      render: (_, record) =>
+        new Date(record.created_at).toLocaleDateString('vi-VN'),
     },
     {
       title: 'Hành động',
@@ -88,7 +107,10 @@ const UserManagement: React.FC = () => {
           <a onClick={() => handleToggleStatus(record)}>
             {record.is_active ? 'Khóa' : 'Kích hoạt'}
           </a>
-          <Popconfirm title="Xóa người dùng này?" onConfirm={() => handleDelete(record.id)}>
+          <Popconfirm
+            title="Xóa người dùng này?"
+            onConfirm={() => handleDelete(record.id)}
+          >
             <a style={{ color: '#EF4444' }}>Xóa</a>
           </Popconfirm>
         </Space>
@@ -104,7 +126,12 @@ const UserManagement: React.FC = () => {
         rowKey="id"
         search={{ labelWidth: 120 }}
         toolBarRender={() => [
-          <Button key="create" type="primary" icon={<PlusOutlined />} onClick={() => setShowCreateModal(true)}>
+          <Button
+            key="create"
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setShowCreateModal(true)}
+          >
             Tạo người dùng
           </Button>,
         ]}
@@ -117,7 +144,11 @@ const UserManagement: React.FC = () => {
               is_active: params.is_active || undefined,
               search: params.full_name || params.email || undefined,
             });
-            return { data: res.data || [], total: res.pagination?.total || 0, success: true };
+            return {
+              data: res.data || [],
+              total: res.pagination?.total || 0,
+              success: true,
+            };
           } catch {
             return { data: [], total: 0, success: false };
           }
@@ -128,20 +159,39 @@ const UserManagement: React.FC = () => {
       <Modal
         title="Tạo người dùng mới"
         open={showCreateModal}
-        onCancel={() => { setShowCreateModal(false); createForm.resetFields(); }}
+        onCancel={() => {
+          setShowCreateModal(false);
+          createForm.resetFields();
+        }}
         footer={null}
       >
         <Form form={createForm} layout="vertical" onFinish={handleCreate}>
-          <Form.Item name="full_name" label="Họ tên" rules={[{ required: true }]}>
+          <Form.Item
+            name="full_name"
+            label="Họ tên"
+            rules={[{ required: true }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[{ required: true, type: 'email' }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="password" label="Mật khẩu" rules={[{ required: true, min: 6 }]}>
+          <Form.Item
+            name="password"
+            label="Mật khẩu"
+            rules={[{ required: true, min: 6 }]}
+          >
             <Input.Password />
           </Form.Item>
-          <Form.Item name="user_type" label="Vai trò" rules={[{ required: true }]}>
+          <Form.Item
+            name="user_type"
+            label="Vai trò"
+            rules={[{ required: true }]}
+          >
             <Select
               options={[
                 { label: 'Học viên', value: 'student' },

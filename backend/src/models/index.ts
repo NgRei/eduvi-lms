@@ -16,6 +16,7 @@ import { Certificate } from './Certificate.model';
 import { UserCertificate } from './UserCertificate.model';
 import { CourseReview } from './CourseReview.model';
 import { AuditLog } from './AuditLog.model';
+import { RefreshToken } from './RefreshToken.model';
 
 // User 1-to-1 StudentProfile
 User.hasOne(StudentProfile, { foreignKey: 'user_id', as: 'studentProfile', onDelete: 'CASCADE' });
@@ -129,6 +130,10 @@ CourseReview.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 User.hasMany(AuditLog, { foreignKey: 'user_id', as: 'auditLogs', onDelete: 'SET NULL' });
 AuditLog.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
+// RefreshToken associations
+User.hasMany(RefreshToken, { foreignKey: 'user_id', as: 'refreshTokens', onDelete: 'CASCADE' });
+RefreshToken.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
 export {
   User,
   StudentProfile,
@@ -147,5 +152,6 @@ export {
   Certificate,
   UserCertificate,
   CourseReview,
-  AuditLog
+  AuditLog,
+  RefreshToken
 };

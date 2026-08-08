@@ -1,14 +1,25 @@
+import { ClockCircleOutlined, UploadOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { history, useParams } from '@umijs/max';
 import {
-  Button, Card, Radio, Checkbox, Input, Upload, Space,
-  Typography, message, Spin, Result,
+  Button,
+  Card,
+  Checkbox,
+  Input,
+  message,
+  Radio,
+  Result,
+  Space,
+  Spin,
+  Typography,
+  Upload,
 } from 'antd';
-import { UploadOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  getAssignment, submitAssignment, getMySubmissions,
   type Assignment,
+  getAssignment,
+  getMySubmissions,
+  submitAssignment,
 } from '@/services/ant-design-pro/assignments';
 import { uploadImage } from '@/services/ant-design-pro/uploads';
 
@@ -22,7 +33,10 @@ const TakeAssignmentPage: React.FC = () => {
   const [assignment, setAssignment] = useState<Assignment | null>(null);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string[]>>({});
   const [essayText, setEssayText] = useState('');
-  const [uploadedFile, setUploadedFile] = useState<{ url: string; name: string } | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<{
+    url: string;
+    name: string;
+  } | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [gradingResult, setGradingResult] = useState<any>(null);
   const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
@@ -51,7 +65,11 @@ const TakeAssignmentPage: React.FC = () => {
     fetchAssignment();
   }, [fetchAssignment]);
 
-  const handleQuizAnswer = (questionId: string, optionId: string, type: string) => {
+  const handleQuizAnswer = (
+    questionId: string,
+    optionId: string,
+    type: string,
+  ) => {
     setQuizAnswers((prev) => {
       const current = prev[questionId] || [];
       if (type === 'single' || type === 'true_false') {
@@ -59,7 +77,10 @@ const TakeAssignmentPage: React.FC = () => {
       } else {
         // multiple
         if (current.includes(optionId)) {
-          return { ...prev, [questionId]: current.filter((id) => id !== optionId) };
+          return {
+            ...prev,
+            [questionId]: current.filter((id) => id !== optionId),
+          };
         } else {
           return { ...prev, [questionId]: [...current, optionId] };
         }
@@ -106,14 +127,19 @@ const TakeAssignmentPage: React.FC = () => {
     try {
       let answers: any;
       if (assignment.assignment_type === 'quiz') {
-        answers = Object.entries(quizAnswers).map(([question_id, selected_options]) => ({
-          question_id,
-          selected_options,
-        }));
+        answers = Object.entries(quizAnswers).map(
+          ([question_id, selected_options]) => ({
+            question_id,
+            selected_options,
+          }),
+        );
       } else if (assignment.assignment_type === 'essay') {
         answers = { text: essayText };
       } else {
-        answers = { file_url: uploadedFile!.url, file_name: uploadedFile!.name };
+        answers = {
+          file_url: uploadedFile!.url,
+          file_name: uploadedFile!.name,
+        };
       }
 
       const res = await submitAssignment(id!, answers);
@@ -157,9 +183,20 @@ const TakeAssignmentPage: React.FC = () => {
             <Result
               status={gradingResult.passed ? 'success' : 'warning'}
               title={`${gradingResult.score}/${gradingResult.total} điểm`}
-              subTitle={gradingResult.passed ? 'Bạn đã đạt!' : 'Bạn chưa đạt điểm tối thiểu'}
+              subTitle={
+                gradingResult.passed
+                  ? 'Bạn đã đạt!'
+                  : 'Bạn chưa đạt điểm tối thiểu'
+              }
               extra={[
-                <Button key="back" onClick={() => history.push(`/student/courses/${assignment.course_id}/lessons/${assignment.lesson_id}`)}>
+                <Button
+                  key="back"
+                  onClick={() =>
+                    history.push(
+                      `/student/courses/${assignment.course_id}/lessons/${assignment.lesson_id}`,
+                    )
+                  }
+                >
                   Quay lại bài học
                 </Button>,
               ]}
@@ -170,7 +207,14 @@ const TakeAssignmentPage: React.FC = () => {
               title="Nộp bài thành công!"
               subTitle="Bài tập của bạn đang chờ giảng viên chấm điểm."
               extra={[
-                <Button key="back" onClick={() => history.push(`/student/courses/${assignment.course_id}/lessons/${assignment.lesson_id}`)}>
+                <Button
+                  key="back"
+                  onClick={() =>
+                    history.push(
+                      `/student/courses/${assignment.course_id}/lessons/${assignment.lesson_id}`,
+                    )
+                  }
+                >
                   Quay lại bài học
                 </Button>,
               ]}
@@ -189,7 +233,14 @@ const TakeAssignmentPage: React.FC = () => {
           title="Hết lượt nộp bài"
           subTitle={`Bạn đã sử dụng hết ${assignment.attempts_allowed} lượt nộp cho bài tập này.`}
           extra={[
-            <Button key="back" onClick={() => history.push(`/student/courses/${assignment.course_id}/lessons/${assignment.lesson_id}`)}>
+            <Button
+              key="back"
+              onClick={() =>
+                history.push(
+                  `/student/courses/${assignment.course_id}/lessons/${assignment.lesson_id}`,
+                )
+              }
+            >
               Quay lại bài học
             </Button>,
           ]}
@@ -203,9 +254,18 @@ const TakeAssignmentPage: React.FC = () => {
       <Card>
         <div style={{ marginBottom: 24 }}>
           <Title level={4}>{assignment.title}</Title>
-          {assignment.description && <Paragraph>{assignment.description}</Paragraph>}
+          {assignment.description && (
+            <Paragraph>{assignment.description}</Paragraph>
+          )}
           <Space>
-            <Text type="secondary">Loại: {assignment.assignment_type === 'quiz' ? 'Trắc nghiệm' : assignment.assignment_type === 'essay' ? 'Tự luận' : 'Nộp file'}</Text>
+            <Text type="secondary">
+              Loại:{' '}
+              {assignment.assignment_type === 'quiz'
+                ? 'Trắc nghiệm'
+                : assignment.assignment_type === 'essay'
+                  ? 'Tự luận'
+                  : 'Nộp file'}
+            </Text>
             <Text type="secondary">|</Text>
             <Text type="secondary">Tổng điểm: {assignment.total_points}</Text>
             <Text type="secondary">|</Text>
@@ -219,7 +279,9 @@ const TakeAssignmentPage: React.FC = () => {
             {assignment.time_limit_minutes && (
               <>
                 <Text type="secondary">|</Text>
-                <Text type="secondary"><ClockCircleOutlined /> {assignment.time_limit_minutes} phút</Text>
+                <Text type="secondary">
+                  <ClockCircleOutlined /> {assignment.time_limit_minutes} phút
+                </Text>
               </>
             )}
           </Space>
@@ -229,26 +291,43 @@ const TakeAssignmentPage: React.FC = () => {
         {assignment.assignment_type === 'quiz' && assignment.questions && (
           <>
             {assignment.questions.map((q, index) => (
-              <Card key={q.id} size="small" style={{ marginBottom: 16 }} title={`Câu ${index + 1}: ${q.question_text}`}>
-                {q.question_type === 'single' || q.question_type === 'true_false' ? (
+              <Card
+                key={q.id}
+                size="small"
+                style={{ marginBottom: 16 }}
+                title={`Câu ${index + 1}: ${q.question_text}`}
+              >
+                {q.question_type === 'single' ||
+                q.question_type === 'true_false' ? (
                   <Radio.Group
-                    onChange={(e) => handleQuizAnswer(q.id, e.target.value, q.question_type)}
+                    onChange={(e) =>
+                      handleQuizAnswer(q.id, e.target.value, q.question_type)
+                    }
                     value={quizAnswers[q.id]?.[0]}
                   >
                     <Space direction="vertical">
                       {q.options.map((opt) => (
-                        <Radio key={opt.id} value={opt.id}>{opt.text}</Radio>
+                        <Radio key={opt.id} value={opt.id}>
+                          {opt.text}
+                        </Radio>
                       ))}
                     </Space>
                   </Radio.Group>
                 ) : (
                   <Checkbox.Group
-                    onChange={(values) => setQuizAnswers((prev) => ({ ...prev, [q.id]: values as string[] }))}
+                    onChange={(values) =>
+                      setQuizAnswers((prev) => ({
+                        ...prev,
+                        [q.id]: values as string[],
+                      }))
+                    }
                     value={quizAnswers[q.id]}
                   >
                     <Space direction="vertical">
                       {q.options.map((opt) => (
-                        <Checkbox key={opt.id} value={opt.id}>{opt.text}</Checkbox>
+                        <Checkbox key={opt.id} value={opt.id}>
+                          {opt.text}
+                        </Checkbox>
                       ))}
                     </Space>
                   </Checkbox.Group>
@@ -299,7 +378,11 @@ const TakeAssignmentPage: React.FC = () => {
             </Button>
             <Button
               size="large"
-              onClick={() => history.push(`/student/courses/${assignment.course_id}/lessons/${assignment.lesson_id}`)}
+              onClick={() =>
+                history.push(
+                  `/student/courses/${assignment.course_id}/lessons/${assignment.lesson_id}`,
+                )
+              }
             >
               Hủy
             </Button>

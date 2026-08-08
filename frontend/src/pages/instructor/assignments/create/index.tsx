@@ -1,12 +1,25 @@
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { history } from '@umijs/max';
 import {
-  Button, Card, DatePicker, Form, Input, InputNumber,
-  Radio, Select, Space, Switch, message, Divider,
+  Button,
+  Card,
+  DatePicker,
+  Divider,
+  Form,
+  Input,
+  InputNumber,
+  message,
+  Radio,
+  Select,
+  Space,
+  Switch,
 } from 'antd';
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import React, { useState } from 'react';
-import { createAssignment, addQuestion } from '@/services/ant-design-pro/assignments';
+import {
+  addQuestion,
+  createAssignment,
+} from '@/services/ant-design-pro/assignments';
 
 const { TextArea } = Input;
 
@@ -73,7 +86,12 @@ const CreateAssignmentPage: React.FC = () => {
     setQuestions(updated);
   };
 
-  const updateOption = (qIndex: number, oIndex: number, field: string, value: any) => {
+  const updateOption = (
+    qIndex: number,
+    oIndex: number,
+    field: string,
+    value: any,
+  ) => {
     const updated = [...questions];
     updated[qIndex].options[oIndex] = {
       ...updated[qIndex].options[oIndex],
@@ -84,19 +102,27 @@ const CreateAssignmentPage: React.FC = () => {
 
   const removeOption = (qIndex: number, oIndex: number) => {
     const updated = [...questions];
-    updated[qIndex].options = updated[qIndex].options.filter((_: any, i: number) => i !== oIndex);
+    updated[qIndex].options = updated[qIndex].options.filter(
+      (_: any, i: number) => i !== oIndex,
+    );
     setQuestions(updated);
   };
 
   const setCorrectOption = (qIndex: number, oIndex: number) => {
     const updated = [...questions];
-    if (updated[qIndex].question_type === 'single' || updated[qIndex].question_type === 'true_false') {
-      updated[qIndex].options = updated[qIndex].options.map((opt: any, i: number) => ({
-        ...opt,
-        is_correct: i === oIndex,
-      }));
+    if (
+      updated[qIndex].question_type === 'single' ||
+      updated[qIndex].question_type === 'true_false'
+    ) {
+      updated[qIndex].options = updated[qIndex].options.map(
+        (opt: any, i: number) => ({
+          ...opt,
+          is_correct: i === oIndex,
+        }),
+      );
     } else {
-      updated[qIndex].options[oIndex].is_correct = !updated[qIndex].options[oIndex].is_correct;
+      updated[qIndex].options[oIndex].is_correct =
+        !updated[qIndex].options[oIndex].is_correct;
     }
     setQuestions(updated);
   };
@@ -104,8 +130,22 @@ const CreateAssignmentPage: React.FC = () => {
   return (
     <PageContainer title="Tạo bài tập mới">
       <Card>
-        <Form form={form} layout="vertical" onFinish={handleFinish} initialValues={{ assignment_type: 'quiz', total_points: 100, passing_score: 50, attempts_allowed: 1 }}>
-          <Form.Item name="title" label="Tiêu đề" rules={[{ required: true, message: 'Vui lòng nhập tiêu đề!' }]}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleFinish}
+          initialValues={{
+            assignment_type: 'quiz',
+            total_points: 100,
+            passing_score: 50,
+            attempts_allowed: 1,
+          }}
+        >
+          <Form.Item
+            name="title"
+            label="Tiêu đề"
+            rules={[{ required: true, message: 'Vui lòng nhập tiêu đề!' }]}
+          >
             <Input placeholder="Nhập tiêu đề bài tập" />
           </Form.Item>
 
@@ -113,7 +153,11 @@ const CreateAssignmentPage: React.FC = () => {
             <TextArea rows={3} placeholder="Mô tả bài tập (tùy chọn)" />
           </Form.Item>
 
-          <Form.Item name="assignment_type" label="Loại bài tập" rules={[{ required: true }]}>
+          <Form.Item
+            name="assignment_type"
+            label="Loại bài tập"
+            rules={[{ required: true }]}
+          >
             <Radio.Group onChange={(e) => setAssignmentType(e.target.value)}>
               <Radio.Button value="quiz">Trắc nghiệm</Radio.Button>
               <Radio.Button value="essay">Tự luận</Radio.Button>
@@ -140,7 +184,11 @@ const CreateAssignmentPage: React.FC = () => {
             <Form.Item name="due_date" label="Hạn nộp">
               <DatePicker showTime />
             </Form.Item>
-            <Form.Item name="show_answer_after" label="Hiện đáp án sau khi nộp" valuePropName="checked">
+            <Form.Item
+              name="show_answer_after"
+              label="Hiện đáp án sau khi nộp"
+              valuePropName="checked"
+            >
               <Switch />
             </Form.Item>
           </Space>
@@ -149,12 +197,28 @@ const CreateAssignmentPage: React.FC = () => {
             <>
               <Divider>Câu hỏi</Divider>
               {questions.map((q, qIndex) => (
-                <Card key={qIndex} size="small" style={{ marginBottom: 16 }} title={`Câu ${qIndex + 1}`}
-                  extra={<Button danger size="small" icon={<MinusCircleOutlined />} onClick={() => removeQuestion(qIndex)}>Xóa</Button>}>
+                <Card
+                  key={qIndex}
+                  size="small"
+                  style={{ marginBottom: 16 }}
+                  title={`Câu ${qIndex + 1}`}
+                  extra={
+                    <Button
+                      danger
+                      size="small"
+                      icon={<MinusCircleOutlined />}
+                      onClick={() => removeQuestion(qIndex)}
+                    >
+                      Xóa
+                    </Button>
+                  }
+                >
                   <Form.Item label="Câu hỏi" required>
                     <TextArea
                       value={q.question_text}
-                      onChange={(e) => updateQuestion(qIndex, 'question_text', e.target.value)}
+                      onChange={(e) =>
+                        updateQuestion(qIndex, 'question_text', e.target.value)
+                      }
                       rows={2}
                       placeholder="Nhập nội dung câu hỏi"
                     />
@@ -184,7 +248,9 @@ const CreateAssignmentPage: React.FC = () => {
                     <Form.Item label="Điểm">
                       <InputNumber
                         value={q.points}
-                        onChange={(val) => updateQuestion(qIndex, 'points', val)}
+                        onChange={(val) =>
+                          updateQuestion(qIndex, 'points', val)
+                        }
                         min={1}
                       />
                     </Form.Item>
@@ -192,7 +258,10 @@ const CreateAssignmentPage: React.FC = () => {
 
                   <div style={{ marginBottom: 8 }}>Đáp án:</div>
                   {q.options.map((opt: any, oIndex: number) => (
-                    <Space key={oIndex} style={{ display: 'flex', marginBottom: 8 }}>
+                    <Space
+                      key={oIndex}
+                      style={{ display: 'flex', marginBottom: 8 }}
+                    >
                       <Button
                         size="small"
                         type={opt.is_correct ? 'primary' : 'default'}
@@ -202,7 +271,9 @@ const CreateAssignmentPage: React.FC = () => {
                       </Button>
                       <Input
                         value={opt.text}
-                        onChange={(e) => updateOption(qIndex, oIndex, 'text', e.target.value)}
+                        onChange={(e) =>
+                          updateOption(qIndex, oIndex, 'text', e.target.value)
+                        }
                         placeholder="Nhập đáp án"
                         disabled={q.question_type === 'true_false'}
                         style={{ width: 300 }}
@@ -218,7 +289,12 @@ const CreateAssignmentPage: React.FC = () => {
                     </Space>
                   ))}
                   {q.question_type !== 'true_false' && (
-                    <Button type="dashed" size="small" onClick={() => addOption(qIndex)} icon={<PlusOutlined />}>
+                    <Button
+                      type="dashed"
+                      size="small"
+                      onClick={() => addOption(qIndex)}
+                      icon={<PlusOutlined />}
+                    >
                       Thêm đáp án
                     </Button>
                   )}
@@ -226,13 +302,20 @@ const CreateAssignmentPage: React.FC = () => {
                   <Form.Item label="Giải thích" style={{ marginTop: 8 }}>
                     <Input
                       value={q.explanation}
-                      onChange={(e) => updateQuestion(qIndex, 'explanation', e.target.value)}
+                      onChange={(e) =>
+                        updateQuestion(qIndex, 'explanation', e.target.value)
+                      }
                       placeholder="Giải thích đáp án (tùy chọn)"
                     />
                   </Form.Item>
                 </Card>
               ))}
-              <Button type="dashed" onClick={addNewQuestion} icon={<PlusOutlined />} style={{ width: '100%' }}>
+              <Button
+                type="dashed"
+                onClick={addNewQuestion}
+                icon={<PlusOutlined />}
+                style={{ width: '100%' }}
+              >
                 Thêm câu hỏi
               </Button>
             </>
@@ -245,7 +328,9 @@ const CreateAssignmentPage: React.FC = () => {
               <Button type="primary" htmlType="submit" loading={loading}>
                 Tạo bài tập
               </Button>
-              <Button onClick={() => history.push('/instructor/assignments')}>Hủy</Button>
+              <Button onClick={() => history.push('/instructor/assignments')}>
+                Hủy
+              </Button>
             </Space>
           </Form.Item>
         </Form>

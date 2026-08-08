@@ -1,14 +1,14 @@
 import { PlusOutlined } from '@ant-design/icons';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { history } from '@umijs/max';
-import { Button, Popconfirm, Space, Tag, message } from 'antd';
+import { Button, message, Popconfirm, Space, Tag } from 'antd';
 import React, { useRef } from 'react';
-import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import {
-  getAssignments,
-  deleteAssignment,
-  publishAssignment,
   type Assignment,
+  deleteAssignment,
+  getAssignments,
+  publishAssignment,
 } from '@/services/ant-design-pro/assignments';
 
 const AssignmentManagement: React.FC = () => {
@@ -28,7 +28,7 @@ const AssignmentManagement: React.FC = () => {
     try {
       await publishAssignment(record.id);
       message.success(
-        record.is_published ? 'Đã ẩn bài tập!' : 'Đã xuất bản bài tập!'
+        record.is_published ? 'Đã ẩn bài tập!' : 'Đã xuất bản bài tập!',
       );
       actionRef.current?.reload();
     } catch (err: any) {
@@ -111,8 +111,18 @@ const AssignmentManagement: React.FC = () => {
       valueType: 'option',
       render: (_, record) => (
         <Space>
-          <a onClick={() => history.push(`/instructor/assignments/${record.id}/edit`)}>Chỉnh sửa</a>
-          <a onClick={() => history.push(`/instructor/assignments/${record.id}/submissions`)}>
+          <a
+            onClick={() =>
+              history.push(`/instructor/assignments/${record.id}/edit`)
+            }
+          >
+            Chỉnh sửa
+          </a>
+          <a
+            onClick={() =>
+              history.push(`/instructor/assignments/${record.id}/submissions`)
+            }
+          >
             Bài nộp
           </a>
           <a onClick={() => handleTogglePublish(record)}>

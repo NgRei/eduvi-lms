@@ -9,6 +9,8 @@ export class Enrollment extends Model {
   declare progress_percentage: number;
   declare completed_at: Date | null;
   declare certificate_issued: boolean;
+  declare payment_id: string | null;
+  declare enrolled_by: string | null;
   declare enrolled_at: Date;
   declare expired_at: Date | null;
   declare readonly createdAt: Date;
@@ -50,6 +52,16 @@ Enrollment.init(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
+    },
+    payment_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      defaultValue: null,
+    },
+    enrolled_by: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      defaultValue: null,
     },
     enrolled_at: {
       type: DataTypes.DATE,

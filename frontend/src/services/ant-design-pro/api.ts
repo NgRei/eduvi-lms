@@ -55,7 +55,23 @@ export async function currentUser(options?: { [key: string]: any }) {
 
 /** 退出登录接口 POST /api/login/outLogin */
 export async function outLogin(options?: { [key: string]: any }) {
+  const refreshToken = localStorage.getItem('refresh_token');
   localStorage.removeItem('auth_token');
+  localStorage.removeItem('refresh_token');
+  // Best-effort: thu hồi refresh token phía server, bỏ qua nếu lỗi
+  if (refreshToken) {
+    try {
+      await request('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        data: { refreshToken },
+        skipErrorHandler: true,
+        ...(options || {}),
+      });
+    } catch {
+      // ignore
+    }
+  }
   return { success: true };
 }
 
@@ -65,6 +81,8 @@ export async function login(body: API.LoginParams, options?: { [key: string]: an
     const response = await request<{
       success: boolean;
       token?: string;
+      accessToken?: string;
+      refreshToken?: string;
       user?: {
         id: number | string;
         email: string;
@@ -85,8 +103,11 @@ export async function login(body: API.LoginParams, options?: { [key: string]: an
       ...(options || {}),
     });
 
-    if (response && response.success && response.token) {
-      localStorage.setItem('auth_token', response.token);
+    if (response && response.success && (response.accessToken || response.token)) {
+      localStorage.setItem('auth_token', response.accessToken || response.token || '');
+      if ((response as any).refreshToken) {
+        localStorage.setItem('refresh_token', (response as any).refreshToken);
+      }
       return {
         status: 'ok',
         type: 'account',

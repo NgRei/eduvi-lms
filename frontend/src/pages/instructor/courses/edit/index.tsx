@@ -1,13 +1,36 @@
-import { PageContainer } from '@ant-design/pro-components';
-import {
-  Button, Card, Form, Input, InputNumber, message, Popconfirm,
-  Select, Space, Spin, Table, Tabs, Tag
-} from 'antd';
-import { history, useParams } from '@umijs/max';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { PageContainer } from '@ant-design/pro-components';
+import { history, useParams } from '@umijs/max';
+import {
+  Button,
+  Card,
+  Form,
+  Input,
+  InputNumber,
+  message,
+  Popconfirm,
+  Select,
+  Space,
+  Spin,
+  Table,
+  Tabs,
+  Tag,
+} from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
-import { getCourseById, updateCourse, getCategories, type CourseCategory, type CourseDetail } from '@/services/ant-design-pro/courses';
-import { createLesson, updateLesson, deleteLesson, getLessonsByCourse, type Lesson } from '@/services/ant-design-pro/lessons';
+import {
+  type CourseCategory,
+  type CourseDetail,
+  getCategories,
+  getCourseById,
+  updateCourse,
+} from '@/services/ant-design-pro/courses';
+import {
+  createLesson,
+  deleteLesson,
+  getLessonsByCourse,
+  type Lesson,
+  updateLesson,
+} from '@/services/ant-design-pro/lessons';
 
 const { TextArea } = Input;
 
@@ -23,34 +46,37 @@ const EditCourse: React.FC = () => {
   const [showLessonForm, setShowLessonForm] = useState(false);
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
 
-  const fetchCourse = useCallback(async (courseId: string) => {
-    try {
-      const [courseRes, lessonsRes, catRes] = await Promise.all([
-        getCourseById(courseId),
-        getLessonsByCourse(courseId),
-        getCategories(),
-      ]);
-      if (courseRes.success) {
-        setCourse(courseRes.data);
-        courseForm.setFieldsValue({
-          title: courseRes.data.title,
-          short_description: courseRes.data.short_description,
-          description: courseRes.data.description,
-          price: courseRes.data.price,
-          target_level: courseRes.data.target_level,
-          category_id: courseRes.data.category?.id,
-          is_published: courseRes.data.is_published,
-        });
+  const fetchCourse = useCallback(
+    async (courseId: string) => {
+      try {
+        const [courseRes, lessonsRes, catRes] = await Promise.all([
+          getCourseById(courseId),
+          getLessonsByCourse(courseId),
+          getCategories(),
+        ]);
+        if (courseRes.success) {
+          setCourse(courseRes.data);
+          courseForm.setFieldsValue({
+            title: courseRes.data.title,
+            short_description: courseRes.data.short_description,
+            description: courseRes.data.description,
+            price: courseRes.data.price,
+            target_level: courseRes.data.target_level,
+            category_id: courseRes.data.category?.id,
+            is_published: courseRes.data.is_published,
+          });
+        }
+        if (lessonsRes.success) setLessons(lessonsRes.data);
+        if (catRes.success) setCategories(catRes.data);
+      } catch (err) {
+        console.error(err);
+        message.error('Không thể tải dữ liệu khóa học');
+      } finally {
+        setLoading(false);
       }
-      if (lessonsRes.success) setLessons(lessonsRes.data);
-      if (catRes.success) setCategories(catRes.data);
-    } catch (err) {
-      console.error(err);
-      message.error('Không thể tải dữ liệu khóa học');
-    } finally {
-      setLoading(false);
-    }
-  }, [courseForm]);
+    },
+    [courseForm],
+  );
 
   useEffect(() => {
     if (id) fetchCourse(id);
@@ -120,7 +146,9 @@ const EditCourse: React.FC = () => {
       title: 'Loại',
       dataIndex: 'lesson_type',
       key: 'lesson_type',
-      render: (t: string) => <Tag color={t === 'video' ? 'blue' : 'green'}>{t}</Tag>,
+      render: (t: string) => (
+        <Tag color={t === 'video' ? 'blue' : 'green'}>{t}</Tag>
+      ),
     },
     {
       title: 'Thời lượng',
@@ -132,7 +160,9 @@ const EditCourse: React.FC = () => {
       title: 'Trạng thái',
       dataIndex: 'is_published',
       key: 'is_published',
-      render: (v: boolean) => <Tag color={v ? 'green' : 'default'}>{v ? 'Đã xuất bản' : 'Nháp'}</Tag>,
+      render: (v: boolean) => (
+        <Tag color={v ? 'green' : 'default'}>{v ? 'Đã xuất bản' : 'Nháp'}</Tag>
+      ),
     },
     {
       title: 'Hành động',
@@ -153,8 +183,13 @@ const EditCourse: React.FC = () => {
           >
             <EditOutlined /> Sửa
           </a>
-          <Popconfirm title="Xóa bài giảng này?" onConfirm={() => handleDeleteLesson(record.id)}>
-            <a style={{ color: '#EF4444' }}><DeleteOutlined /> Xóa</a>
+          <Popconfirm
+            title="Xóa bài giảng này?"
+            onConfirm={() => handleDeleteLesson(record.id)}
+          >
+            <a style={{ color: '#EF4444' }}>
+              <DeleteOutlined /> Xóa
+            </a>
           </Popconfirm>
         </Space>
       ),
@@ -170,12 +205,26 @@ const EditCourse: React.FC = () => {
             label: 'Thông tin khóa học',
             children: (
               <Card>
-                <Form form={courseForm} layout="vertical" onFinish={handleSaveCourse}>
-                  <Form.Item name="title" label="Tên khóa học" rules={[{ required: true }]}>
+                <Form
+                  form={courseForm}
+                  layout="vertical"
+                  onFinish={handleSaveCourse}
+                >
+                  <Form.Item
+                    name="title"
+                    label="Tên khóa học"
+                    rules={[{ required: true }]}
+                  >
                     <Input />
                   </Form.Item>
                   <Form.Item name="category_id" label="Danh mục">
-                    <Select allowClear options={categories.map((c) => ({ label: c.name, value: c.id }))} />
+                    <Select
+                      allowClear
+                      options={categories.map((c) => ({
+                        label: c.name,
+                        value: c.id,
+                      }))}
+                    />
                   </Form.Item>
                   <Form.Item name="short_description" label="Mô tả ngắn">
                     <TextArea rows={2} />
@@ -227,10 +276,23 @@ const EditCourse: React.FC = () => {
                 </div>
 
                 {showLessonForm && (
-                  <Card style={{ marginBottom: 16 }} title={editingLesson ? 'Sửa bài giảng' : 'Thêm bài giảng'}>
-                    <Form form={lessonForm} layout="inline" onFinish={handleSaveLesson}>
-                      <Form.Item name="title" rules={[{ required: true, message: 'Nhập tên' }]}>
-                        <Input placeholder="Tên bài giảng" style={{ width: 250 }} />
+                  <Card
+                    style={{ marginBottom: 16 }}
+                    title={editingLesson ? 'Sửa bài giảng' : 'Thêm bài giảng'}
+                  >
+                    <Form
+                      form={lessonForm}
+                      layout="inline"
+                      onFinish={handleSaveLesson}
+                    >
+                      <Form.Item
+                        name="title"
+                        rules={[{ required: true, message: 'Nhập tên' }]}
+                      >
+                        <Input
+                          placeholder="Tên bài giảng"
+                          style={{ width: 250 }}
+                        />
                       </Form.Item>
                       <Form.Item name="lesson_type" initialValue="video">
                         <Select
@@ -258,7 +320,12 @@ const EditCourse: React.FC = () => {
                           <Button type="primary" htmlType="submit">
                             {editingLesson ? 'Cập nhật' : 'Thêm'}
                           </Button>
-                          <Button onClick={() => { setShowLessonForm(false); setEditingLesson(null); }}>
+                          <Button
+                            onClick={() => {
+                              setShowLessonForm(false);
+                              setEditingLesson(null);
+                            }}
+                          >
                             Hủy
                           </Button>
                         </Space>
@@ -267,7 +334,12 @@ const EditCourse: React.FC = () => {
                   </Card>
                 )}
 
-                <Table dataSource={lessons} columns={lessonColumns} rowKey="id" pagination={false} />
+                <Table
+                  dataSource={lessons}
+                  columns={lessonColumns}
+                  rowKey="id"
+                  pagination={false}
+                />
               </Card>
             ),
           },

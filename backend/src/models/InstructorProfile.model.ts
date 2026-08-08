@@ -10,6 +10,8 @@ export class InstructorProfile extends Model {
   declare linkedin_url: string | null;
   declare total_students: number;
   declare rating_avg: number;
+  declare avatar_url: string | null;
+  declare is_active: boolean;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 }
@@ -49,6 +51,16 @@ InstructorProfile.init(
     rating_avg: {
       type: DataTypes.DECIMAL(3, 2),
       defaultValue: 0.00,
+    },
+    avatar_url: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      defaultValue: null,
+    },
+    is_active: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
     },
   },
   {

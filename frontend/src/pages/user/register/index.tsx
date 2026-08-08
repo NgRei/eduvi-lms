@@ -60,7 +60,7 @@ const Register: FC = () => {
 
   const [passwordValue, setPasswordValue] = useState('');
   const [form] = Form.useForm();
-  
+
   useEffect(() => {
     return () => {
       clearInterval(interval);
@@ -111,7 +111,8 @@ const Register: FC = () => {
       }
     },
     onError: (error: any) => {
-      const errMsg = error?.response?.data?.error || error?.message || 'Đăng ký thất bại!';
+      const errMsg =
+        error?.response?.data?.error || error?.message || 'Đăng ký thất bại!';
       message.error(errMsg);
     },
   });
@@ -160,11 +161,15 @@ const Register: FC = () => {
   const renderPasswordProgress = () => {
     const passwordStatus = getPasswordStatus();
     return passwordValue?.length ? (
-      <div className={styles[`progress-${passwordStatus}` as keyof typeof styles]}>
+      <div
+        className={styles[`progress-${passwordStatus}` as keyof typeof styles]}
+      >
         <Progress
           status={passwordProgressMap[passwordStatus]}
           size={6}
-          percent={passwordValue.length * 10 > 100 ? 100 : passwordValue.length * 10}
+          percent={
+            passwordValue.length * 10 > 100 ? 100 : passwordValue.length * 10
+          }
           showInfo={false}
         />
       </div>
@@ -173,10 +178,23 @@ const Register: FC = () => {
 
   return (
     <div className={styles.main}>
-      <h3 style={{ fontSize: 20, fontWeight: 'bold', color: '#111827', textAlign: 'center', marginBottom: 24 }}>
+      <h3
+        style={{
+          fontSize: 20,
+          fontWeight: 'bold',
+          color: '#111827',
+          textAlign: 'center',
+          marginBottom: 24,
+        }}
+      >
         Đăng ký tài khoản Eduvi LMS
       </h3>
-      <Form form={form} name="UserRegister" onFinish={onFinish} onFinishFailed={onFinishFailed}>
+      <Form
+        form={form}
+        name="UserRegister"
+        onFinish={onFinish}
+        onFinishFailed={onFinishFailed}
+      >
         <FormItem
           name="name"
           rules={[
@@ -229,7 +247,10 @@ const Register: FC = () => {
                 {passwordStatusMap[getPasswordStatus()]}
                 {renderPasswordProgress()}
                 <div style={{ marginTop: 10 }}>
-                  <span>Vui lòng nhập tối thiểu 6 ký tự. Hãy sử dụng mật khẩu khó đoán.</span>
+                  <span>
+                    Vui lòng nhập tối thiểu 6 ký tự. Hãy sử dụng mật khẩu khó
+                    đoán.
+                  </span>
                 </div>
               </div>
             )
@@ -243,9 +264,9 @@ const Register: FC = () => {
           <FormItem
             name="password"
             className={
-              passwordValue &&
-              passwordValue.length > 0 ?
-              styles.password : undefined
+              passwordValue && passwordValue.length > 0
+                ? styles.password
+                : undefined
             }
             rules={[
               {
@@ -342,13 +363,19 @@ const Register: FC = () => {
               type="primary"
               htmlType="submit"
               block
-              style={{ background: '#4F46E5', borderColor: '#4F46E5', height: 40 }}
+              style={{
+                background: '#4F46E5',
+                borderColor: '#4F46E5',
+                height: 40,
+              }}
             >
               <span>Đăng ký thành viên</span>
             </Button>
             <div style={{ marginTop: 16, textAlign: 'center' }}>
               <Link to="/user/login" prefetch>
-                <span style={{ color: '#4F46E5' }}>Đăng nhập với tài khoản có sẵn</span>
+                <span style={{ color: '#4F46E5' }}>
+                  Đăng nhập với tài khoản có sẵn
+                </span>
               </Link>
             </div>
           </div>

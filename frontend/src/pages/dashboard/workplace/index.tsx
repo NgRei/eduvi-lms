@@ -227,7 +227,7 @@ const Workplace: FC = () => {
             variant="borderless"
           >
             <EditableLinkGroup
-              onAdd={() => { }}
+              onAdd={() => {}}
               links={links}
               linkElement={Link}
             />

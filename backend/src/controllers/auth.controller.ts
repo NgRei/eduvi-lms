@@ -3,10 +3,45 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { Op } from 'sequelize';
-import { User, StudentProfile, InstructorProfile } from '../models';
+import { User, StudentProfile, InstructorProfile, RefreshToken } from '../models';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import { sendPasswordResetEmail } from '../utils/email.util';
 import { createAuditLog, getClientIp } from '../services/audit.service';
+
+// Token config
+const ACCESS_TOKEN_EXPIRES = '15m';
+const REFRESH_TOKEN_EXPIRES_DAYS = 7;
+
+// Generate access token
+const generateAccessToken = (user: any): string => {
+  const jwtSecret = process.env.JWT_SECRET || 'eduvi_lms_jwt_secret_key_2026_super_secure';
+  return jwt.sign(
+    { id: user.id, email: user.email, username: user.username, user_type: user.user_type },
+    jwtSecret,
+    { expiresIn: ACCESS_TOKEN_EXPIRES } as jwt.SignOptions
+  );
+};
+
+// Generate random refresh token, return raw token + hash
+const generateRefreshToken = (): { raw: string; hash: string } => {
+  const raw = crypto.randomBytes(40).toString('hex');
+  const hash = crypto.createHash('sha256').update(raw).digest('hex');
+  return { raw, hash };
+};
+
+// Store refresh token in DB
+const storeRefreshToken = async (userId: string, tokenHash: string, req: Request): Promise<void> => {
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_EXPIRES_DAYS);
+
+  await RefreshToken.create({
+    user_id: userId,
+    token_hash: tokenHash,
+    device_info: req.headers['user-agent'] || null,
+    ip_address: getClientIp(req),
+    expires_at: expiresAt,
+  });
+};
 
 // Helper to remove accents from Vietnamese text
 const removeAccents = (str: string): string => {
@@ -141,20 +176,15 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ success: false, error: 'Mật khẩu đăng nhập không chính xác!' });
     }
 
-    // Sign JWT
-    const jwtSecret = process.env.JWT_SECRET || 'eduvi_lms_jwt_secret_key_2026_super_secure';
-    const jwtExpires = process.env.JWT_EXPIRES_IN || '1h';
+    // Update last_login_at
+    await user.update({ last_login_at: new Date() });
 
-    const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        user_type: user.user_type,
-      },
-      jwtSecret,
-      { expiresIn: jwtExpires } as jwt.SignOptions
-    );
+    // Generate access token (15 min)
+    const accessToken = generateAccessToken(user);
+
+    // Generate refresh token (7 days)
+    const { raw: refreshToken, hash: refreshTokenHash } = generateRefreshToken();
+    await storeRefreshToken(user.id, refreshTokenHash, req);
 
     // Audit log — đăng nhập thành công
     createAuditLog({
@@ -169,7 +199,8 @@ export const login = async (req: Request, res: Response) => {
     return res.status(200).json({
       success: true,
       message: 'Đăng nhập thành công!',
-      token,
+      accessToken,
+      refreshToken,
       user: {
         id: user.id,
         email: user.email,
@@ -377,5 +408,87 @@ export const getMe = async (req: AuthRequest, res: Response) => {
   } catch (error: any) {
     console.error('getMe Error:', error);
     return res.status(500).json({ success: false, error: 'Lỗi nạp thông tin tài khoản!' });
+  }
+};
+
+export const refreshToken = async (req: Request, res: Response) => {
+  try {
+    const { refreshToken: token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ success: false, error: 'Vui lòng cung cấp refresh token!' });
+    }
+
+    // Hash the submitted token to match DB
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    // Find valid refresh token in DB
+    const storedToken = await RefreshToken.findOne({
+      where: {
+        token_hash: tokenHash,
+        revoked_at: null,
+        expires_at: { [Op.gt]: new Date() },
+      },
+      include: [{ model: User, as: 'user' }],
+    });
+
+    if (!storedToken) {
+      return res.status(401).json({ success: false, error: 'Refresh token không hợp lệ hoặc đã hết hạn!' });
+    }
+
+    const user = (storedToken as any).user;
+    if (!user || !user.is_active) {
+      return res.status(401).json({ success: false, error: 'Tài khoản không tồn tại hoặc đã bị khóa!' });
+    }
+
+    // Revoke old refresh token (rotate)
+    await storedToken.update({ revoked_at: new Date() });
+
+    // Generate new access token
+    const newAccessToken = generateAccessToken(user);
+
+    // Generate new refresh token
+    const { raw: newRefreshToken, hash: newRefreshTokenHash } = generateRefreshToken();
+    await storeRefreshToken(user.id, newRefreshTokenHash, req);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Làm mới token thành công!',
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    });
+  } catch (error: any) {
+    console.error('Refresh Token Error:', error);
+    return res.status(500).json({ success: false, error: 'Có lỗi xảy ra khi làm mới token!' });
+  }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  try {
+    const { refreshToken: token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ success: false, error: 'Vui lòng cung cấp refresh token!' });
+    }
+
+    // Hash the submitted token to match DB
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    // Revoke the refresh token
+    const storedToken = await RefreshToken.findOne({
+      where: { token_hash: tokenHash, revoked_at: null },
+    });
+
+    if (storedToken) {
+      await storedToken.update({ revoked_at: new Date() });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Đăng xuất thành công!',
+    });
+  } catch (error: any) {
+    console.error('Logout Error:', error);
+    return res.status(500).json({ success: false, error: 'Có lỗi xảy ra khi đăng xuất!' });
   }
 };

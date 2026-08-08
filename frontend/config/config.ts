@@ -150,7 +150,8 @@ export default defineConfig({
       variant: 'filled',
       theme: {
         token: {
-          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          fontFamily:
+            "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
           colorPrimary: '#4F46E5',
           borderRadius: 8,
         },

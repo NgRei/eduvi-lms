@@ -43,8 +43,8 @@ const OperationModal: FC<OperationModalProps> = (props) => {
         destroyOnHidden: true,
         bodyStyle: done
           ? {
-            padding: '72px 0',
-          }
+              padding: '72px 0',
+            }
           : {},
       }}
     >

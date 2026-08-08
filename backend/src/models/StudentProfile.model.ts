@@ -9,6 +9,8 @@ export class StudentProfile extends Model {
   declare address: string | null;
   declare school_name: string | null;
   declare grade_level: string | null;
+  declare avatar_url: string | null;
+  declare is_active: boolean;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 }
@@ -44,6 +46,16 @@ StudentProfile.init(
     grade_level: {
       type: DataTypes.STRING(50),
       allowNull: true,
+    },
+    avatar_url: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      defaultValue: null,
+    },
+    is_active: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
     },
   },
   {

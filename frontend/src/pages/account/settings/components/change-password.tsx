@@ -1,9 +1,12 @@
-import { Button, Form, Input, App, Progress } from 'antd';
 import { LockOutlined } from '@ant-design/icons';
-import React, { useState } from 'react';
 import { request } from '@umijs/max';
+import { App, Button, Form, Input, Progress } from 'antd';
+import React, { useState } from 'react';
 
-const passwordStrengthMap: Record<string, { status: 'success' | 'normal' | 'exception'; text: string; color: string }> = {
+const passwordStrengthMap: Record<
+  string,
+  { status: 'success' | 'normal' | 'exception'; text: string; color: string }
+> = {
   ok: { status: 'success', text: 'Mạnh', color: '#52c41a' },
   pass: { status: 'normal', text: 'Trung bình', color: '#faad14' },
   poor: { status: 'exception', text: 'Yếu', color: '#ff4d4f' },
@@ -22,7 +25,11 @@ const ChangePasswordView: React.FC = () => {
     return 'poor';
   };
 
-  const handleSubmit = async (values: { old_password: string; new_password: string; confirm_password: string }) => {
+  const handleSubmit = async (values: {
+    old_password: string;
+    new_password: string;
+    confirm_password: string;
+  }) => {
     setLoading(true);
     try {
       const res = await request('/api/auth/change-password', {
@@ -47,14 +54,23 @@ const ChangePasswordView: React.FC = () => {
 
   return (
     <div style={{ maxWidth: 480 }}>
-      <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 24, color: '#111827' }}>
+      <h3
+        style={{
+          fontSize: 18,
+          fontWeight: 600,
+          marginBottom: 24,
+          color: '#111827',
+        }}
+      >
         Đổi mật khẩu
       </h3>
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Form.Item
           name="old_password"
           label="Mật khẩu hiện tại"
-          rules={[{ required: true, message: 'Vui lòng nhập mật khẩu hiện tại!' }]}
+          rules={[
+            { required: true, message: 'Vui lòng nhập mật khẩu hiện tại!' },
+          ]}
         >
           <Input.Password
             size="large"
@@ -80,9 +96,24 @@ const ChangePasswordView: React.FC = () => {
 
         {strengthInfo && (
           <div style={{ marginTop: -16, marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                marginBottom: 4,
+              }}
+            >
               <span style={{ fontSize: 12, color: '#6B7280' }}>Độ mạnh:</span>
-              <span style={{ fontSize: 12, fontWeight: 500, color: strengthInfo.color }}>{strengthInfo.text}</span>
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: strengthInfo.color,
+                }}
+              >
+                {strengthInfo.text}
+              </span>
             </div>
             <Progress
               percent={strength === 'ok' ? 100 : strength === 'pass' ? 60 : 30}
@@ -101,8 +132,11 @@ const ChangePasswordView: React.FC = () => {
             { required: true, message: 'Vui lòng xác nhận mật khẩu mới!' },
             ({ getFieldValue }) => ({
               validator(_, value) {
-                if (!value || getFieldValue('new_password') === value) return Promise.resolve();
-                return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
+                if (!value || getFieldValue('new_password') === value)
+                  return Promise.resolve();
+                return Promise.reject(
+                  new Error('Mật khẩu xác nhận không khớp!'),
+                );
               },
             }),
           ]}
@@ -119,7 +153,13 @@ const ChangePasswordView: React.FC = () => {
             type="primary"
             htmlType="submit"
             loading={loading}
-            style={{ background: '#4F46E5', borderColor: '#4F46E5', height: 40, fontWeight: 500, minWidth: 160 }}
+            style={{
+              background: '#4F46E5',
+              borderColor: '#4F46E5',
+              height: 40,
+              fontWeight: 500,
+              minWidth: 160,
+            }}
           >
             Cập nhật mật khẩu
           </Button>

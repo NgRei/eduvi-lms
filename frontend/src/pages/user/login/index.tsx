@@ -19,7 +19,7 @@ import {
   useIntl,
   useModel,
 } from '@umijs/max';
-import { Alert, App, Tabs, Form, Button, Space } from 'antd';
+import { Alert, App, Button, Form, Space, Tabs } from 'antd';
 import { createStyles } from 'antd-style';
 import React, { startTransition, useState } from 'react';
 import { Footer } from '@/components';
@@ -144,10 +144,14 @@ const Login: React.FC = () => {
    */
   const getDefaultPath = (userType: string): string => {
     switch (userType) {
-      case 'admin': return '/admin/dashboard';
-      case 'instructor': return '/instructor/dashboard';
-      case 'student': return '/student/dashboard';
-      default: return '/';
+      case 'admin':
+        return '/admin/dashboard';
+      case 'instructor':
+        return '/instructor/dashboard';
+      case 'student':
+        return '/student/dashboard';
+      default:
+        return '/';
     }
   };
 
@@ -241,7 +245,9 @@ const Login: React.FC = () => {
             minWidth: 280,
             maxWidth: '75vw',
           }}
-          logo={<img alt="logo" src="/logo.svg" style={{ width: 44, height: 44 }} />}
+          logo={
+            <img alt="logo" src="/logo.svg" style={{ width: 44, height: 44 }} />
+          }
           title="Eduvi LMS"
           subTitle="Hệ thống Quản lý Học tập Trực tuyến Cao cấp"
           initialValues={{
@@ -259,27 +265,67 @@ const Login: React.FC = () => {
             await handleSubmit(values as API.LoginParams);
           }}
         >
-          <div style={{ 
-            marginBottom: 20, 
-            textAlign: 'center', 
-            background: '#F0FDF4', 
-            padding: '12px', 
-            borderRadius: '8px', 
-            border: '1px solid #BBF7D0' 
-          }}>
-            <span style={{ fontSize: 13, fontWeight: 'bold', color: '#16A34A', display: 'block', marginBottom: 8 }}>
+          <div
+            style={{
+              marginBottom: 20,
+              textAlign: 'center',
+              background: '#F0FDF4',
+              padding: '12px',
+              borderRadius: '8px',
+              border: '1px solid #BBF7D0',
+            }}
+          >
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 'bold',
+                color: '#16A34A',
+                display: 'block',
+                marginBottom: 8,
+              }}
+            >
               👉 ĐĂNG NHẬP NHANH TÀI KHOẢN DEMO
             </span>
             <Space size="small" wrap>
-              <Button size="small" type="dashed" style={{ borderColor: '#22C55E', color: '#15803D' }} onClick={() => {
-                form.setFieldsValue({ username: 'annv', password: 'ant.design' });
-              }}>Học viên</Button>
-              <Button size="small" type="dashed" style={{ borderColor: '#22C55E', color: '#15803D' }} onClick={() => {
-                form.setFieldsValue({ username: 'binhtt', password: 'ant.design' });
-              }}>Giảng viên</Button>
-              <Button size="small" type="dashed" style={{ borderColor: '#22C55E', color: '#15803D' }} onClick={() => {
-                form.setFieldsValue({ username: 'sysadmin', password: 'ant.design' });
-              }}>Quản trị</Button>
+              <Button
+                size="small"
+                type="dashed"
+                style={{ borderColor: '#22C55E', color: '#15803D' }}
+                onClick={() => {
+                  form.setFieldsValue({
+                    username: 'annv',
+                    password: 'ant.design',
+                  });
+                }}
+              >
+                Học viên
+              </Button>
+              <Button
+                size="small"
+                type="dashed"
+                style={{ borderColor: '#22C55E', color: '#15803D' }}
+                onClick={() => {
+                  form.setFieldsValue({
+                    username: 'binhtt',
+                    password: 'ant.design',
+                  });
+                }}
+              >
+                Giảng viên
+              </Button>
+              <Button
+                size="small"
+                type="dashed"
+                style={{ borderColor: '#22C55E', color: '#15803D' }}
+                onClick={() => {
+                  form.setFieldsValue({
+                    username: 'sysadmin',
+                    password: 'ant.design',
+                  });
+                }}
+              >
+                Quản trị
+              </Button>
             </Space>
           </div>
 
@@ -471,7 +517,9 @@ const Login: React.FC = () => {
           </div>
 
           <div style={{ textAlign: 'center', marginTop: -8, marginBottom: 16 }}>
-            <span style={{ color: 'rgba(0, 0, 0, 0.45)' }}>Chưa có tài khoản? </span>
+            <span style={{ color: 'rgba(0, 0, 0, 0.45)' }}>
+              Chưa có tài khoản?{' '}
+            </span>
             <a
               href="/user/register"
               style={{ color: '#4F46E5', fontWeight: 500 }}

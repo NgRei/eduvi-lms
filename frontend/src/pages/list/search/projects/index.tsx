@@ -113,13 +113,13 @@ const Projects: FC = () => {
                 {categoryOptions.flatMap((category) =>
                   category.value !== undefined && category.value !== null
                     ? [
-                      <TagSelect.Option
-                        value={category.value}
-                        key={category.value}
-                      >
-                        {category.label}
-                      </TagSelect.Option>,
-                    ]
+                        <TagSelect.Option
+                          value={category.value}
+                          key={category.value}
+                        >
+                          {category.label}
+                        </TagSelect.Option>,
+                      ]
                     : [],
                 )}
               </TagSelect>

@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { history, useModel } from '@umijs/max';
 import { PageLoading } from '@ant-design/pro-components';
+import { history, useModel } from '@umijs/max';
+import React, { useEffect } from 'react';
 
 const HomeRedirect: React.FC = () => {
   const { initialState } = useModel('@@initialState');

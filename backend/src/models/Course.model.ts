@@ -9,6 +9,7 @@ export class Course extends Model {
   declare short_description: string | null;
   declare description: string | null;
   declare thumbnail: string | null;
+  declare banner: string | null;
   declare price: number;
   declare sale_price: number | null;
   declare target_level: 'beginner' | 'intermediate' | 'advanced' | 'all';
@@ -61,6 +62,11 @@ Course.init(
       defaultValue: null,
     },
     thumbnail: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      defaultValue: null,
+    },
+    banner: {
       type: DataTypes.STRING(500),
       allowNull: true,
       defaultValue: null,
