@@ -4,6 +4,11 @@ import { request } from '@umijs/max';
 
 /** 获取当前的用户 GET /api/auth/me */
 export async function currentUser(options?: { [key: string]: any }) {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+  if (!token) {
+    return { data: undefined };
+  }
+
   const response = await request<{
     success: boolean;
     data?: {

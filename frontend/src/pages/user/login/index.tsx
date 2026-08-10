@@ -159,15 +159,17 @@ const Login: React.FC = () => {
    * Check if redirect URL is allowed for the given role
    */
   const isRedirectAllowed = (redirect: string, userType: string): boolean => {
+    // Root homepage is not a mandatory redirect target on login - go to dashboard instead
+    if (redirect === '/') return false;
     // /account/* is allowed for all roles
     if (redirect.startsWith('/account/')) return true;
     // /exception/* is allowed for all
     if (redirect.startsWith('/exception/')) return true;
+    // /courses/* is allowed for all
+    if (redirect.startsWith('/courses')) return true;
     // Check role-specific prefix
     if (redirect.startsWith(`/${userType}/`)) return true;
-    // Root is always allowed
-    if (redirect === '/') return true;
-    // Everything else is blocked (wrong role's page)
+    // Everything else defaults to role dashboard
     return false;
   };
 
@@ -199,8 +201,8 @@ const Login: React.FC = () => {
         const rawRedirect = getSafeRedirectUrl(urlParams.get('redirect'));
         const userType = msg.currentAuthority || 'student';
 
-        // Only redirect if the URL matches the user's role
-        const finalRedirect = isRedirectAllowed(rawRedirect, userType)
+        // Direct login from homepage or login page -> Go straight to role dashboard!
+        const finalRedirect = (rawRedirect !== '/' && isRedirectAllowed(rawRedirect, userType))
           ? rawRedirect
           : getDefaultPath(userType);
 

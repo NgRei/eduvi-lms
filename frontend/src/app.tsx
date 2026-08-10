@@ -18,7 +18,6 @@ import {
   OfflineBanner,
 } from '@/components';
 import { currentUser as queryCurrentUser } from '@/services/ant-design-pro/api';
-import { isPublicPath } from '@/utils/publicPath';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
 
@@ -298,6 +297,20 @@ if (isDev && typeof window !== 'undefined') {
   }
 }
 
+const checkIsPublic = (pathname: string): boolean => {
+  if (!pathname) return false;
+  const cleanPath = pathname.split('?')[0].split('#')[0];
+  if (cleanPath === '/' || cleanPath === loginPath) return true;
+  if (
+    cleanPath.startsWith('/user/') ||
+    cleanPath === '/courses' ||
+    cleanPath.startsWith('/courses/')
+  ) {
+    return true;
+  }
+  return false;
+};
+
 /**
  * @see https://umijs.org/docs/api/runtime-config#getinitialstate
  * */
@@ -316,7 +329,7 @@ export async function getInitialState(): Promise<{
       return msg.data;
     } catch (_error) {
       const { pathname, search, hash } = history.location;
-      if (!isPublicPath(pathname)) {
+      if (!checkIsPublic(pathname)) {
         history.replace(
           `${loginPath}?redirect=${encodeURIComponent(pathname + search + hash)}`,
         );
@@ -364,7 +377,7 @@ export const layout: RunTimeLayoutConfig = ({
       const { location } = history;
       if (
         !initialState?.currentUser &&
-        !isPublicPath(location.pathname)
+        !checkIsPublic(location.pathname)
       ) {
         history.replace(
           `${loginPath}?redirect=${encodeURIComponent(location.pathname + location.search + location.hash)}`,
