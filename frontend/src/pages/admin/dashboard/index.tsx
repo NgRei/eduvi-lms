@@ -108,7 +108,7 @@ const AdminDashboard: React.FC = () => {
                 <Statistic
                   title={stat.title}
                   value={stat.value}
-                  valueStyle={{ fontSize: 24, fontWeight: 'bold' }}
+                  styles={{ content: { fontSize: 24, fontWeight: 'bold' } }}
                 />
                 {stat.icon}
               </div>

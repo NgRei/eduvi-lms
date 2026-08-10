@@ -233,10 +233,33 @@ const Login: React.FC = () => {
         </title>
       </Helmet>
       <Lang />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', zIndex: 10 }}>
+        <a
+          href="/"
+          style={{
+            color: '#4F46E5',
+            fontWeight: 600,
+            fontSize: 14,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            textDecoration: 'none',
+            background: 'rgba(255, 255, 255, 0.9)',
+            padding: '8px 16px',
+            borderRadius: 10,
+            border: '1px solid #E0E7FF',
+            boxShadow: '0 4px 12px rgba(79, 70, 229, 0.08)',
+            backdropFilter: 'blur(8px)',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          ← Quay lại trang chủ
+        </a>
+      </div>
       <div
         style={{
           flex: '1',
-          padding: '32px 0',
+          padding: '16px 0 32px',
         }}
       >
         <LoginForm
@@ -246,9 +269,11 @@ const Login: React.FC = () => {
             maxWidth: '75vw',
           }}
           logo={
-            <img alt="logo" src="/logo.svg" style={{ width: 44, height: 44 }} />
+            <a href="/" style={{ display: 'inline-flex', cursor: 'pointer' }}>
+              <img alt="logo" src="/logo.svg" style={{ width: 44, height: 44 }} />
+            </a>
           }
-          title="Eduvi LMS"
+          title={<a href="/" style={{ color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}>Eduvi LMS</a>}
           subTitle="Hệ thống Quản lý Học tập Trực tuyến Cao cấp"
           initialValues={{
             autoLogin: true,

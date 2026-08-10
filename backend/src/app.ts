@@ -1,100 +1,108 @@
-import express from 'express';
+import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import { sequelize } from './config/database';
+import './models'; // Load all models and associations
 import authRoutes from './routes/auth.routes';
 import courseRoutes from './routes/course.routes';
 import lessonRoutes from './routes/lesson.routes';
-import enrollmentRoutes from './routes/enrollment.routes';
-import lessonProgressRoutes from './routes/lessonProgress.routes';
-import uploadRoutes from './routes/upload.routes';
-import dashboardRoutes from './routes/dashboard.routes';
-import adminRoutes from './routes/admin.routes';
 import assignmentRoutes from './routes/assignment.routes';
-import submissionRoutes from './routes/submission.routes';
-import certificateRoutes from './routes/certificate.routes';
+import enrollmentRoutes from './routes/enrollment.routes';
 import reviewRoutes from './routes/review.routes';
 import auditRoutes from './routes/audit.routes';
+import certificateRoutes from './routes/certificate.routes';
+import adminRoutes from './routes/admin.routes';
+import uploadRoutes from './routes/upload.routes';
+import paymentRoutes from './routes/payment.routes';
+import dashboardRoutes from './routes/dashboard.routes';
+import lessonProgressRoutes from './routes/lessonProgress.routes';
+import submissionRoutes from './routes/submission.routes';
 
-// Load env vars
 dotenv.config();
 
-const app = express();
+const app: Express = express();
 const port = process.env.PORT || 5000;
 
-// Enable CORS
-app.use(cors({
-  origin: '*', // Allow all origins for dev simplicity, can narrow later
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// Middlewares
+app.use(cors());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Parsers
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Static directory for uploaded files (if local storage used)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Test route
-app.get('/health', (req, res) => {
-  res.status(200).json({ success: true, message: 'Eduvi LMS Backend is healthy!' });
+// Root Route
+app.get('/', (req: Request, res: Response) => {
+  res.json({
+    message: 'Welcome to Eduvi LMS Backend API (MySQL/phpMyAdmin)',
+    status: 'running',
+    timestamp: new Date().toISOString(),
+  });
 });
 
-// Register api routes
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/lessons', lessonRoutes);
-app.use('/api/enrollments', enrollmentRoutes);
-app.use('/api/lesson-progress', lessonProgressRoutes);
-app.use('/api/uploads', uploadRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/admin', adminRoutes);
 app.use('/api/assignments', assignmentRoutes);
-app.use('/api', submissionRoutes);
-app.use('/api/certificates', certificateRoutes);
+app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/audit-logs', auditRoutes);
+app.use('/api/certificates', certificateRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/uploads', uploadRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/lesson-progress', lessonProgressRoutes);
+app.use('/api/submissions', submissionRoutes);
 
 // Global Error Handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error('[SERVER ERROR]:', err);
   res.status(500).json({ success: false, error: 'Có lỗi xảy ra trên máy chủ!' });
 });
 
+let isServerListening = false;
+const startServer = () => {
+  if (!isServerListening) {
+    isServerListening = true;
+    app.listen(port, () => {
+      console.log(`\n==================================================`);
+      console.log(`🚀 Eduvi LMS Backend server is running on http://localhost:${port}`);
+      console.log(`==================================================\n`);
+    });
+  }
+};
+
 // Connect to MySQL and Sync Models
 sequelize.authenticate()
-  .then(() => {
-    console.log('Successfully connected to MySQL database via phpMyAdmin.');
-    
-    // Sync models - automatically creates tables in phpMyAdmin if they do not exist
-    return sequelize.sync({ force: false });
-  })
   .then(async () => {
-    console.log('Database schema successfully synchronized.');
-    
-    // Add FULLTEXT index for courses search if not exists
+    console.log('Successfully connected to MySQL database via phpMyAdmin.');
+
+    try {
+      await sequelize.sync({ force: false });
+      console.log('Database schema successfully synchronized.');
+    } catch (syncErr: any) {
+      console.warn('Database sync note:', syncErr.message || syncErr);
+    }
+
     try {
       await sequelize.query(`
         ALTER TABLE courses 
         ADD FULLTEXT INDEX ft_courses_search (title, short_description)
       `);
-      console.log('FULLTEXT index added successfully.');
     } catch (err: any) {
-      // Index may already exist, ignore error
-      if (!err.message.includes('Duplicate key name')) {
-        console.log('FULLTEXT index note:', err.message);
-      }
+      // FULLTEXT index may already exist
     }
-    
-    // Start listening
-    app.listen(port, () => {
-      console.log(`Eduvi LMS Backend server is running at http://localhost:${port}`);
-    });
+
+    startServer();
   })
-  .catch((err) => {
-    console.error('Database connection or synchronization error:', err);
-    console.log('\n[ATTENTION]: Vui lòng mở XAMPP/WampServer và tạo cơ sở dữ liệu có tên "eduvi_lms" trong phpMyAdmin để kết nối.');
-    
-    // Start listening anyway so they can see logs
-    app.listen(port, () => {
-      console.log(`Express server started in fallback mode on port ${port}`);
-    });
+  .catch((err: any) => {
+    console.error('Database connection warning:', err.message || err);
+    startServer();
   });
+
+export default app;
+// Server started
+

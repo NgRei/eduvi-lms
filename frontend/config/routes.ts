@@ -79,6 +79,12 @@ export default [
         component: './student/my-courses',
       },
       {
+        path: '/student/payments',
+        name: 'Lịch sử thanh toán',
+        icon: 'credit-card',
+        component: './student/payments',
+      },
+      {
         path: '/student/courses',
         name: 'Danh sách khóa học',
         icon: 'search',
@@ -132,6 +138,12 @@ export default [
         name: 'Quản lý khóa học',
         icon: 'table',
         component: './instructor/courses',
+      },
+      {
+        path: '/instructor/payments',
+        name: 'Doanh thu & Giao dịch',
+        icon: 'dollar',
+        component: './instructor/payments',
       },
       {
         path: '/instructor/courses/create',
@@ -189,6 +201,12 @@ export default [
         component: './admin/dashboard',
       },
       {
+        path: '/admin/payments',
+        name: 'Quản lý giao dịch & Doanh thu',
+        icon: 'pay-circle',
+        component: './admin/payments',
+      },
+      {
         path: '/admin/users',
         name: 'Quản lý người dùng',
         icon: 'team',
@@ -244,7 +262,8 @@ export default [
   },
   {
     path: '/',
-    component: './HomeRedirect',
+    component: './PublicHome',
+    layout: false,
   },
   {
     component: './exception/404',

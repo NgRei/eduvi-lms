@@ -150,3 +150,6 @@ vite.config.ts.timestamp-*
 
 #ignore dbml
 *.dbml
+
+#ignore website folder
+website-019fea90-4f07-756b-b59a-45ba01cb2c50/

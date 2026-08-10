@@ -18,6 +18,7 @@ import {
   OfflineBanner,
 } from '@/components';
 import { currentUser as queryCurrentUser } from '@/services/ant-design-pro/api';
+import { isPublicPath } from '@/utils/publicPath';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
 
@@ -297,14 +298,6 @@ if (isDev && typeof window !== 'undefined') {
   }
 }
 
-const publicPaths = [
-  loginPath,
-  '/user/register',
-  '/user/register-result',
-  '/user/forgot-password',
-  '/user/reset-password',
-];
-
 /**
  * @see https://umijs.org/docs/api/runtime-config#getinitialstate
  * */
@@ -323,25 +316,20 @@ export async function getInitialState(): Promise<{
       return msg.data;
     } catch (_error) {
       const { pathname, search, hash } = history.location;
-      history.replace(
-        `${loginPath}?redirect=${encodeURIComponent(pathname + search + hash)}`,
-      );
+      if (!isPublicPath(pathname)) {
+        history.replace(
+          `${loginPath}?redirect=${encodeURIComponent(pathname + search + hash)}`,
+        );
+      }
     }
     return undefined;
   };
-  // 如果不是登录页面，执行
-  const { location } = history;
-  if (!publicPaths.includes(location.pathname)) {
-    const currentUser = await fetchUserInfo();
-    return {
-      fetchUserInfo,
-      currentUser,
-      settings: defaultSettings as Partial<LayoutSettings>,
-      settingDrawerOpen: false,
-    };
-  }
+
+  const currentUser = await fetchUserInfo();
+
   return {
     fetchUserInfo,
+    currentUser,
     settings: defaultSettings as Partial<LayoutSettings>,
     settingDrawerOpen: false,
   };
@@ -374,10 +362,9 @@ export const layout: RunTimeLayoutConfig = ({
     footerRender: () => <Footer />,
     onPageChange: () => {
       const { location } = history;
-      // 如果没有登录，重定向到 login
       if (
         !initialState?.currentUser &&
-        !publicPaths.includes(location.pathname)
+        !isPublicPath(location.pathname)
       ) {
         history.replace(
           `${loginPath}?redirect=${encodeURIComponent(location.pathname + location.search + location.hash)}`,

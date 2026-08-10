@@ -17,6 +17,7 @@ import { UserCertificate } from './UserCertificate.model';
 import { CourseReview } from './CourseReview.model';
 import { AuditLog } from './AuditLog.model';
 import { RefreshToken } from './RefreshToken.model';
+import { Payment } from './Payment.model';
 
 // User 1-to-1 StudentProfile
 User.hasOne(StudentProfile, { foreignKey: 'user_id', as: 'studentProfile', onDelete: 'CASCADE' });
@@ -134,6 +135,16 @@ AuditLog.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 User.hasMany(RefreshToken, { foreignKey: 'user_id', as: 'refreshTokens', onDelete: 'CASCADE' });
 RefreshToken.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
+// Payment associations
+User.hasMany(Payment, { foreignKey: 'user_id', as: 'payments', onDelete: 'CASCADE' });
+Payment.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+Course.hasMany(Payment, { foreignKey: 'course_id', as: 'payments', onDelete: 'CASCADE' });
+Payment.belongsTo(Course, { foreignKey: 'course_id', as: 'course' });
+
+Payment.hasOne(Enrollment, { foreignKey: 'payment_id', as: 'enrollment', onDelete: 'SET NULL' });
+Enrollment.belongsTo(Payment, { foreignKey: 'payment_id', as: 'payment' });
+
 export {
   User,
   StudentProfile,
@@ -153,5 +164,6 @@ export {
   UserCertificate,
   CourseReview,
   AuditLog,
-  RefreshToken
+  RefreshToken,
+  Payment
 };

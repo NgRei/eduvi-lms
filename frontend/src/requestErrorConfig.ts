@@ -2,6 +2,7 @@ import type { RequestOptions } from '@@/plugin-request/request';
 import type { RequestConfig } from '@umijs/max';
 import { getIntl, request } from '@umijs/max';
 import { message, notification } from 'antd';
+import { isPublicPath } from '@/utils/publicPath';
 
 // Dedupe: nhiều request 403 cùng lúc chỉ kích hoạt MỘT lần refresh.
 let refreshPromise: Promise<string> | null = null;
@@ -39,7 +40,7 @@ const refreshAccessToken = (refreshToken: string): Promise<string> => {
 const redirectToLogin = () => {
   if (typeof window === 'undefined') return;
   const { pathname } = window.location;
-  if (pathname !== '/user/login') {
+  if (!isPublicPath(pathname)) {
     window.location.href = `/user/login?redirect=${encodeURIComponent(pathname)}`;
   }
 };

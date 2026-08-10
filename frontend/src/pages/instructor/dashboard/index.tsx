@@ -150,10 +150,12 @@ const InstructorDashboard: React.FC = () => {
                     value={stat.value}
                     prefix={stat.prefix}
                     suffix={stat.suffix}
-                    valueStyle={{
-                      fontSize: 24,
-                      fontWeight: 'bold',
-                      color: '#111827',
+                    styles={{
+                      content: {
+                        fontSize: 24,
+                        fontWeight: 'bold',
+                        color: '#111827',
+                      },
                     }}
                   />
                 </div>

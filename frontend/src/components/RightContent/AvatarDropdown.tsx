@@ -22,8 +22,8 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
     startTransition(() => {
       setInitialState((s) => ({ ...s, currentUser: undefined }));
     });
-    // Always go to clean login page — no redirect param
-    window.location.href = '/user/login';
+    // Redirect to public homepage upon logout
+    window.location.href = '/';
   };
   const { initialState, setInitialState } = useModel('@@initialState');
 
