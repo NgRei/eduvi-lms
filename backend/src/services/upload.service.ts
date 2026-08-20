@@ -1,5 +1,6 @@
 import cloudinary from '../config/cloudinary';
 import { Readable } from 'stream';
+import path from 'path';
 
 interface CloudinaryUploadResult {
   public_id: string;
@@ -65,6 +66,41 @@ export async function uploadImage(
     readableStream.pipe(uploadStream);
   });
 }
+
+export async function uploadRawFile(
+  fileBuffer: Buffer,
+  folder: string,
+  originalFilename?: string
+): Promise<CloudinaryUploadResult> {
+  return new Promise((resolve, reject) => {
+    let publicId = undefined;
+    if (originalFilename) {
+      const ext = path.extname(originalFilename) || '.pdf';
+      const nameWithoutExt = path.basename(originalFilename, ext).replace(/[^a-zA-Z0-9_-]/g, '_');
+      publicId = `${nameWithoutExt}_${Date.now()}`;
+    } else {
+      publicId = `document_${Date.now()}`;
+    }
+
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: 'raw',
+        folder: folder,
+        public_id: publicId,
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result as unknown as CloudinaryUploadResult);
+      }
+    );
+
+    const readableStream = new Readable();
+    readableStream.push(fileBuffer);
+    readableStream.push(null);
+    readableStream.pipe(uploadStream);
+  });
+}
+
 
 export function getSignedVideoUrl(
   cloudinaryId: string,

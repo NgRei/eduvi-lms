@@ -97,6 +97,12 @@ export default [
         hideInMenu: true,
       },
       {
+        path: '/student/courses/:courseId/completion',
+        name: 'Hoàn thành khóa học',
+        component: './student/my-courses/completion',
+        hideInMenu: true,
+      },
+      {
         path: '/student/assignments/:id',
         name: 'Làm bài tập',
         component: './student/assignments/take',

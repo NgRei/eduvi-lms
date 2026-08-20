@@ -86,7 +86,6 @@ sequelize.authenticate()
     } catch (syncErr: any) {
       console.warn('Database sync note:', syncErr.message || syncErr);
     }
-
     try {
       await sequelize.query(`
         ALTER TABLE courses 
@@ -94,6 +93,16 @@ sequelize.authenticate()
       `);
     } catch (err: any) {
       // FULLTEXT index may already exist
+    }
+
+    try {
+      await sequelize.query(`
+        ALTER TABLE lessons 
+        MODIFY COLUMN lesson_type ENUM('video', 'text', 'pdf', 'slide', 'quiz') NOT NULL DEFAULT 'video'
+      `);
+      console.log('Successfully altered lessons.lesson_type column enum values.');
+    } catch (err: any) {
+      console.warn('Modify lessons.lesson_type enum warning:', err.message);
     }
 
     startServer();

@@ -44,6 +44,12 @@ jest.mock('../services/upload.service', () => ({
     width: 800,
     height: 600,
   }),
+  uploadRawFile: jest.fn().mockResolvedValue({
+    public_id: 'eduvi/raw/doc123',
+    secure_url: 'https://res.cloudinary.com/raw/upload/v12345/eduvi/doc123.pdf',
+    format: 'pdf',
+    bytes: 1048576,
+  }),
   getSignedVideoUrl: mockGetSignedVideoUrl,
   deleteVideo: jest.fn().mockResolvedValue(true),
   deleteImage: jest.fn().mockResolvedValue(true),

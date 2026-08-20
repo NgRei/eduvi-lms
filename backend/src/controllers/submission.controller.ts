@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { Op } from 'sequelize';
 import { Submission, Assignment, QuizQuestion, User, Enrollment, LessonProgress, CourseInstructor } from '../models';
 import { AuthRequest } from '../middlewares/auth.middleware';
+import { autoIssueCertificateHelper } from './certificate.controller';
 
 // Helper: Check if user is instructor of the course
 const isInstructorOfCourse = async (userId: string, courseId: string): Promise<boolean> => {
@@ -101,12 +102,13 @@ export const submitAssignment = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ success: false, error: 'Bạn chưa đăng ký khóa học này!' });
     }
 
-    // Check attempts
+    // Count existing submissions
     const existingSubmissions = await Submission.count({
       where: { assignment_id: id, user_id: req.user.id },
     });
 
-    if (existingSubmissions >= assignment.attempts_allowed) {
+    // Check attempts (bypass for Final Exam where lesson_id is null)
+    if (assignment.lesson_id !== null && existingSubmissions >= assignment.attempts_allowed) {
       return res.status(400).json({ success: false, error: 'Bạn đã hết lượt nộp bài!' });
     }
 
@@ -161,6 +163,15 @@ export const submitAssignment = async (req: AuthRequest, res: Response) => {
             quiz_score: gradingResult.score,
             completed_at: new Date(),
           });
+        }
+      }
+
+      // Auto-issue certificate if it's Final Exam and user passed
+      if (gradingResult.passed && assignment.lesson_id === null) {
+        try {
+          await autoIssueCertificateHelper(req.user.id, assignment.course_id);
+        } catch (certErr: any) {
+          console.warn('Auto-issue certificate error on quiz submission:', certErr.message);
         }
       }
     }
@@ -389,6 +400,15 @@ export const gradeSubmission = async (req: AuthRequest, res: Response) => {
           quiz_score: score,
           completed_at: new Date(),
         });
+      }
+    }
+
+    // Auto-issue certificate if it's Final Exam and user passed
+    if (score >= assignment.passing_score && assignment.lesson_id === null) {
+      try {
+        await autoIssueCertificateHelper(submission.user_id, assignment.course_id);
+      } catch (certErr: any) {
+        console.warn('Auto-issue certificate error on manual essay grading:', certErr.message);
       }
     }
 

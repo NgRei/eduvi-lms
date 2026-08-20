@@ -90,6 +90,20 @@ export async function uploadImage(file: File, folder?: string) {
   });
 }
 
+export async function uploadRawFile(file: File, folder?: string) {
+  const formData = new FormData();
+  formData.append('file', file);
+  if (folder) {
+    formData.append('folder', folder);
+  }
+
+  return request<any>('/api/uploads/raw', {
+    method: 'POST',
+    data: formData,
+    requestType: 'form',
+  });
+}
+
 export async function getSignedVideoUrl(videoId: string, courseId: string) {
   return request<SignedUrlResponse>(`/api/uploads/video/${videoId}/signed-url`, {
     method: 'GET',

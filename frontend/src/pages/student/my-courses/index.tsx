@@ -90,10 +90,18 @@ const MyCourses: React.FC = () => {
                   <Button
                     key="study-btn"
                     type="primary"
-                    style={{ width: '85%' }}
+                    size="small"
                     onClick={() => history.push(`/courses/${course.id}`)}
                   >
-                    {isCompleted ? 'Xem lại bài học' : 'Tiếp tục học bài'}
+                    Vào học
+                  </Button>,
+                  <Button
+                    key="completion-btn"
+                    type="default"
+                    size="small"
+                    onClick={() => history.push(`/student/courses/${course.id}/completion`)}
+                  >
+                    Tiến trình
                   </Button>,
                 ]}
               >

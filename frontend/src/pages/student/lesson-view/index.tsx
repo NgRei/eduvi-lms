@@ -4,6 +4,8 @@ import {
   ClockCircleOutlined,
   FileTextOutlined,
   PlayCircleOutlined,
+  FilePdfOutlined,
+  DownloadOutlined,
 } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { history, useParams } from '@umijs/max';
@@ -22,6 +24,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   type Assignment,
   getAssignments,
+  getAssignment,
 } from '@/services/ant-design-pro/assignments';
 import { checkEnrollment } from '@/services/ant-design-pro/enrollments';
 import {
@@ -39,6 +42,11 @@ import {
 import { getSignedVideoUrl } from '@/services/ant-design-pro/uploads';
 
 const { Title, Text } = Typography;
+
+const getProxyFileUrl = (url: string, isDownload: boolean = false): string => {
+  if (!url) return '';
+  return `/api/uploads/file-proxy?url=${encodeURIComponent(url)}${isDownload ? '&download=true' : ''}`;
+};
 
 const LessonViewPage: React.FC = () => {
   const { courseId, lessonId } = useParams<{
@@ -70,6 +78,10 @@ const LessonViewPage: React.FC = () => {
           ) {
             const urlRes = await getSignedVideoUrl(res.data.video_id, courseId);
             if (urlRes.success && urlRes.data) setSignedUrl(urlRes.data.url);
+          }
+          if (res.data.lesson_type === 'quiz' && res.data.content_url) {
+            const assignRes = await getAssignment(res.data.content_url);
+            if (assignRes.success) setAssignment(assignRes.data);
           }
         }
       } catch (err) {
@@ -266,6 +278,83 @@ const LessonViewPage: React.FC = () => {
               />
             )}
 
+            {lesson.lesson_type === 'pdf' && lesson.content_url && (
+              <div style={{ width: '100%', borderRadius: 8, overflow: 'hidden', border: '1px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
+                <div style={{ padding: '10px 16px', background: '#f3f4f6', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 600, color: '#374151' }}>
+                    <FilePdfOutlined style={{ color: '#EF4444', marginRight: 8, fontSize: 16 }} />
+                    Tài liệu bài học (PDF)
+                  </span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<DownloadOutlined />}
+                    href={getProxyFileUrl(lesson.content_url)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Mở trong tab mới
+                  </Button>
+                </div>
+                <div style={{ height: '650px', width: '100%' }}>
+                  <iframe
+                    src={getProxyFileUrl(lesson.content_url)}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 'none' }}
+                    title="PDF Viewer"
+                  />
+                </div>
+              </div>
+            )}
+
+            {lesson.lesson_type === 'slide' && lesson.content_url && (
+              <div style={{ width: '100%', borderRadius: 8, overflow: 'hidden', border: '1px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
+                <div style={{ padding: '10px 16px', background: '#f3f4f6', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 600, color: '#374151' }}>
+                    <FilePdfOutlined style={{ color: '#8B5CF6', marginRight: 8, fontSize: 16 }} />
+                    Slide Bài giảng
+                  </span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<DownloadOutlined />}
+                    href={getProxyFileUrl(lesson.content_url)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Mở trong tab mới
+                  </Button>
+                </div>
+                <div style={{ height: '550px', width: '100%' }}>
+                  <iframe
+                    src={getProxyFileUrl(lesson.content_url)}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 'none' }}
+                    title="Slide Viewer"
+                  />
+                </div>
+              </div>
+            )}
+
+            {lesson.lesson_type === 'quiz' && assignment && (
+              <div style={{ textAlign: 'center', padding: '40px 20px', border: '1px dashed #4f46e5', borderRadius: 8, backgroundColor: '#f9fafb' }}>
+                <FileTextOutlined style={{ fontSize: 48, color: '#4F46E5', marginBottom: 16 }} />
+                <Title level={4} style={{ marginBottom: 8 }}>{assignment.title}</Title>
+                <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>
+                  Thời gian làm bài: {assignment.time_limit_minutes ? `${assignment.time_limit_minutes} phút` : 'Không giới hạn'} | Điểm đạt: {assignment.passing_score}/{assignment.total_points} điểm
+                </Text>
+                <Button
+                  type="primary"
+                  size="large"
+                  onClick={() => history.push(`/student/assignments/${assignment.id}`)}
+                >
+                  Bắt đầu làm bài tập
+                </Button>
+              </div>
+            )}
+
             <div
               style={{
                 marginTop: 24,
@@ -287,28 +376,50 @@ const LessonViewPage: React.FC = () => {
             </div>
 
             {lesson.materials && lesson.materials.length > 0 && (
-              <div style={{ marginTop: 16 }}>
-                <Text strong>Tài liệu bài giảng:</Text>
+              <div style={{ marginTop: 20, padding: 16, background: '#f9fafb', borderRadius: 8, border: '1px solid #f3f4f6' }}>
+                <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 12 }}>
+                  <FileTextOutlined style={{ color: '#4F46E5', marginRight: 8 }} />
+                  Tài liệu bài giảng đính kèm:
+                </Text>
                 <List
                   size="small"
                   dataSource={lesson.materials}
-                  renderItem={(mat) => (
-                    <List.Item>
-                      <a
-                        href={mat.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                  renderItem={(mat) => {
+                    const isPdf = mat.material_type === 'pdf' || mat.file_url.includes('.pdf');
+                    return (
+                      <List.Item
+                        actions={[
+                          <Button
+                            type="link"
+                            size="small"
+                            icon={<DownloadOutlined />}
+                            href={getProxyFileUrl(mat.file_url, true)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            key="download"
+                          >
+                            Tải về
+                          </Button>,
+                        ]}
                       >
-                        {mat.title} ({mat.material_type.toUpperCase()})
-                      </a>
-                    </List.Item>
-                  )}
+                        <List.Item.Meta
+                          avatar={<FilePdfOutlined style={{ color: isPdf ? '#EF4444' : '#3B82F6', fontSize: 18 }} />}
+                          title={
+                            <a href={getProxyFileUrl(mat.file_url)} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 500 }}>
+                              {mat.title}
+                            </a>
+                          }
+                          description={`${mat.material_type.toUpperCase()} ${mat.file_size_kb ? `• ${(mat.file_size_kb / 1024).toFixed(2)} MB` : ''}`}
+                        />
+                      </List.Item>
+                    );
+                  }}
                 />
               </div>
             )}
           </Card>
 
-          {assignment && (
+          {assignment && lesson.lesson_type !== 'quiz' && (
             <Card
               size="small"
               style={{ marginTop: 16, borderColor: '#4F46E5' }}
@@ -389,6 +500,10 @@ const LessonViewPage: React.FC = () => {
                         ) : item.lesson_type === 'video' ? (
                           <PlayCircleOutlined
                             style={{ color: '#6B7280', fontSize: 18 }}
+                          />
+                        ) : item.lesson_type === 'quiz' ? (
+                          <FileTextOutlined
+                            style={{ color: '#8B5CF6', fontSize: 18 }}
                           />
                         ) : (
                           <BookOutlined

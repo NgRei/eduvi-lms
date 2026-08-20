@@ -17,7 +17,7 @@ export interface Lesson {
   course_id: string;
   title: string;
   sort_order: number;
-  lesson_type: 'video' | 'text' | 'quiz' | 'live';
+  lesson_type: 'video' | 'text' | 'pdf' | 'slide' | 'quiz';
   content_url: string | null;
   content_text: string | null;
   duration_minutes: number | null;
@@ -65,7 +65,7 @@ export async function createLesson(
   data: {
     title: string;
     sort_order?: number;
-    lesson_type?: 'video' | 'text' | 'quiz' | 'live';
+    lesson_type?: 'video' | 'text' | 'pdf' | 'slide' | 'quiz';
     content_url?: string;
     content_text?: string;
     duration_minutes?: number;
@@ -83,7 +83,7 @@ export async function updateLesson(
   data: {
     title?: string;
     sort_order?: number;
-    lesson_type?: 'video' | 'text' | 'quiz' | 'live';
+    lesson_type?: 'video' | 'text' | 'pdf' | 'slide' | 'quiz';
     content_url?: string;
     content_text?: string;
     duration_minutes?: number;
@@ -111,4 +111,26 @@ export async function reorderLessons(courseId: string, lessonIds: string[]) {
       data: { lessonIds },
     },
   );
+}
+
+export async function addLessonMaterial(
+  lessonId: string,
+  data: {
+    title: string;
+    material_type: 'pdf' | 'video' | 'slide' | 'link' | 'zip' | 'other';
+    file_url: string;
+    file_size_kb?: number;
+    is_downloadable?: boolean;
+  },
+) {
+  return request<any>(`/api/lessons/${lessonId}/materials`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export async function deleteLessonMaterial(lessonId: string, materialId: string) {
+  return request<any>(`/api/lessons/${lessonId}/materials/${materialId}`, {
+    method: 'DELETE',
+  });
 }

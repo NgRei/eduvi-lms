@@ -296,3 +296,97 @@ export const reorderLessons = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ success: false, error: 'Có lỗi xảy ra khi sắp xếp bài giảng!' });
   }
 };
+
+// POST /api/lessons/:lessonId/materials - Thêm tài liệu cho bài giảng
+export const addLessonMaterial = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Chưa xác thực người dùng!' });
+    }
+
+    const { lessonId } = req.params;
+    const { title, material_type, file_url, file_size_kb, is_downloadable } = req.body;
+
+    if (!title || !material_type || !file_url) {
+      return res.status(400).json({ success: false, error: 'Thiếu thông tin tài liệu!' });
+    }
+
+    const lesson = await Lesson.findByPk(lessonId);
+    if (!lesson) {
+      return res.status(404).json({ success: false, error: 'Không tìm thấy bài giảng!' });
+    }
+
+    // Check permission
+    if (req.user.user_type !== 'admin') {
+      const isInstructor = await CourseInstructor.findOne({
+        where: { course_id: lesson.course_id, instructor_id: req.user.id }
+      });
+      if (!isInstructor) {
+        return res.status(403).json({ success: false, error: 'Bạn không có quyền quản lý tài liệu bài giảng này!' });
+      }
+    }
+
+    // Get max sort_order
+    const maxOrder = await CourseMaterial.max('sort_order', { where: { lesson_id: lessonId } });
+    const order = (maxOrder as number || 0) + 1;
+
+    const material = await CourseMaterial.create({
+      course_id: lesson.course_id,
+      lesson_id: lessonId,
+      title,
+      material_type,
+      file_url,
+      file_size_kb: file_size_kb || null,
+      is_downloadable: is_downloadable !== undefined ? is_downloadable : true,
+      sort_order: order,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'Thêm tài liệu thành công!',
+      data: material
+    });
+  } catch (error: any) {
+    console.error('addLessonMaterial Error:', error);
+    return res.status(500).json({ success: false, error: 'Có lỗi xảy ra khi thêm tài liệu!' });
+  }
+};
+
+// DELETE /api/lessons/:lessonId/materials/:materialId - Xóa tài liệu bài giảng
+export const deleteLessonMaterial = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Chưa xác thực người dùng!' });
+    }
+
+    const { lessonId, materialId } = req.params;
+
+    const material = await CourseMaterial.findOne({
+      where: { id: materialId, lesson_id: lessonId }
+    });
+
+    if (!material) {
+      return res.status(404).json({ success: false, error: 'Không tìm thấy tài liệu!' });
+    }
+
+    // Check permission
+    if (req.user.user_type !== 'admin') {
+      const isInstructor = await CourseInstructor.findOne({
+        where: { course_id: material.course_id, instructor_id: req.user.id }
+      });
+      if (!isInstructor) {
+        return res.status(403).json({ success: false, error: 'Bạn không có quyền quản lý tài liệu bài giảng này!' });
+      }
+    }
+
+    await material.destroy();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Xóa tài liệu thành công!'
+    });
+  } catch (error: any) {
+    console.error('deleteLessonMaterial Error:', error);
+    return res.status(500).json({ success: false, error: 'Có lỗi xảy ra khi xóa tài liệu!' });
+  }
+};

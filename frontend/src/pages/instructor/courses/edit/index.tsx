@@ -15,6 +15,7 @@ import {
   Table,
   Tabs,
   Tag,
+  Drawer,
 } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -31,6 +32,8 @@ import {
   type Lesson,
   updateLesson,
 } from '@/services/ant-design-pro/lessons';
+import { LessonContentForm } from '@/components/lesson/LessonContentForm';
+import { MaterialUpload } from '@/components/lesson/MaterialUpload';
 
 const { TextArea } = Input;
 
@@ -146,9 +149,15 @@ const EditCourse: React.FC = () => {
       title: 'Loại',
       dataIndex: 'lesson_type',
       key: 'lesson_type',
-      render: (t: string) => (
-        <Tag color={t === 'video' ? 'blue' : 'green'}>{t}</Tag>
-      ),
+      render: (t: string) => {
+        let color = 'default';
+        if (t === 'video') color = 'blue';
+        if (t === 'text') color = 'cyan';
+        if (t === 'pdf') color = 'red';
+        if (t === 'slide') color = 'orange';
+        if (t === 'quiz') color = 'purple';
+        return <Tag color={color}>{t ? t.toUpperCase() : '-'}</Tag>;
+      },
     },
     {
       title: 'Thời lượng',
@@ -176,7 +185,10 @@ const EditCourse: React.FC = () => {
                 title: record.title,
                 lesson_type: record.lesson_type,
                 duration_minutes: record.duration_minutes,
+                is_preview: record.is_preview !== undefined ? record.is_preview : false,
                 is_published: record.is_published,
+                content_url: record.content_url || undefined,
+                content_text: record.content_text || undefined,
               });
               setShowLessonForm(true);
             }}
@@ -275,64 +287,105 @@ const EditCourse: React.FC = () => {
                   </Button>
                 </div>
 
-                {showLessonForm && (
-                  <Card
-                    style={{ marginBottom: 16 }}
-                    title={editingLesson ? 'Sửa bài giảng' : 'Thêm bài giảng'}
+                <Drawer
+                  title={editingLesson ? 'Chỉnh sửa bài giảng' : 'Tạo bài giảng mới'}
+                  width={720}
+                  onClose={() => {
+                    setShowLessonForm(false);
+                    setEditingLesson(null);
+                  }}
+                  open={showLessonForm}
+                  destroyOnClose
+                  extra={
+                    <Space>
+                      <Button onClick={() => {
+                        setShowLessonForm(false);
+                        setEditingLesson(null);
+                      }}>
+                        Hủy
+                      </Button>
+                      <Button type="primary" onClick={() => lessonForm.submit()}>
+                        Lưu bài học
+                      </Button>
+                    </Space>
+                  }
+                >
+                  <Form
+                    form={lessonForm}
+                    layout="vertical"
+                    onFinish={handleSaveLesson}
                   >
-                    <Form
-                      form={lessonForm}
-                      layout="inline"
-                      onFinish={handleSaveLesson}
+                    <Form.Item
+                      name="title"
+                      label="Tên bài giảng"
+                      rules={[{ required: true, message: 'Nhập tên bài giảng!' }]}
                     >
+                      <Input placeholder="Tên bài giảng" />
+                    </Form.Item>
+
+                    <Space size="large" style={{ display: 'flex', width: '100%', flexWrap: 'wrap' }}>
                       <Form.Item
-                        name="title"
-                        rules={[{ required: true, message: 'Nhập tên' }]}
+                        name="lesson_type"
+                        label="Loại bài giảng"
+                        initialValue="video"
+                        style={{ width: 180 }}
                       >
-                        <Input
-                          placeholder="Tên bài giảng"
-                          style={{ width: 250 }}
-                        />
-                      </Form.Item>
-                      <Form.Item name="lesson_type" initialValue="video">
                         <Select
-                          style={{ width: 120 }}
                           options={[
                             { label: 'Video', value: 'video' },
-                            { label: 'Text', value: 'text' },
+                            { label: 'Text (Văn bản)', value: 'text' },
+                            { label: 'PDF', value: 'pdf' },
+                            { label: 'Slide (PDF/PPT)', value: 'slide' },
+                            { label: 'Quiz (Bài tập)', value: 'quiz' },
                           ]}
                         />
                       </Form.Item>
-                      <Form.Item name="duration_minutes">
-                        <InputNumber placeholder="Phút" min={1} />
+
+                      <Form.Item name="duration_minutes" label="Thời lượng (phút)" style={{ width: 140 }}>
+                        <InputNumber placeholder="Phút" min={1} style={{ width: '100%' }} />
                       </Form.Item>
-                      <Form.Item name="is_published" initialValue={false}>
+
+                      <Form.Item name="is_preview" label="Xem trước miễn phí" valuePropName="checked" initialValue={false} style={{ width: 150 }}>
                         <Select
-                          style={{ width: 120 }}
+                          options={[
+                            { label: 'Không cho phép', value: false },
+                            { label: 'Cho phép xem trước', value: true },
+                          ]}
+                        />
+                      </Form.Item>
+
+                      <Form.Item name="is_published" label="Trạng thái" initialValue={true} style={{ width: 140 }}>
+                        <Select
                           options={[
                             { label: 'Nháp', value: false },
                             { label: 'Xuất bản', value: true },
                           ]}
                         />
                       </Form.Item>
-                      <Form.Item>
-                        <Space>
-                          <Button type="primary" htmlType="submit">
-                            {editingLesson ? 'Cập nhật' : 'Thêm'}
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              setShowLessonForm(false);
-                              setEditingLesson(null);
-                            }}
-                          >
-                            Hủy
-                          </Button>
-                        </Space>
-                      </Form.Item>
-                    </Form>
-                  </Card>
-                )}
+                    </Space>
+
+                    <Form.Item noStyle shouldUpdate={(prev, curr) => prev.lesson_type !== curr.lesson_type}>
+                      {({ getFieldValue }) => {
+                        const type = getFieldValue('lesson_type') || 'video';
+                        return (
+                          <LessonContentForm
+                            courseId={id!}
+                            lessonType={type}
+                            form={lessonForm}
+                          />
+                        );
+                      }}
+                    </Form.Item>
+                  </Form>
+
+                  {editingLesson && (
+                    <MaterialUpload
+                      lessonId={editingLesson.id}
+                      materials={editingLesson.materials || []}
+                      onRefresh={() => fetchCourse(id!)}
+                    />
+                  )}
+                </Drawer>
 
                 <Table
                   dataSource={lessons}

@@ -6,7 +6,7 @@ export class Lesson extends Model {
   declare course_id: string;
   declare title: string;
   declare sort_order: number;
-  declare lesson_type: 'video' | 'text' | 'quiz' | 'live';
+  declare lesson_type: 'video' | 'text' | 'pdf' | 'slide' | 'quiz';
   declare content_url: string | null;
   declare content_text: string | null;
   declare duration_minutes: number | null;
@@ -43,7 +43,7 @@ Lesson.init(
       defaultValue: 0,
     },
     lesson_type: {
-      type: DataTypes.ENUM('video', 'text', 'quiz', 'live'),
+      type: DataTypes.ENUM('video', 'text', 'pdf', 'slide', 'quiz'),
       allowNull: false,
       defaultValue: 'video',
     },

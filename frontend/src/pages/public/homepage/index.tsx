@@ -30,7 +30,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { FaFacebookF, FaLinkedinIn, FaYoutube } from "react-icons/fa6";
-import React, {
+import {
   useCallback,
   useEffect,
   useMemo,
@@ -40,7 +40,7 @@ import React, {
 } from "react";
 import { Link, useModel } from '@umijs/max';
 import { courses, stats, testimonials, type Course } from "./data";
-import './index.css';
+import './homepage.css';
 
 const IMAGES = {
   COURSES_DOT_CLOUD: "/images/img_913f3d3c671d.jpg",
@@ -167,9 +167,7 @@ const useRevealSections = () => {
     if (typeof document === "undefined" || !("IntersectionObserver" in window)) return;
 
     const sections = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
-    sections.forEach((section) => {
-      section.classList.add("reveal-ready");
-    });
+    sections.forEach((section) => section.classList.add("reveal-ready"));
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -183,9 +181,7 @@ const useRevealSections = () => {
       { threshold: 0.14, rootMargin: "0px 0px -40px" },
     );
 
-    sections.forEach((section) => {
-      observer.observe(section);
-    });
+    sections.forEach((section) => observer.observe(section));
     return () => observer.disconnect();
   }, []);
 };
@@ -194,15 +190,16 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const { initialState } = useModel('@@initialState');
-  const currentUser = initialState?.currentUser;
+  const isLoggedIn = !!initialState?.currentUser;
+  const userAccess = initialState?.currentUser?.access;
 
   // Determine dashboard link based on role
-  const getDashboardPath = () => {
-    if (!currentUser) return "/user/login";
-    if (currentUser.access === "admin") return "/admin/dashboard";
-    if (currentUser.access === "instructor") return "/instructor/dashboard";
-    return "/student/dashboard";
-  };
+  let dashboardPath = '/student/dashboard';
+  if (userAccess === 'admin') {
+    dashboardPath = '/admin/dashboard';
+  } else if (userAccess === 'instructor') {
+    dashboardPath = '/instructor/dashboard';
+  }
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 80);
@@ -239,8 +236,8 @@ const Header = () => {
         </nav>
 
         <div className="desktop-actions">
-          {currentUser ? (
-            <Link className="button button-sm button-primary" to={getDashboardPath()}>
+          {isLoggedIn ? (
+            <Link className="button button-sm button-primary" to={dashboardPath}>
               Góc học tập
               <ArrowUpRight size={16} />
             </Link>
@@ -281,8 +278,8 @@ const Header = () => {
           </a>
         </nav>
         <div className="mobile-actions">
-          {currentUser ? (
-            <Link className="button button-primary" to={getDashboardPath()} onClick={closeMenu}>
+          {isLoggedIn ? (
+            <Link className="button button-primary" to={dashboardPath} onClick={closeMenu}>
               Góc học tập
             </Link>
           ) : (
@@ -852,7 +849,7 @@ const Footer = () => (
   </footer>
 );
 
-const PublicHome = () => {
+const PublicHomepage = () => {
   useRevealSections();
 
   const pageStyle = {
@@ -877,4 +874,4 @@ const PublicHome = () => {
   );
 };
 
-export default PublicHome;
+export default PublicHomepage;

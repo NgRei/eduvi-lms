@@ -50,3 +50,10 @@ export const uploadImage = multer({
     fileSize: 5 * 1024 * 1024,
   },
 }).single('image');
+
+export const uploadRaw = multer({
+  storage,
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100MB limit
+  },
+}).single('file');

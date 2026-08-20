@@ -21,6 +21,13 @@ jest.mock('../models', () => {
     InstructorProfile: {
       create: jest.fn(),
     },
+    RefreshToken: {
+      create: jest.fn().mockResolvedValue({}),
+      destroy: jest.fn().mockResolvedValue(1),
+    },
+    AuditLog: {
+      create: jest.fn().mockResolvedValue({}),
+    },
   };
 });
 
@@ -236,7 +243,7 @@ describe('Auth API', () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.message).toBe('Đăng nhập thành công!');
-      expect(res.body).toHaveProperty('token');
+      expect(res.body).toHaveProperty('accessToken');
       expect(res.body.user).toHaveProperty('email', 'student@test.com');
     });
 
@@ -252,7 +259,7 @@ describe('Auth API', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body).toHaveProperty('token');
+      expect(res.body).toHaveProperty('accessToken');
     });
 
     it('should return 400 if missing credentials', async () => {
@@ -321,7 +328,7 @@ describe('Auth API', () => {
           password: 'password123',
         });
 
-      const decoded = jwt.verify(res.body.token, JWT_SECRET) as any;
+      const decoded = jwt.verify(res.body.accessToken, JWT_SECRET) as any;
       expect(decoded).toHaveProperty('id', mockUser.id);
       expect(decoded).toHaveProperty('email', mockUser.email);
       expect(decoded).toHaveProperty('user_type', mockUser.user_type);

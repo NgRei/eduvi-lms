@@ -1,7 +1,8 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import cloudinary from '../config/cloudinary';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import { Video, Course, CourseInstructor, Enrollment, Lesson } from '../models';
-import { uploadVideo, uploadImage, getSignedVideoUrl, deleteVideo, deleteImage } from '../services/upload.service';
+import { uploadVideo, uploadImage, uploadRawFile, getSignedVideoUrl, deleteVideo, deleteImage } from '../services/upload.service';
 
 export const handleVideoUpload = async (req: AuthRequest, res: Response) => {
   try {
@@ -222,5 +223,135 @@ export const getVideosByCourse = async (req: AuthRequest, res: Response) => {
   } catch (error: any) {
     console.error('getVideosByCourse Error:', error);
     return res.status(500).json({ success: false, error: 'Có lỗi xảy ra!' });
+  }
+};
+
+export const handleRawUpload = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Chưa xác thực người dùng!' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'Vui lòng chọn file!' });
+    }
+
+    const { folder } = req.body;
+    const uploadFolder = folder || 'eduvi/documents';
+
+    const result = await uploadRawFile(req.file.buffer, uploadFolder, req.file.originalname);
+
+    return res.status(201).json({
+      success: true,
+      message: 'Upload file thành công!',
+      data: {
+        url: result.secure_url,
+        public_id: result.public_id,
+        format: result.format,
+        bytes: result.bytes,
+      },
+    });
+  } catch (error: any) {
+    console.error('handleRawUpload Error:', error);
+    return res.status(500).json({ success: false, error: 'Có lỗi xảy ra khi upload file!' });
+  }
+};
+
+export const handleFileProxy = async (req: Request, res: Response) => {
+  try {
+    const fileUrl = req.query.url as string;
+    const isDownload = req.query.download === 'true';
+
+    if (!fileUrl) {
+      return res.status(400).json({ success: false, error: 'Thiếu URL file!' });
+    }
+
+    let successfulResponse: globalThis.Response | null = null;
+    let matchedUrl = '';
+
+    // 1. If it's a Cloudinary URL, use Cloudinary signed private download URLs
+    const match = fileUrl.match(/res\.cloudinary\.com\/[^/]+\/(raw|image|video|auto)\/upload\/(?:s--[^/]+--\/)?(?:v\d+\/)?(.+)/);
+    if (match) {
+      const rawPath = match[2];
+      const candidatePaths = [
+        rawPath,
+        rawPath.replace(/\.pdf\.pdf$/i, '.pdf'),
+        rawPath.replace(/\.pdf$/i, ''),
+        rawPath.endsWith('.pdf') ? rawPath : `${rawPath}.pdf`,
+      ];
+
+      const resourceTypes: Array<'raw' | 'image' | 'auto'> = ['raw', 'image', 'auto'];
+
+      for (const resType of resourceTypes) {
+        for (const p of candidatePaths) {
+          try {
+            const extMatch = p.match(/\.([a-zA-Z0-9]+)$/);
+            const format = extMatch ? extMatch[1] : 'pdf';
+            const signedUrl = cloudinary.utils.private_download_url(p, format, {
+              resource_type: resType,
+              type: 'upload',
+              attachment: false,
+            });
+
+            const resp = await fetch(signedUrl);
+            if (resp.ok && resp.status === 200) {
+              successfulResponse = resp;
+              matchedUrl = signedUrl;
+              break;
+            }
+          } catch (err) {
+            // continue
+          }
+        }
+        if (successfulResponse) break;
+      }
+    }
+
+    // 2. Direct fetch fallback (for local or non-restricted files)
+    if (!successfulResponse) {
+      const directCandidates = [
+        fileUrl,
+        fileUrl.replace(/\.pdf\.pdf$/i, '.pdf'),
+        fileUrl.endsWith('.pdf') ? fileUrl : `${fileUrl}.pdf`,
+      ];
+
+      for (const urlCandidate of directCandidates) {
+        try {
+          const resp = await fetch(urlCandidate);
+          if (resp.ok && resp.status === 200) {
+            successfulResponse = resp;
+            matchedUrl = urlCandidate;
+            break;
+          }
+        } catch (err) {
+          // continue
+        }
+      }
+    }
+
+    if (!successfulResponse || !successfulResponse.ok) {
+      return res.status(404).json({
+        success: false,
+        error: `Không thể tải file từ máy lưu trữ (Mã lỗi: 404)`,
+      });
+    }
+
+    const arrayBuffer = await successfulResponse.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    let contentType = successfulResponse.headers.get('content-type') || 'application/pdf';
+    if (fileUrl.toLowerCase().includes('.pdf') || matchedUrl.toLowerCase().includes('.pdf') || contentType.includes('octet-stream')) {
+      contentType = 'application/pdf';
+    }
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader(
+      'Content-Disposition',
+      isDownload ? 'attachment; filename="document.pdf"' : 'inline'
+    );
+    return res.send(buffer);
+  } catch (error: any) {
+    console.error('handleFileProxy Error:', error);
+    return res.status(500).json({ success: false, error: 'Lỗi server khi tải file proxy!' });
   }
 };

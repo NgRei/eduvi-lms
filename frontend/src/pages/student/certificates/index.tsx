@@ -3,6 +3,8 @@ import {
   CloseCircleOutlined,
   SafetyCertificateOutlined,
   SearchOutlined,
+  DownloadOutlined,
+  EyeOutlined,
 } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { history } from '@umijs/max';
@@ -27,7 +29,7 @@ import {
   verifyCertificate,
 } from '@/services/ant-design-pro/certificates';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const CertificatesPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -63,6 +65,19 @@ const CertificatesPage: React.FC = () => {
     try {
       setVerifying(true);
       const res = await verifyCertificate(verifyCode.trim());
+      if (res.success) setVerifyResult(res.data);
+    } catch (err: any) {
+      setVerifyResult(null);
+      message.error(err?.data?.error || 'Mã chứng chỉ không hợp lệ');
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const handleVerifyManual = async (code: string) => {
+    try {
+      setVerifying(true);
+      const res = await verifyCertificate(code);
       if (res.success) setVerifyResult(res.data);
     } catch (err: any) {
       setVerifyResult(null);
@@ -124,6 +139,38 @@ const CertificatesPage: React.FC = () => {
                     />
                   </div>
                 }
+                actions={[
+                  cert.file_url ? (
+                    <Button
+                      type="link"
+                      icon={<DownloadOutlined />}
+                      href={cert.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      key="download"
+                      size="small"
+                    >
+                      Tải PDF
+                    </Button>
+                  ) : (
+                    <Text type="secondary" key="processing" style={{ fontSize: 12 }}>
+                      Đang tạo PDF...
+                    </Text>
+                  ),
+                  <Button
+                    type="link"
+                    icon={<EyeOutlined />}
+                    onClick={() => {
+                      setVerifyCode(cert.cert_code);
+                      setVerifyModalOpen(true);
+                      setTimeout(() => handleVerifyManual(cert.cert_code), 100);
+                    }}
+                    key="verify"
+                    size="small"
+                  >
+                    Xem Mã QR
+                  </Button>,
+                ]}
               >
                 <Card.Meta
                   title={cert.certificate?.title || 'Chứng chỉ'}
@@ -206,6 +253,27 @@ const CertificatesPage: React.FC = () => {
                 </Tag>
               </div>
             </div>
+
+            <div style={{ textAlign: 'center', marginBottom: 20 }}>
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+                  `${window.location.origin}/verify-certificate?code=${verifyResult.cert_code}`,
+                )}`}
+                alt="QR Code Verification"
+                style={{
+                  border: '1px solid #e2e8f0',
+                  padding: 8,
+                  borderRadius: 8,
+                  backgroundColor: '#fff',
+                }}
+              />
+              <div>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  Quét mã QR để xác thực công khai
+                </Text>
+              </div>
+            </div>
+
             <div>
               <Text strong>Người nhận: </Text>
               <Text>{verifyResult.holder_name}</Text>

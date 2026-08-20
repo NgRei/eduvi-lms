@@ -53,3 +53,31 @@ export async function verifyCertificate(certCode: string) {
     { method: 'GET' }
   );
 }
+
+export interface CourseCompletionStatus {
+  progress_percentage: number;
+  lessons_completed: number;
+  lessons_total: number;
+  final_exam: {
+    exists: boolean;
+    assignment_id?: string;
+    title?: string;
+    submitted?: boolean;
+    passed?: boolean;
+    score?: number | null;
+    passing_score?: number;
+    total_points?: number;
+  };
+  certificate: {
+    eligible: boolean;
+    issued: boolean;
+  };
+}
+
+// GET /api/certificates/course/:courseId/completion-status
+export async function getCourseCompletionStatus(courseId: string) {
+  return request<{ success: boolean; data: CourseCompletionStatus }>(
+    `/api/certificates/course/${courseId}/completion-status`,
+    { method: 'GET' }
+  );
+}
