@@ -72,15 +72,14 @@ const generateUsername = (fullName: string): string => {
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { email, password, full_name, user_type, grade_level, school_name, expertise } = req.body;
+    const { email, password, full_name, grade_level, school_name } = req.body;
 
-    if (!email || !password || !full_name || !user_type) {
+    if (!email || !password || !full_name) {
       return res.status(400).json({ success: false, error: 'Vui lòng cung cấp đầy đủ thông tin bắt buộc!' });
     }
 
-    if (!['student', 'instructor'].includes(user_type)) {
-      return res.status(400).json({ success: false, error: 'Vai trò người dùng không hợp lệ!' });
-    }
+    // Always enforce student role for public registration
+    const user_type = 'student';
 
     // Check if email already exists
     const emailExists = await User.findOne({ where: { email } });
@@ -102,7 +101,7 @@ export const register = async (req: Request, res: Response) => {
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
 
-    // Create User inside transaction
+    // Create User
     const newUser = await User.create({
       email,
       username,
@@ -112,20 +111,12 @@ export const register = async (req: Request, res: Response) => {
       is_active: true,
     });
 
-    // Create sub profiles based on role
-    if (user_type === 'student') {
-      await StudentProfile.create({
-        user_id: newUser.id,
-        grade_level: grade_level || null,
-        school_name: school_name || null,
-      });
-    } else if (user_type === 'instructor') {
-      await InstructorProfile.create({
-        user_id: newUser.id,
-        expertise: expertise || null,
-        experience_years: 0,
-      });
-    }
+    // Create student profile
+    await StudentProfile.create({
+      user_id: newUser.id,
+      grade_level: grade_level || null,
+      school_name: school_name || null,
+    });
 
     return res.status(201).json({
       success: true,

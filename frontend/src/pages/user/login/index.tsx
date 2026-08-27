@@ -167,6 +167,8 @@ const Login: React.FC = () => {
     if (redirect.startsWith('/exception/')) return true;
     // /courses/* is allowed for all
     if (redirect.startsWith('/courses')) return true;
+    // /teach or /become-instructor is allowed for all
+    if (redirect.startsWith('/teach') || redirect.startsWith('/become-instructor')) return true;
     // Check role-specific prefix
     if (redirect.startsWith(`/${userType}/`)) return true;
     // Everything else defaults to role dashboard

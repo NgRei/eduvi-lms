@@ -55,6 +55,17 @@ export default [
       },
     ],
   },
+  // ================= TEACH / BECOME INSTRUCTOR (Public / Dedicated Candidate Portal) =================
+  {
+    path: '/teach',
+    name: 'Trở thành Giảng viên',
+    component: './student/become-instructor',
+    layout: false,
+  },
+  {
+    path: '/become-instructor',
+    redirect: '/teach',
+  },
   // ================= STUDENT PORTAL =================
   {
     path: '/student',
@@ -119,6 +130,12 @@ export default [
         name: 'Chứng chỉ',
         icon: 'safety-certificate',
         component: './student/certificates',
+      },
+      {
+        path: '/student/become-instructor',
+        name: 'Trở thành Giảng viên',
+        icon: 'solution',
+        component: './student/become-instructor',
       },
     ],
   },
@@ -223,6 +240,12 @@ export default [
         name: 'Nhật ký hệ thống',
         icon: 'file-text',
         component: './admin/audit-logs',
+      },
+      {
+        path: '/admin/instructor-applications',
+        name: 'Duyệt hồ sơ giảng viên',
+        icon: 'crown',
+        component: './admin/instructor-applications',
       },
     ],
   },

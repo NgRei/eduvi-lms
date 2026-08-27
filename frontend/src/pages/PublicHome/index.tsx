@@ -823,7 +823,7 @@ const Footer = () => (
         <div className="footer-column">
           <h3>Về Eduvi</h3>
           <a href="#why-eduvi">Giới thiệu</a>
-          <a href="#why-eduvi">Đội ngũ giảng viên</a>
+          <Link to="/student/become-instructor">Trở thành Giảng viên</Link>
           <Link to="/courses">Khóa học</Link>
           <a href="#">Blog & tin tức</a>
         </div>

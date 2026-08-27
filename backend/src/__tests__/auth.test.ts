@@ -130,21 +130,21 @@ describe('Auth API', () => {
       expect(StudentProfile.create).toHaveBeenCalled();
     });
 
-    it('should register a new instructor successfully', async () => {
+    it('should always register a new user as student even if instructor is requested', async () => {
       (User.findOne as jest.Mock).mockResolvedValue(null);
       (User.create as jest.Mock).mockResolvedValue({
-        id: mockInstructor.id,
-        email: mockInstructor.email,
-        username: mockInstructor.username,
-        full_name: mockInstructor.full_name,
-        user_type: mockInstructor.user_type,
+        id: mockUser.id,
+        email: mockUser.email,
+        username: mockUser.username,
+        full_name: mockUser.full_name,
+        user_type: 'student',
       });
-      (InstructorProfile.create as jest.Mock).mockResolvedValue({ user_id: mockInstructor.id });
+      (StudentProfile.create as jest.Mock).mockResolvedValue({ user_id: mockUser.id });
 
       const res = await request(app)
         .post('/api/auth/register')
         .send({
-          email: 'instructor@test.com',
+          email: 'instructor_applicant@test.com',
           password: 'password123',
           full_name: 'Tran Thi Bich',
           user_type: 'instructor',
@@ -153,8 +153,8 @@ describe('Auth API', () => {
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
-      expect(res.body.data).toHaveProperty('user_type', 'instructor');
-      expect(InstructorProfile.create).toHaveBeenCalled();
+      expect(res.body.data).toHaveProperty('user_type', 'student');
+      expect(StudentProfile.create).toHaveBeenCalled();
     });
 
     it('should return 400 if missing required fields', async () => {
@@ -167,19 +167,29 @@ describe('Auth API', () => {
       expect(res.body.error).toBe('Vui lòng cung cấp đầy đủ thông tin bắt buộc!');
     });
 
-    it('should return 400 if user_type is invalid', async () => {
+    it('should ignore attempted user_type escalation to admin and register as student', async () => {
+      (User.findOne as jest.Mock).mockResolvedValue(null);
+      (User.create as jest.Mock).mockResolvedValue({
+        id: mockUser.id,
+        email: 'attacker@test.com',
+        username: 'attacker@123',
+        full_name: 'Attacker User',
+        user_type: 'student',
+      });
+      (StudentProfile.create as jest.Mock).mockResolvedValue({ user_id: mockUser.id });
+
       const res = await request(app)
         .post('/api/auth/register')
         .send({
-          email: 'test@test.com',
+          email: 'attacker@test.com',
           password: 'password123',
-          full_name: 'Test User',
+          full_name: 'Attacker User',
           user_type: 'admin',
         });
 
-      expect(res.status).toBe(400);
-      expect(res.body.success).toBe(false);
-      expect(res.body.error).toBe('Vai trò người dùng không hợp lệ!');
+      expect(res.status).toBe(201);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.user_type).toBe('student');
     });
 
     it('should return 409 if email already exists', async () => {

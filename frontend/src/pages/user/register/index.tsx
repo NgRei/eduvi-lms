@@ -96,7 +96,6 @@ const Register: FC = () => {
         email: formValues.email,
         password: formValues.password,
         full_name: formValues.name,
-        user_type: formValues.role as 'student' | 'instructor',
       };
       return fakeRegister(payload);
     },
@@ -204,18 +203,7 @@ const Register: FC = () => {
             },
           ]}
         >
-          <Input size="large" placeholder="Họ và tên học viên" />
-        </FormItem>
-
-        <FormItem
-          name="role"
-          initialValue="student"
-          rules={[{ required: true }]}
-        >
-          <Select size="large" placeholder="Bạn đăng ký với vai trò">
-            <Option value="student">Học viên (Student)</Option>
-            <Option value="instructor">Giảng viên (Instructor)</Option>
-          </Select>
+          <Input size="large" placeholder="Họ và tên của bạn" />
         </FormItem>
 
         <FormItem
@@ -373,8 +361,25 @@ const Register: FC = () => {
             </Button>
             <div style={{ marginTop: 16, textAlign: 'center' }}>
               <Link to="/user/login" prefetch>
-                <span style={{ color: '#4F46E5' }}>
+                <span style={{ color: '#4F46E5', fontWeight: 500 }}>
                   Đăng nhập với tài khoản có sẵn
+                </span>
+              </Link>
+            </div>
+            <div
+              style={{
+                marginTop: 20,
+                paddingTop: 16,
+                borderTop: '1px dashed #E5E7EB',
+                textAlign: 'center',
+                fontSize: 13,
+                color: '#6B7280',
+              }}
+            >
+              <span>Bạn muốn trở thành Giảng viên? </span>
+              <Link to="/teach" prefetch>
+                <span style={{ color: '#F59E0B', fontWeight: 600 }}>
+                  Tìm hiểu quy trình ứng tuyển &rarr;
                 </span>
               </Link>
             </div>

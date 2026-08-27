@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { Op } from 'sequelize';
 import { Assignment, QuizQuestion, Course, Lesson, CourseInstructor, Submission } from '../models';
 import { AuthRequest } from '../middlewares/auth.middleware';
 
@@ -81,13 +82,32 @@ export const getAssignments = async (req: AuthRequest, res: Response) => {
 
     const where: any = {};
     if (lesson_id) where.lesson_id = lesson_id;
-    if (course_id) where.course_id = course_id;
     if (type) where.assignment_type = type;
     if (is_published !== undefined) where.is_published = is_published === 'true';
 
     // Students only see published assignments
     if (req.user?.user_type === 'student') {
       where.is_published = true;
+      if (course_id) where.course_id = course_id;
+    } else if (req.user?.user_type === 'instructor') {
+      // Instructors only see assignments belonging to courses they instruct
+      const myCourseInstructors = await CourseInstructor.findAll({
+        where: { instructor_id: req.user.id },
+        attributes: ['course_id'],
+      });
+      const myCourseIds = myCourseInstructors.map((ci) => ci.course_id);
+
+      if (course_id) {
+        if (!myCourseIds.includes(course_id as string)) {
+          where.course_id = '00000000-0000-0000-0000-000000000000';
+        } else {
+          where.course_id = course_id;
+        }
+      } else {
+        where.course_id = { [Op.in]: myCourseIds };
+      }
+    } else if (course_id) {
+      where.course_id = course_id;
     }
 
     const { count, rows } = await Assignment.findAndCountAll({

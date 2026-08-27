@@ -99,6 +99,7 @@ jest.mock('../models', () => {
     },
     CourseInstructor: {
       findOne: mockFindOne,
+      findAll: mockFindAll,
     },
     Submission: {
       count: jest.fn(),
@@ -312,7 +313,8 @@ describe('Assignment API', () => {
   });
 
   describe('GET /api/assignments', () => {
-    it('should return assignments list', async () => {
+    it('should return assignments list for instructor filtered by their courses', async () => {
+      (CourseInstructor.findAll as jest.Mock).mockResolvedValue([{ course_id: 'uuid-course-1' }]);
       (Assignment.findAndCountAll as jest.Mock).mockResolvedValue({
         count: 1,
         rows: [{ ...mockAssignment, questions: [], course: { id: 'uuid-course-1', title: 'Test Course' }, lesson: null }],
@@ -328,7 +330,8 @@ describe('Assignment API', () => {
       expect(res.body.pagination).toBeDefined();
     });
 
-    it('should filter by course_id', async () => {
+    it('should filter by course_id when instructor is owner', async () => {
+      (CourseInstructor.findAll as jest.Mock).mockResolvedValue([{ course_id: 'uuid-course-1' }]);
       (Assignment.findAndCountAll as jest.Mock).mockResolvedValue({
         count: 0,
         rows: [],

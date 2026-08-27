@@ -9,7 +9,7 @@ export interface UserRegisterParams {
   email: string;
   password: string;
   full_name: string;
-  user_type: 'student' | 'instructor';
+  phone?: string;
 }
 
 export interface RegisterResult {

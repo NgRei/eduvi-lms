@@ -18,6 +18,7 @@ import { CourseReview } from './CourseReview.model';
 import { AuditLog } from './AuditLog.model';
 import { RefreshToken } from './RefreshToken.model';
 import { Payment } from './Payment.model';
+import { InstructorApplication } from './InstructorApplication.model';
 
 // User 1-to-1 StudentProfile
 User.hasOne(StudentProfile, { foreignKey: 'user_id', as: 'studentProfile', onDelete: 'CASCADE' });
@@ -26,6 +27,11 @@ StudentProfile.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 // User 1-to-1 InstructorProfile
 User.hasOne(InstructorProfile, { foreignKey: 'user_id', as: 'instructorProfile', onDelete: 'CASCADE' });
 InstructorProfile.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// User 1-to-many InstructorApplication
+User.hasMany(InstructorApplication, { foreignKey: 'user_id', as: 'instructorApplications', onDelete: 'CASCADE' });
+InstructorApplication.belongsTo(User, { foreignKey: 'user_id', as: 'candidate' });
+InstructorApplication.belongsTo(User, { foreignKey: 'reviewed_by', as: 'reviewer' });
 
 // Category self-referencing (parent-child)
 Category.hasMany(Category, { foreignKey: 'parent_id', as: 'children', onDelete: 'SET NULL' });
@@ -165,5 +171,6 @@ export {
   CourseReview,
   AuditLog,
   RefreshToken,
-  Payment
+  Payment,
+  InstructorApplication
 };

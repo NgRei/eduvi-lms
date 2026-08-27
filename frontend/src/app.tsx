@@ -304,7 +304,11 @@ const checkIsPublic = (pathname: string): boolean => {
   if (
     cleanPath.startsWith('/user/') ||
     cleanPath === '/courses' ||
-    cleanPath.startsWith('/courses/')
+    cleanPath.startsWith('/courses/') ||
+    cleanPath === '/teach' ||
+    cleanPath.startsWith('/teach/') ||
+    cleanPath === '/become-instructor' ||
+    cleanPath.startsWith('/become-instructor/')
   ) {
     return true;
   }
