@@ -11,6 +11,11 @@ import {
   deleteQuestion,
   reorderQuestions,
 } from '../controllers/assignment.controller';
+import {
+  submitAssignment,
+  getMySubmissions,
+  getSubmissionsForGrading,
+} from '../controllers/submission.controller';
 import { authenticateToken, authorizeRole } from '../middlewares/auth.middleware';
 
 const router = Router();
@@ -18,6 +23,11 @@ const router = Router();
 // Public routes (students can view published assignments)
 router.get('/', authenticateToken as any, getAssignments as any);
 router.get('/:id', authenticateToken as any, getAssignmentById as any);
+
+// Submission & Grading routes
+router.post('/:id/submit', authenticateToken as any, authorizeRole('student') as any, submitAssignment as any);
+router.get('/:id/submissions', authenticateToken as any, getMySubmissions as any);
+router.get('/:id/grading', authenticateToken as any, authorizeRole('instructor', 'admin') as any, getSubmissionsForGrading as any);
 
 // Protected routes - Instructor & Admin
 router.post('/', authenticateToken as any, authorizeRole('instructor', 'admin') as any, createAssignment as any);

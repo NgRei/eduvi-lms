@@ -17,6 +17,7 @@ import {
   Footer,
   OfflineBanner,
 } from '@/components';
+import GlobalChatWidget from '@/components/GlobalChatWidget';
 import { currentUser as queryCurrentUser } from '@/services/ant-design-pro/api';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
@@ -469,5 +470,14 @@ export function rootContainer(container: React.ReactNode) {
       <OfflineBanner />
       <ErrorBoundary>{container}</ErrorBoundary>
     </App>
+  );
+}
+
+export function innerProvider(container: React.ReactNode) {
+  return (
+    <>
+      {container}
+      <GlobalChatWidget />
+    </>
   );
 }

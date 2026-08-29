@@ -19,6 +19,7 @@ import dashboardRoutes from './routes/dashboard.routes';
 import lessonProgressRoutes from './routes/lessonProgress.routes';
 import submissionRoutes from './routes/submission.routes';
 import instructorApplicationRoutes from './routes/instructorApplication.routes';
+import chatRoutes from './routes/chat.routes';
 
 dotenv.config();
 
@@ -47,6 +48,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/lessons', lessonRoutes);
 app.use('/api/assignments', assignmentRoutes);
+app.use('/api/submissions', submissionRoutes);
 app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/audit-logs', auditRoutes);
@@ -56,8 +58,8 @@ app.use('/api/uploads', uploadRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/lesson-progress', lessonProgressRoutes);
-app.use('/api/submissions', submissionRoutes);
 app.use('/api/instructor-applications', instructorApplicationRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Global Error Handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

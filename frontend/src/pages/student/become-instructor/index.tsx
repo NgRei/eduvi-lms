@@ -26,6 +26,7 @@ import {
   StepsForm,
 } from '@ant-design/pro-components';
 import { history, Link, useModel } from '@umijs/max';
+import GlobalChatWidget from '@/components/GlobalChatWidget';
 import {
   Alert,
   Avatar,
@@ -924,6 +925,7 @@ const BecomeInstructor: React.FC = () => {
       </div>
 
       {renderFooter()}
+      {!history.location.pathname.startsWith('/student') && <GlobalChatWidget />}
     </div>
   );
 };

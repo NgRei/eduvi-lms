@@ -39,13 +39,15 @@ jest.mock('../utils/email.util', () => ({
 }));
 
 import { Assignment, QuizQuestion, Submission, Enrollment, LessonProgress, CourseInstructor, User } from '../models';
+import assignmentRoutes from '../routes/assignment.routes';
 import submissionRoutes from '../routes/submission.routes';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/api', submissionRoutes);
+app.use('/api/assignments', assignmentRoutes);
+app.use('/api/submissions', submissionRoutes);
 
 const JWT_SECRET = 'test_jwt_secret_key';
 

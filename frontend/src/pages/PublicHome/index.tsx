@@ -39,6 +39,7 @@ import React, {
   type CSSProperties,
 } from "react";
 import { Link, useModel } from '@umijs/max';
+import GlobalChatWidget from '@/components/GlobalChatWidget';
 import { courses, stats, testimonials, type Course } from "./data";
 import './index.css';
 
@@ -873,6 +874,7 @@ const PublicHome = () => {
         <CtaSection />
       </main>
       <Footer />
+      <GlobalChatWidget />
     </div>
   );
 };

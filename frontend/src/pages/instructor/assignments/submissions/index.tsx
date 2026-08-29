@@ -14,6 +14,7 @@ import {
   Tag,
   Typography,
 } from 'antd';
+import { CheckCircleOutlined, CloseCircleOutlined, DownloadOutlined } from '@ant-design/icons';
 import React, { useRef, useState } from 'react';
 import {
   getSubmission,
@@ -181,8 +182,8 @@ const SubmissionsPage: React.FC = () => {
       <Modal
         title={
           selectedSubmission?.status === 'graded'
-            ? 'Chi tiết bài nộp'
-            : 'Chấm bài'
+            ? `Chi tiết bài nộp - ${selectedSubmission?.user?.full_name || selectedSubmission?.user?.username || 'Học viên'}`
+            : `Chấm bài - ${selectedSubmission?.user?.full_name || selectedSubmission?.user?.username || 'Học viên'}`
         }
         open={gradingModalVisible}
         onCancel={() => {
@@ -191,15 +192,113 @@ const SubmissionsPage: React.FC = () => {
           gradeForm.resetFields();
         }}
         footer={null}
-        width={700}
+        width={780}
       >
         {selectedSubmission && (
-          <>
+          <div style={{ maxHeight: '70vh', overflowY: 'auto', paddingRight: 8 }}>
+            <Card size="small" style={{ marginBottom: 16, backgroundColor: '#f9fafb' }}>
+              <Space orientation="horizontal" size="large" wrap>
+                <div><strong>Học viên:</strong> {selectedSubmission.user?.full_name || selectedSubmission.user?.username}</div>
+                <div><strong>Lần nộp:</strong> Lần {selectedSubmission.attempt_number}</div>
+                <div><strong>Thời gian:</strong> {new Date(selectedSubmission.submitted_at).toLocaleString('vi-VN')}</div>
+                <div>
+                  <strong>Trạng thái:</strong>{' '}
+                  <Tag color={statusColors[selectedSubmission.status]}>
+                    {statusLabels[selectedSubmission.status]}
+                  </Tag>
+                </div>
+              </Space>
+            </Card>
+
+            {/* Render Quiz Question Results */}
+            {selectedSubmission.question_results && selectedSubmission.question_results.length > 0 && (
+              <div style={{ marginBottom: 16 }}>
+                <Typography.Title level={5} style={{ marginBottom: 12 }}>
+                  Chi tiết câu trả lời trắc nghiệm:
+                </Typography.Title>
+                <Space orientation="vertical" style={{ width: '100%' }} size="middle">
+                  {selectedSubmission.question_results.map((q: any, idx: number) => (
+                    <Card
+                      key={q.question_id || idx}
+                      size="small"
+                      title={
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span>Câu {idx + 1}: {q.question_text}</span>
+                          <Tag color={q.is_correct ? 'success' : 'error'} icon={q.is_correct ? <CheckCircleOutlined /> : <CloseCircleOutlined />}>
+                            {q.is_correct ? `+${q.points || q.points_earned || 0} điểm` : '0 điểm'}
+                          </Tag>
+                        </div>
+                      }
+                      style={{
+                        borderColor: q.is_correct ? '#b7eb8f' : '#ffa39e',
+                        backgroundColor: q.is_correct ? '#f6ffed' : '#fff1f0',
+                      }}
+                    >
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {q.options?.map((opt: any) => {
+                          const isSelected = (q.selected_options || []).includes(opt.id);
+                          const isOptionCorrect = opt.is_correct;
+                          let optBg = '#ffffff';
+                          let optBorder = '#d9d9d9';
+
+                          if (isSelected && isOptionCorrect) {
+                            optBg = '#d9f7be';
+                            optBorder = '#52c41a';
+                          } else if (isSelected && !isOptionCorrect) {
+                            optBg = '#ffccc7';
+                            optBorder = '#ff4d4f';
+                          } else if (isOptionCorrect) {
+                            optBg = '#f6ffed';
+                            optBorder = '#73d13d';
+                          }
+
+                          return (
+                            <div
+                              key={opt.id}
+                              style={{
+                                padding: '6px 12px',
+                                borderRadius: 4,
+                                border: `1px solid ${optBorder}`,
+                                backgroundColor: optBg,
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                              }}
+                            >
+                              <span>
+                                <strong>{opt.id}.</strong> {opt.text}
+                              </span>
+                              <Space>
+                                {isSelected && (
+                                  <Tag color={isOptionCorrect ? 'green' : 'red'}>
+                                    Học viên chọn
+                                  </Tag>
+                                )}
+                                {isOptionCorrect && (
+                                  <Tag color="green">Đáp án đúng</Tag>
+                                )}
+                              </Space>
+                            </div>
+                          );
+                        })}
+                        {q.explanation && (
+                          <div style={{ marginTop: 8, fontSize: 13, color: '#595959', fontStyle: 'italic' }}>
+                            <strong>Giải thích:</strong> {q.explanation}
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
+                </Space>
+              </div>
+            )}
+
+            {/* Render Essay */}
             {selectedSubmission.assignment?.assignment_type === 'essay' &&
               selectedSubmission.answers?.text && (
                 <Card
                   size="small"
-                  title="Bài viết"
+                  title="Bài viết của học viên"
                   style={{ marginBottom: 16 }}
                 >
                   <div
@@ -207,6 +306,9 @@ const SubmissionsPage: React.FC = () => {
                       whiteSpace: 'pre-wrap',
                       maxHeight: 300,
                       overflow: 'auto',
+                      padding: 8,
+                      backgroundColor: '#fafafa',
+                      borderRadius: 4,
                     }}
                   >
                     {selectedSubmission.answers.text}
@@ -214,6 +316,7 @@ const SubmissionsPage: React.FC = () => {
                 </Card>
               )}
 
+            {/* Render File Upload */}
             {selectedSubmission.assignment?.assignment_type === 'upload' &&
               selectedSubmission.answers?.file_url && (
                 <Card
@@ -221,58 +324,63 @@ const SubmissionsPage: React.FC = () => {
                   title="File đã nộp"
                   style={{ marginBottom: 16 }}
                 >
-                  <a
+                  <Button
+                    type="primary"
+                    ghost
+                    icon={<DownloadOutlined />}
                     href={selectedSubmission.answers.file_url}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {selectedSubmission.answers.file_name || 'Xem file'}
-                  </a>
+                    {selectedSubmission.answers.file_name || 'Tải file bài nộp'}
+                  </Button>
                 </Card>
               )}
 
-            <Form form={gradeForm} layout="vertical" onFinish={handleGrade}>
-              <Form.Item
-                name="score"
-                label={`Điểm (tối đa: ${selectedSubmission.assignment?.total_points || 100})`}
-                rules={[{ required: true, message: 'Vui lòng nhập điểm!' }]}
-              >
-                <InputNumber
-                  min={0}
-                  max={selectedSubmission.assignment?.total_points || 100}
-                  style={{ width: '100%' }}
-                />
-              </Form.Item>
+            <Card title="Chấm điểm & Đánh giá" size="small" style={{ marginTop: 16 }}>
+              <Form form={gradeForm} layout="vertical" onFinish={handleGrade}>
+                <Form.Item
+                  name="score"
+                  label={`Điểm số (Thang điểm tối đa: ${selectedSubmission.assignment?.total_points || 100})`}
+                  rules={[{ required: true, message: 'Vui lòng nhập điểm!' }]}
+                >
+                  <InputNumber
+                    min={0}
+                    max={selectedSubmission.assignment?.total_points || 100}
+                    style={{ width: '100%' }}
+                  />
+                </Form.Item>
 
-              <Form.Item name="feedback" label="Nhận xét">
-                <TextArea
-                  rows={4}
-                  placeholder="Nhận xét cho học viên (tùy chọn)"
-                />
-              </Form.Item>
+                <Form.Item name="feedback" label="Nhận xét của giảng viên">
+                  <TextArea
+                    rows={3}
+                    placeholder="Nhập nhận xét / góp ý cho học viên (tùy chọn)..."
+                  />
+                </Form.Item>
 
-              <Form.Item>
-                <Space>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={gradingLoading}
-                  >
-                    Lưu điểm
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setGradingModalVisible(false);
-                      setSelectedSubmission(null);
-                      gradeForm.resetFields();
-                    }}
-                  >
-                    Đóng
-                  </Button>
-                </Space>
-              </Form.Item>
-            </Form>
-          </>
+                <Form.Item style={{ marginBottom: 0 }}>
+                  <Space>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      loading={gradingLoading}
+                    >
+                      Lưu điểm & Nhận xét
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setGradingModalVisible(false);
+                        setSelectedSubmission(null);
+                        gradeForm.resetFields();
+                      }}
+                    >
+                      Đóng
+                    </Button>
+                  </Space>
+                </Form.Item>
+              </Form>
+            </Card>
+          </div>
         )}
       </Modal>
     </PageContainer>

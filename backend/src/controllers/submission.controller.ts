@@ -93,9 +93,13 @@ export const submitAssignment = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ success: false, error: 'Đã quá hạn nộp bài!' });
     }
 
-    // Check enrollment
+    // Check enrollment (must be active or completed, not dropped)
     const enrollment = await Enrollment.findOne({
-      where: { user_id: req.user.id, course_id: assignment.course_id, status: 'active' },
+      where: {
+        user_id: req.user.id,
+        course_id: assignment.course_id,
+        status: { [Op.ne]: 'dropped' },
+      },
     });
 
     if (!enrollment) {
@@ -244,19 +248,25 @@ export const getSubmissionById = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ success: false, error: 'Bạn chỉ có thể xem bài nộp của mình!' });
     }
 
-    // If quiz is graded and show_answer_after is true, include question details
+    // If quiz, include question details (for instructors/admins ALWAYS, and for students if graded + show_answer_after)
     let responseData: any = submission.toJSON();
+    const isInstructorOrAdmin = req.user.user_type === 'instructor' || req.user.user_type === 'admin';
+    const isQuiz = (submission as any).assignment?.assignment_type === 'quiz';
+
     if (
-      submission.status === 'graded' &&
-      (submission as any).assignment?.show_answer_after &&
-      (submission as any).assignment?.assignment_type === 'quiz'
+      isQuiz &&
+      (isInstructorOrAdmin ||
+        (submission.status === 'graded' && (submission as any).assignment?.show_answer_after))
     ) {
       const questions = (submission as any).assignment?.questions || [];
       const answers = submission.answers || [];
-      responseData.question_results = questions.map((q: any) => {
-        const studentAnswer = answers.find((a: any) => a.question_id === q.id);
+      responseData.question_results = questions.map((q: any, idx: number) => {
+        const studentAnswer =
+          answers.find((a: any) => a.question_id === q.id || a.question_id === String(q.id)) ||
+          answers[q.sort_order - 1] ||
+          answers[idx];
         const correctOptions = q.options.filter((o: any) => o.is_correct).map((o: any) => o.id);
-        const selectedOptions = studentAnswer?.selected_options || [];
+        const selectedOptions = studentAnswer?.selected_options || studentAnswer?.selected || [];
         const isCorrect =
           correctOptions.length === selectedOptions.length &&
           correctOptions.every((opt: string) => selectedOptions.includes(opt));
